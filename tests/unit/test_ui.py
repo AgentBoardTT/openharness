@@ -62,7 +62,7 @@ class TestRichPrinter:
             tool_use_id="t1", content="File not found", is_error=True,
         ))
         output = stderr_buf.getvalue()
-        assert "Error" in output
+        assert "File not found" in output
 
     def test_print_result(self):
         printer, stderr_buf, _ = self._make_printer()

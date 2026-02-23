@@ -113,6 +113,55 @@ def resolve_api_key(provider: str, explicit_key: str | None = None) -> str | Non
     return None
 
 
+def load_defaults() -> dict[str, str]:
+    """Load saved defaults (provider, model) from ~/.harness/config.toml.
+
+    Returns a dict with optional keys ``"provider"`` and ``"model"``.
+    """
+    config_path = Path.home() / ".harness" / "config.toml"
+    if not config_path.exists():
+        return {}
+    try:
+        import tomllib
+        with open(config_path, "rb") as f:
+            data = tomllib.load(f)
+        return {k: v for k, v in data.get("defaults", {}).items() if isinstance(v, str)}
+    except Exception:
+        return {}
+
+
+def save_defaults(provider: str | None = None, model: str | None = None) -> Path:
+    """Persist provider and/or model as the user's defaults.
+
+    Writes to the ``[defaults]`` section of ``~/.harness/config.toml``.
+    Only non-*None* values are written; existing keys are preserved.
+
+    Returns the config file path.
+    """
+    config_dir = Path.home() / ".harness"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_path = config_dir / "config.toml"
+
+    data: dict[str, Any] = {}
+    if config_path.exists():
+        try:
+            import tomllib
+            with open(config_path, "rb") as f:
+                data = tomllib.load(f)
+        except Exception:
+            pass
+
+    if "defaults" not in data:
+        data["defaults"] = {}
+    if provider is not None:
+        data["defaults"]["provider"] = provider
+    if model is not None:
+        data["defaults"]["model"] = model
+
+    _write_toml(config_path, data)
+    return config_path
+
+
 def save_api_key(provider: str, api_key: str) -> Path:
     """Save an API key to ~/.harness/config.toml and set it in the current process.
 

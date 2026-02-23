@@ -118,6 +118,15 @@ def cli(
     if dangerously_skip_permissions:
         permission = "bypass"
 
+    # Load saved defaults for provider/model when user didn't pass explicit flags
+    from harness.core.config import load_defaults
+    saved = load_defaults()
+    source = ctx.get_parameter_source  # click.core.ParameterSource
+    if source("provider") == click.core.ParameterSource.DEFAULT and "provider" in saved:
+        provider = saved["provider"]
+    if source("model") == click.core.ParameterSource.DEFAULT and "model" in saved:
+        model = saved["model"]
+
     ctx.ensure_object(dict)
     prompt_args = ctx.obj.get("prompt_args", [])
 

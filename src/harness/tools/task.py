@@ -24,8 +24,8 @@ class TaskTool(BaseTool):
             description=(
                 "Launch a sub-agent to handle a task. The sub-agent runs autonomously "
                 "with its own context and returns the result. Use 'general' for full "
-                "tool access, 'explore' for fast read-only search, or 'plan' for "
-                "read-only planning."
+                "tool access, 'explore' for fast read-only search, 'plan' for "
+                "read-only planning, or 'review' for structured code review."
             ),
             parameters=(
                 ToolParam(
@@ -39,7 +39,7 @@ class TaskTool(BaseTool):
                     type="string",
                     description="The type of sub-agent to spawn.",
                     required=False,
-                    enum=("general", "explore", "plan"),
+                    enum=("general", "explore", "plan", "review"),
                     default="general",
                 ),
             ),

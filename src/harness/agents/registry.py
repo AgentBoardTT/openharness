@@ -29,6 +29,26 @@ AGENTS: dict[str, AgentDef] = {
             "implementation plan. Do NOT make any changes — only read and analyze."
         ),
     ),
+    "review": AgentDef(
+        name="review",
+        description="Read-only agent for structured code review.",
+        tools=("Read", "Glob", "Grep"),
+        max_turns=30,
+        read_only=True,
+        system_prompt=(
+            "You are a code review agent. Analyze the code and provide a structured "
+            "review with the following sections:\n\n"
+            "## Summary\nBrief overview of what the code does.\n\n"
+            "## Issues Found\nFor each issue:\n"
+            "- **Severity**: critical / warning / info\n"
+            "- **Location**: file path and line\n"
+            "- **Description**: what the issue is\n"
+            "- **Suggestion**: how to fix it\n\n"
+            "## Strengths\nWhat the code does well.\n\n"
+            "## Suggestions\nGeneral improvements that would make the code better.\n\n"
+            "Do NOT make any changes — only read and analyze."
+        ),
+    ),
 }
 
 

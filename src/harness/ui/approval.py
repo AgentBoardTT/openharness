@@ -20,14 +20,20 @@ class RichApprovalCallback:
         self, tool_name: str, args: dict[str, Any], description: str,
     ) -> bool:
         """Show a styled approval prompt and wait for y/n."""
-        title = Text(f" {tool_name} ", style="bold yellow")
-        body = Text(description, style="dim")
+        title = Text(f" \u25c6 {tool_name} ", style="bold #fbbf24")
+        body = Text(description, style="#94a3b8")
 
         self._console.print()
-        self._console.print(Panel(body, title=title, border_style="yellow", expand=False))
+        self._console.print(Panel(
+            body,
+            title=title,
+            border_style="#fbbf24",
+            expand=False,
+            padding=(0, 1),
+        ))
 
         loop = asyncio.get_running_loop()
-        prompt_text = "[bold yellow]Allow?[/bold yellow] [dim](y/n)[/dim] > "
+        prompt_text = "[bold #fbbf24]Allow?[/bold #fbbf24] [#7c7c8a](y/n)[/#7c7c8a] \u203a "
         try:
             self._console.print(prompt_text, end="")
             answer = await loop.run_in_executor(None, lambda: input(""))
