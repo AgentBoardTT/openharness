@@ -78,7 +78,7 @@ fi
 
 # --- Install harness ---
 info "Installing harness-agent..."
-uv tool install harness-agent
+uv tool install "harness-agent @ git+https://github.com/AgentBoardTT/openharness.git"
 
 # --- Verify ---
 if command -v harness &>/dev/null; then
