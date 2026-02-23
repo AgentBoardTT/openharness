@@ -30,42 +30,6 @@ esac
 
 info "Installing Harness on $OS..."
 
-# --- Python 3.12+ check ---
-check_python() {
-    local cmd="$1"
-    command -v "$cmd" >/dev/null 2>&1 || return 1
-    local ver
-    ver="$("$cmd" -c 'import sys; v=sys.version_info; print(f"{v.major}.{v.minor}")' 2>/dev/null)" || return 1
-    local major minor
-    major="$(echo "$ver" | cut -d. -f1)"
-    minor="$(echo "$ver" | cut -d. -f2)"
-    [ "$major" -ge 3 ] 2>/dev/null && [ "$minor" -ge 12 ] 2>/dev/null
-}
-
-PYTHON=""
-for cmd in python3.13 python3.12 python3 python; do
-    if check_python "$cmd"; then
-        PYTHON="$cmd"
-        break
-    fi
-done
-
-if [ -z "$PYTHON" ]; then
-    err "Python 3.12 or later is required but was not found."
-    echo ""
-    if [ "$OS" = "Darwin" ]; then
-        echo "Install with Homebrew:  brew install python@3.12"
-    else
-        echo "Install with your package manager, e.g.:"
-        echo "  sudo apt install python3.12   # Debian/Ubuntu"
-        echo "  sudo dnf install python3.12   # Fedora"
-    fi
-    echo "Then re-run this installer."
-    exit 1
-fi
-
-ok "Found $PYTHON ($("$PYTHON" --version))"
-
 # --- Install uv if missing ---
 if ! command -v uv &>/dev/null; then
     info "Installing uv..."
@@ -84,7 +48,7 @@ fi
 
 # --- Install harness ---
 info "Installing harness-agent..."
-uv tool install harness-agent
+uv tool install --python 3.12 harness-agent
 
 # --- Verify ---
 if command -v harness &>/dev/null; then
