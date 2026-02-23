@@ -10,133 +10,56 @@ The only open-source agent to score **100% on Harness-Bench** and outperform Cla
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://python.org)
+[![PyPI](https://img.shields.io/pypi/v/harness-agent)](https://pypi.org/project/harness-agent/)
 [![GitHub stars](https://img.shields.io/github/stars/AgentBoardTT/openharness?style=social)](https://github.com/AgentBoardTT/openharness)
-[![GitHub issues](https://img.shields.io/github/issues/AgentBoardTT/openharness)](https://github.com/AgentBoardTT/openharness/issues)
 
-[Get Started in 60 Seconds](#-get-started-in-60-seconds) · [Benchmark Results](#-benchmark-results) · [Features](#-features) · [Providers](#-providers) · [SDK](#-sdk) · [Contributing](#-contributing)
+[Quick Start](#-quick-start) · [Screenshots](#-screenshots) · [Commands](#-interactive-repl-commands) · [Providers](#-providers) · [Features](#-features) · [SDK](#-sdk) · [Benchmarks](#-benchmark-results) · [Contributing](#-contributing)
 
 </div>
 
 ---
 
-## Benchmark Results
+## ⚡ Quick Start
 
-Harness was benchmarked against the leading coding agents on 8 real-world tasks covering multi-file editing, bug fixing, error recovery, refactoring, context understanding, and code analysis.
-
-### Overall Scores
-
-| Agent | Claude Opus 4.6 | GPT-5.2 |
-|-------|:---:|:---:|
-| **Harness** | **7/8 (88%)** | **8/8 (100%)** |
-| Claude Code | 7/8 (88%) | — |
-| OpenCode | 7/8 (88%) | 7/8 (88%) |
-| pi-mono | 7/8 (88%) | 8/8 (100%) |
-
-Harness is the **only open-source agent** that achieves a perfect score — and it does so across providers, not locked to one.
-
-### Per-Task Breakdown (GPT-5.2)
-
-| Task | Harness | OpenCode | pi-mono |
-|------|:---:|:---:|:---:|
-| Multi-file editing | PASS (17.5s) | PASS (19.4s) | PASS (26.8s) |
-| Error recovery | PASS (5.2s) | PASS (11.7s) | PASS (10.1s) |
-| Tool efficiency | PASS (1.8s) | PASS (5.6s) | PASS (9.2s) |
-| Context understanding | PASS (9.7s) | FAIL | PASS (41.3s) |
-| Project creation | PASS (3.0s) | PASS (7.6s) | PASS (3.8s) |
-| Bug fixing | PASS (5.5s) | PASS (12.9s) | PASS (10.0s) |
-| Code analysis | PASS (1.9s) | PASS (5.2s) | PASS (2.3s) |
-| Refactoring | PASS (6.4s) | PASS (11.7s) | PASS (12.7s) |
-
-### Speed
-
-| Agent | Model | Avg per Task | Total (8 tasks) |
-|-------|-------|:---:|:---:|
-| **Harness** | **GPT-5.2** | **6.4s** | **51.0s** |
-| Harness | Opus 4.6 | 12.5s | 99.7s |
-| Claude Code | Opus 4.6 | 16.4s | 131.5s |
-| OpenCode | GPT-5.2 | 10.7s | 85.8s |
-| pi-mono | GPT-5.2 | 14.5s | 116.2s |
-
-Harness is **2x faster** than the next-fastest agent on GPT-5.2, and **30% faster** than Claude Code on Opus.
-
-### Why This Matters
-
-The scaffold around a model matters as much as the model itself. The same Claude Opus 4.5 scores anywhere from 58% to 80% on SWE-bench depending on the agent harness. That's why we built this — a SOTA scaffold that's open, fast, and works with every provider.
-
-<p align="right"><a href="#harness">back to top</a></p>
-
----
-
-## Get Started in 60 Seconds
-
-No programming experience needed. Just open your terminal and follow these 3 steps.
-
-> **What's a terminal?** On Mac, open Spotlight (Cmd + Space) and type "Terminal". On Windows, search for "PowerShell". On Linux, look for "Terminal" in your apps.
-
-### Step 1: Install
-
-Copy-paste this into your terminal and press Enter:
+### Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AgentBoardTT/openharness/main/install.sh | bash
 ```
 
-This automatically installs everything you need (Python, uv, and Harness). Just follow any prompts.
+Or with pip:
 
-> **Windows users:** Run `pip install harness-agent` instead.
+```bash
+pip install harness-agent
+```
 
-### Step 2: Connect your AI provider
+### Connect
 
 ```bash
 harness connect
 ```
 
-You'll see a menu like this:
-
-```
-Select a provider:
-  (1) Anthropic
-  (2) OpenAI
-  (3) Google
-
-Enter choice [1]:
-```
-
-Pick a provider, paste your API key, and you're connected. Your key is saved securely to `~/.harness/config.toml` — you only need to do this once.
+Pick a provider, paste your API key, done. Your key is saved to `~/.harness/config.toml`.
 
 > **Where do I get an API key?**
 > - Anthropic (Claude): https://console.anthropic.com/settings/keys
 > - OpenAI (GPT): https://platform.openai.com/api-keys
 > - Google (Gemini): https://aistudio.google.com/apikey
 
-### Step 3: Use it
-
-Give it any coding task in plain English:
+### Use
 
 ```bash
-harness "Create a Python script that downloads all images from a webpage"
-```
-
-Or start an interactive chat:
-
-```bash
+# Interactive REPL
 harness
-```
 
-Then just type what you want. Type `/help` to see commands, `/connect` to switch providers, Ctrl+D to exit.
-
-That's it. You're running a state-of-the-art coding agent.
-
-<p align="right"><a href="#harness">back to top</a></p>
-
----
-
-## More Examples
-
-```bash
-# Fix a bug
+# One-shot command
 harness "Fix the authentication bug in auth.py"
 
+# Bypass mode — full auto-approve, no prompts (great for CI/scripts)
+harness --permission bypass "Run all tests and fix failures"
+```
+
+```bash
 # Use a specific model
 harness -p openai -m gpt-5.2 "Refactor this function"
 
@@ -145,16 +68,67 @@ harness -p ollama -m llama3.3 "Write unit tests for utils.py"
 
 # Resume a previous session
 harness --session abc123 "Continue where we left off"
-
-# Auto-approve everything (for scripting/CI)
-harness --permission bypass "Run all tests and fix failures"
 ```
+
+That's it. You're running a state-of-the-art coding agent.
 
 <p align="right"><a href="#harness">back to top</a></p>
 
 ---
 
-## Providers
+## 📸 Screenshots
+
+### REPL Banner
+
+<img src="docs/screenshots/banner.svg" width="600" alt="Harness REPL banner showing version, provider, and model">
+
+### Interactive Command Palette
+
+Type `/` to open a filterable command palette. Arrow keys navigate, Enter selects, Escape dismisses.
+
+<img src="docs/screenshots/palette.svg" width="600" alt="Interactive slash command palette with filtering">
+
+### Agent Execution
+
+<img src="docs/screenshots/agent-run.svg" width="660" alt="Agent building a tic-tac-toe game with tool calls">
+
+### Status & Models
+
+<img src="docs/screenshots/status.svg" width="600" alt="/status command showing provider, model, session, and cost">
+<img src="docs/screenshots/models.svg" width="600" alt="/models command listing available models by provider">
+
+<p align="right"><a href="#harness">back to top</a></p>
+
+---
+
+## 🎛 Interactive REPL Commands
+
+Type `/` in the REPL to open the command palette, or use any command directly.
+
+| Command | Description |
+|---------|-------------|
+| `/help` | Show available commands and tips |
+| `/connect` | Set up or change your API key |
+| `/model` | Switch model (e.g. `/model gpt-5.2`) |
+| `/models` | List available models |
+| `/plan` | Plan implementation with a read-only agent |
+| `/review` | Review code changes or a specific file |
+| `/team` | Decompose a task and run agents in parallel |
+| `/status` | Show provider, model, session, and cost |
+| `/cost` | Show token usage and cost for this session |
+| `/compact` | Summarize conversation to free up context |
+| `/session` | Show or switch session ID |
+| `/diff` | Show git diff of changes in working directory |
+| `/init` | Create a HARNESS.md project config file |
+| `/doctor` | Check your setup (provider, API key, tools) |
+| `/permission` | View or change permission mode |
+| `/clear` | Clear the screen |
+
+<p align="right"><a href="#harness">back to top</a></p>
+
+---
+
+## 🔌 Providers
 
 Harness works with every major AI provider — switch with a single flag.
 
@@ -175,7 +149,7 @@ harness models info sonnet   # Get details for a specific model
 
 ---
 
-## Features
+## 🛠 Features
 
 ### Built-in Tools
 
@@ -201,6 +175,7 @@ The agent can spin up specialized workers in parallel:
 | **general** | Full tools | Complex multi-step tasks |
 | **explore** | Read-only | Fast codebase exploration |
 | **plan** | Read-only | Architecture planning |
+| **review** | Read-only | Structured code review |
 
 ### Permission Modes
 
@@ -212,6 +187,18 @@ You control what the agent can do:
 | `accept_edits` | File edits are automatic, shell commands ask |
 | `plan` | Read-only — nothing gets changed |
 | `bypass` | Full auto-approve (for scripts/CI) |
+
+### Interactive Command Palette
+
+Type `/` in the REPL to open a filterable dropdown. Arrow keys navigate, typing filters, Enter selects, Escape dismisses. All 16 slash commands are accessible instantly.
+
+### Async Steering (Live Message Injection)
+
+While the agent is executing, type a message and press Enter to inject it between turns. The steering channel queues your message and the agent processes it at the next turn boundary — no need to wait for it to finish.
+
+### Context Compaction
+
+When the conversation approaches the model's context limit (85% threshold), Harness automatically summarizes earlier messages while preserving key information. The compacted context targets 50% of the window, giving you room to keep working without starting a new session.
 
 ### MCP (Model Context Protocol)
 
@@ -273,7 +260,7 @@ async for msg in harness.run("Fix the tests", hooks=hooks):
 
 ---
 
-## SDK
+## 🐍 SDK
 
 Use Harness as a Python library to build your own tools on top of it.
 
@@ -317,15 +304,79 @@ result = await mgr.spawn("explore", "Find all API endpoints")
 results = await mgr.spawn_parallel([
     ("explore", "Find all API endpoints"),
     ("explore", "Find all database models"),
-    ("explore", "Find all test files"),
+    ("review", "Review the auth module"),
 ])
+```
+
+### Steering Channel (Async Message Injection)
+
+Inject messages into the agent loop while it's running:
+
+```python
+from harness.core.steering import SteeringChannel
+
+steering = SteeringChannel()
+
+# Start the agent with steering enabled
+async for msg in harness.run(
+    "Refactor the API layer",
+    steering=steering,
+):
+    print(msg)
+
+# From another coroutine, inject a message between turns:
+await steering.send("Actually, skip the auth endpoints")
 ```
 
 <p align="right"><a href="#harness">back to top</a></p>
 
 ---
 
-## Configuration
+## 📊 Benchmark Results
+
+Harness was benchmarked against the leading coding agents on 8 real-world tasks covering multi-file editing, bug fixing, error recovery, refactoring, context understanding, and code analysis.
+
+### Overall Scores
+
+| Agent | Claude Opus 4.6 | GPT-5.2 |
+|-------|:---:|:---:|
+| **Harness** | **7/8 (88%)** | **8/8 (100%)** |
+| Claude Code | 7/8 (88%) | — |
+| OpenCode | 7/8 (88%) | 7/8 (88%) |
+| pi-mono | 7/8 (88%) | 8/8 (100%) |
+
+Harness is the **only open-source agent** that achieves a perfect score — and it does so across providers, not locked to one.
+
+### Per-Task Breakdown (GPT-5.2)
+
+| Task | Harness | OpenCode | pi-mono |
+|------|:---:|:---:|:---:|
+| Multi-file editing | PASS (17.5s) | PASS (19.4s) | PASS (26.8s) |
+| Error recovery | PASS (5.2s) | PASS (11.7s) | PASS (10.1s) |
+| Tool efficiency | PASS (1.8s) | PASS (5.6s) | PASS (9.2s) |
+| Context understanding | PASS (9.7s) | FAIL | PASS (41.3s) |
+| Project creation | PASS (3.0s) | PASS (7.6s) | PASS (3.8s) |
+| Bug fixing | PASS (5.5s) | PASS (12.9s) | PASS (10.0s) |
+| Code analysis | PASS (1.9s) | PASS (5.2s) | PASS (2.3s) |
+| Refactoring | PASS (6.4s) | PASS (11.7s) | PASS (12.7s) |
+
+### Speed
+
+| Agent | Model | Avg per Task | Total (8 tasks) |
+|-------|-------|:---:|:---:|
+| **Harness** | **GPT-5.2** | **6.4s** | **51.0s** |
+| Harness | Opus 4.6 | 12.5s | 99.7s |
+| Claude Code | Opus 4.6 | 16.4s | 131.5s |
+| OpenCode | GPT-5.2 | 10.7s | 85.8s |
+| pi-mono | GPT-5.2 | 14.5s | 116.2s |
+
+Harness is **2x faster** than the next-fastest agent on GPT-5.2, and **30% faster** than Claude Code on Opus.
+
+<p align="right"><a href="#harness">back to top</a></p>
+
+---
+
+## ⚙️ Configuration
 
 ### Config File
 
@@ -353,7 +404,40 @@ export GOOGLE_API_KEY="AIza..."
 
 ---
 
-## Evaluation
+## 🏗 Architecture
+
+```
+src/harness/
+  core/
+    engine.py          Top-level run() entry point
+    loop.py            Agent loop (provider -> tools -> repeat)
+    session.py         JSONL session persistence
+    context.py         Context window management + compaction
+    config.py          Config loading (env, TOML, HARNESS.md)
+    steering.py        Async steering channel for live message injection
+  providers/
+    anthropic.py       Claude adapter
+    openai.py          GPT / OpenAI-compatible adapter
+    google.py          Gemini adapter
+    ollama.py          Ollama local model adapter
+    registry.py        Model catalogue (50+ models)
+  tools/               Read, Write, Edit, Bash, Glob, Grep, Task, Web, etc.
+  agents/              Sub-agent registry + lifecycle manager
+  hooks/               Pre/post tool-use hook system
+  mcp/                 MCP client + progressive tool discovery
+  skills/              Skill loader (SKILL.md parser)
+  memory/              Auto-memory + project instructions
+  permissions/         Permission rules engine
+  ui/                  Rich terminal output + streaming + diffs
+  eval/                SWE-bench, Harness-Bench, metrics, reports
+  cli/                 Click CLI entry point + subcommands
+```
+
+<p align="right"><a href="#harness">back to top</a></p>
+
+---
+
+## 🧪 Evaluation
 
 ### Run Benchmarks
 
@@ -381,39 +465,7 @@ harness eval list
 
 ---
 
-## Architecture
-
-```
-src/harness/
-  core/
-    engine.py          Top-level run() entry point
-    loop.py            Agent loop (provider -> tools -> repeat)
-    session.py         JSONL session persistence
-    context.py         Context window management + compaction
-    config.py          Config loading (env, TOML, HARNESS.md)
-  providers/
-    anthropic.py       Claude adapter
-    openai.py          GPT / OpenAI-compatible adapter
-    google.py          Gemini adapter
-    ollama.py          Ollama local model adapter
-    registry.py        Model catalogue (50+ models)
-  tools/               Read, Write, Edit, Bash, Glob, Grep, Task, Web, etc.
-  agents/              Sub-agent registry + lifecycle manager
-  hooks/               Pre/post tool-use hook system
-  mcp/                 MCP client + progressive tool discovery
-  skills/              Skill loader (SKILL.md parser)
-  memory/              Auto-memory + project instructions
-  permissions/         Permission rules engine
-  ui/                  Rich terminal output + streaming + diffs
-  eval/                SWE-bench, Harness-Bench, metrics, reports
-  cli/                 Click CLI entry point + subcommands
-```
-
-<p align="right"><a href="#harness">back to top</a></p>
-
----
-
-## Development
+## 🔧 Development
 
 ```bash
 git clone https://github.com/AgentBoardTT/openharness.git
@@ -425,7 +477,7 @@ uv run ruff check src/ tests/
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 We'd love your help. Here's how:
 
@@ -441,7 +493,7 @@ Areas where we especially need help:
 
 ---
 
-## License
+## 📄 License
 
 [MIT](LICENSE)
 
