@@ -83,7 +83,7 @@ curl -fsSL https://raw.githubusercontent.com/AgentBoardTT/openharness/main/insta
 
 This automatically installs everything you need (Python, uv, and Harness). Just follow any prompts.
 
-> **Windows users:** Run `pip install "harness-agent @ git+https://github.com/AgentBoardTT/openharness.git"` instead.
+> **Windows users:** Run `pip install harness-agent` instead.
 
 ### Step 2: Connect your AI provider
 
