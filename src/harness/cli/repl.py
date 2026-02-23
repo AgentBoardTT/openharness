@@ -91,6 +91,11 @@ class Repl:
         self._total_cost = 0.0
         self._turn_count = 0
 
+        # Eagerly resolve API key from config if not passed via CLI.
+        # This covers the case where the user previously ran /connect
+        # and the key is saved in ~/.harness/config.toml.
+        self._load_saved_api_key()
+
     # -- Display helpers -------------------------------------------------------
 
     @property
@@ -117,6 +122,48 @@ class Repl:
             return info.aliases[0] if info.aliases else info.id
         except Exception:
             return model_id
+
+    def _load_saved_api_key(self) -> None:
+        """Try to load an API key from saved config into self._api_key.
+
+        If no key is found for the current provider, check whether *any*
+        saved provider has a key and auto-switch to it.  This handles the
+        common case where a user ran ``/connect`` once and expects it to
+        Just Work on next launch.
+        """
+        if self._api_key:
+            return  # Already have an explicit key
+        if self._provider == "ollama":
+            return
+
+        from harness.core.config import resolve_api_key
+
+        # 1. Check current provider
+        key = resolve_api_key(self._provider)
+        if key:
+            self._api_key = key
+            return
+
+        # 2. No key for current provider — scan saved providers
+        try:
+            from pathlib import Path
+            import tomllib
+            config_path = Path.home() / ".harness" / "config.toml"
+            if not config_path.exists():
+                return
+            with open(config_path, "rb") as f:
+                data = tomllib.load(f)
+            for prov, prov_conf in data.get("providers", {}).items():
+                saved_key = prov_conf.get("api_key") if isinstance(prov_conf, dict) else None
+                if saved_key:
+                    self._provider = prov
+                    self._api_key = saved_key
+                    # Also resolve the default model for this provider
+                    if not self._model:
+                        self._model = DEFAULT_MODELS.get(prov)
+                    return
+        except Exception:
+            pass
 
     def _has_api_key(self) -> bool:
         """Check whether an API key is available for the current provider."""
