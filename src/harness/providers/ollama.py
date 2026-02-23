@@ -58,7 +58,8 @@ class OllamaProvider(OpenAIProvider):
         Delegates to :class:`OpenAIProvider` after stripping unsupported
         options (e.g. ``stream_options``) that Ollama may not handle.
         """
-        return self._stream(messages, tools, system, max_tokens)
+        async for event in self._stream(messages, tools, system, max_tokens):
+            yield event
 
     async def _stream(
         self,

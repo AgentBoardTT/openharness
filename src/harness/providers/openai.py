@@ -157,10 +157,19 @@ class OpenAIProvider(BaseProvider):
         # their arguments progressively.  A new entry starts when we see a
         # chunk with a non-None ``id`` field on the tool_call object.
         active_tool_call_ids: dict[int, str] = {}  # index -> tool_use_id
-        last_chunk: Any = None
+        final_usage: dict[str, int] | None = None
 
         async for chunk in stream:
-            last_chunk = chunk
+            # OpenAI sends a final chunk with choices=[] and usage populated
+            # when stream_options={"include_usage": True}. Capture it before
+            # skipping the chunk.
+            raw_usage = getattr(chunk, "usage", None)
+            if raw_usage is not None:
+                final_usage = {
+                    "input_tokens": getattr(raw_usage, "prompt_tokens", 0) or 0,
+                    "output_tokens": getattr(raw_usage, "completion_tokens", 0) or 0,
+                }
+
             choice = chunk.choices[0] if chunk.choices else None
             if choice is None:
                 continue
@@ -201,16 +210,6 @@ class OpenAIProvider(BaseProvider):
                     yield StreamEvent(type="tool_use_end")
                 active_tool_call_ids.clear()
 
-                # Attempt to extract usage from the final chunk.
-                usage: dict[str, int] | None = None
-                if last_chunk is not None:
-                    raw_usage = getattr(last_chunk, "usage", None)
-                    if raw_usage is not None:
-                        usage = {
-                            "input_tokens": getattr(raw_usage, "prompt_tokens", 0) or 0,
-                            "output_tokens": getattr(raw_usage, "completion_tokens", 0) or 0,
-                        }
-
                 # Normalize OpenAI's "tool_calls" to "tool_use" for consistency
                 # with the provider-agnostic convention used by the agent loop.
                 reason = choice.finish_reason
@@ -220,7 +219,7 @@ class OpenAIProvider(BaseProvider):
                 yield StreamEvent(
                     type="message_end",
                     stop_reason=reason,
-                    usage=usage,
+                    usage=final_usage,
                 )
 
     # ------------------------------------------------------------------

@@ -36,6 +36,7 @@ async def run(
     hooks: list[Hook] | None = None,
     interactive: bool = False,
     approval_callback: Any | None = None,
+    steering: Any | None = None,
     _provider: ProviderAdapter | None = None,
     **kwargs: Any,
 ) -> AsyncIterator[Message]:
@@ -60,6 +61,7 @@ async def run(
         system_prompt: Override default system prompt.
         hooks: List of Hook definitions for lifecycle events.
         interactive: Whether to enable interactive tools (e.g. AskUser).
+        steering: A SteeringChannel for injecting messages between turns.
         _provider: Injected provider for testing (private).
     """
     # Resolve working directory
@@ -153,6 +155,7 @@ async def run(
         permission_manager=perm_manager,
         mcp_manager=mcp_manager,
         hook_manager=hook_manager,
+        steering=steering,
         approval_callback=approval_callback,
     )
 

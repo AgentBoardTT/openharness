@@ -24,11 +24,18 @@ from harness.types.providers import ChatMessage, ProviderAdapter, StreamEvent
 from harness.types.tools import ToolContext, ToolResultData
 
 SYSTEM_PROMPT = """\
-You are Harness, an expert software engineering assistant. You help users with coding tasks \
-by reading, writing, and editing files, running commands, and searching codebases.
+You are Harness, an expert software engineering assistant.
 
-You have access to tools to interact with the filesystem and execute commands. Use them to \
-accomplish the user's request. Be concise and direct in your responses.
+You have tools to read, write, and edit files, run shell commands, search codebases, and \
+browse the web. Use them proactively to accomplish the user's request.
+
+IMPORTANT: Be action-oriented. When the user asks you to build, fix, or change something, \
+start doing it immediately using your tools. Do NOT ask clarifying questions unless the \
+request is genuinely ambiguous and you cannot make a reasonable default choice. Prefer \
+making sensible decisions and executing over asking for permission or preferences. If the \
+user doesn't specify details, choose good defaults and proceed.
+
+Be concise in your text responses. Let your tool calls and code do the talking.
 
 Working directory: {cwd}
 """
@@ -59,9 +66,13 @@ class AgentLoop:
         self._session = session
         self._cwd = Path(config.cwd or ".").resolve()
         self._tool_defs = [t.definition for t in tools.values()]
-        self._system = (config.system_prompt or SYSTEM_PROMPT).format(
-            cwd=str(self._cwd),
-        )
+        # Only format the bare SYSTEM_PROMPT constant. If config.system_prompt
+        # is set it was already formatted by engine.py and may contain literal
+        # braces from HARNESS.md or skill summaries.
+        if config.system_prompt:
+            self._system = config.system_prompt
+        else:
+            self._system = SYSTEM_PROMPT.format(cwd=str(self._cwd))
         self._context_window = context_window
         self._permission_manager = permission_manager
         self._mcp_manager = mcp_manager
@@ -120,6 +131,8 @@ class AgentLoop:
             current_tool: dict[str, Any] | None = None
             stop_reason = "end_turn"
             turn_tokens = 0
+            turn_input_tokens = 0
+            turn_output_tokens = 0
 
             async for event in self._provider.chat_completion_stream(
                 messages=messages,
@@ -158,9 +171,9 @@ class AgentLoop:
                 elif event.type == "message_end":
                     stop_reason = event.stop_reason or "end_turn"
                     if event.usage:
-                        in_t = event.usage.get("input_tokens", 0)
-                        out_t = event.usage.get("output_tokens", 0)
-                        turn_tokens = in_t + out_t
+                        turn_input_tokens = event.usage.get("input_tokens", 0)
+                        turn_output_tokens = event.usage.get("output_tokens", 0)
+                        turn_tokens = turn_input_tokens + turn_output_tokens
 
             # Emit final text if any
             if accumulated_text:
@@ -182,14 +195,12 @@ class AgentLoop:
                 self._session.add_message(assistant_msg)
                 messages.append(assistant_msg)
 
-            # Calculate cost
+            # Calculate cost using actual input/output token counts
             model_info = getattr(self._provider, '_model_info', None)
             turn_cost = 0.0
             if model_info and hasattr(model_info, 'input_cost_per_mtok'):
-                input_toks = (turn_tokens * 0.7)  # rough split
-                output_toks = (turn_tokens * 0.3)
-                in_cost = input_toks * model_info.input_cost_per_mtok
-                out_cost = output_toks * model_info.output_cost_per_mtok
+                in_cost = turn_input_tokens * model_info.input_cost_per_mtok
+                out_cost = turn_output_tokens * model_info.output_cost_per_mtok
                 turn_cost = (in_cost + out_cost) / 1_000_000
 
             total_tokens += turn_tokens
@@ -204,6 +215,9 @@ class AgentLoop:
             tool_result_contents: list[dict[str, Any]] = []
             for tu in tool_uses:
                 tool_call_count += 1
+
+                # Safe default in case tool execution is interrupted
+                result = ToolResultData(content="Tool execution failed.", is_error=True)
 
                 # Check permissions before executing
                 decision = self._check_permission(tu["name"], tu["args"])

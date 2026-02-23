@@ -91,6 +91,15 @@ class Repl:
         self._total_cost = 0.0
         self._turn_count = 0
 
+        # Cache Rich console once (avoids re-detection issues after input())
+        self._console: Any | None = None
+        if use_rich:
+            try:
+                from rich.console import Console
+                self._console = Console()
+            except ImportError:
+                pass
+
         # Eagerly resolve API key from config if not passed via CLI.
         # This covers the case where the user previously ran /connect
         # and the key is saved in ~/.harness/config.toml.
@@ -126,44 +135,27 @@ class Repl:
     def _load_saved_api_key(self) -> None:
         """Try to load an API key from saved config into self._api_key.
 
-        If no key is found for the current provider, check whether *any*
-        saved provider has a key and auto-switch to it.  This handles the
-        common case where a user ran ``/connect`` once and expects it to
-        Just Work on next launch.
+        Uses ``resolve_saved_session()`` which checks defaults, env vars,
+        and scans all saved providers.  If the resolved provider differs
+        from the current one, auto-switch to it.
         """
         if self._api_key:
             return  # Already have an explicit key
         if self._provider == "ollama":
             return
 
-        from harness.core.config import resolve_api_key
+        from harness.core.config import resolve_saved_session
 
-        # 1. Check current provider
-        key = resolve_api_key(self._provider)
-        if key:
-            self._api_key = key
-            return
-
-        # 2. No key for current provider — scan saved providers
-        try:
-            from pathlib import Path
-            import tomllib
-            config_path = Path.home() / ".harness" / "config.toml"
-            if not config_path.exists():
-                return
-            with open(config_path, "rb") as f:
-                data = tomllib.load(f)
-            for prov, prov_conf in data.get("providers", {}).items():
-                saved_key = prov_conf.get("api_key") if isinstance(prov_conf, dict) else None
-                if saved_key:
-                    self._provider = prov
-                    self._api_key = saved_key
-                    # Also resolve the default model for this provider
-                    if not self._model:
-                        self._model = DEFAULT_MODELS.get(prov)
-                    return
-        except Exception:
-            pass
+        saved = resolve_saved_session()
+        if "api_key" in saved:
+            self._api_key = saved["api_key"]
+        if "provider" in saved:
+            self._provider = saved["provider"]
+        if "model" in saved and not self._model:
+            self._model = saved["model"]
+        # If we got a provider but no model, use the default for that provider
+        if self._api_key and not self._model:
+            self._model = DEFAULT_MODELS.get(self._provider)
 
     def _has_api_key(self) -> bool:
         """Check whether an API key is available for the current provider."""
@@ -196,11 +188,6 @@ class Repl:
             if not prompt:
                 continue
 
-            # Bare "/" — show command palette
-            if prompt == "/":
-                self._show_command_palette()
-                continue
-
             # Handle slash commands
             if prompt.startswith("/"):
                 if await self._handle_slash_command(prompt):
@@ -217,20 +204,211 @@ class Repl:
             await self._run_prompt(prompt)
 
     async def _read_prompt(self) -> str:
-        """Read a prompt from stdin asynchronously."""
+        """Read a prompt with interactive slash command palette.
+
+        When the user types ``/``, a filterable command palette appears
+        below the cursor.  Arrow keys navigate, Enter selects, Escape
+        dismisses, and further typing filters the list.
+        """
         loop = asyncio.get_running_loop()
         prompt_str = f"{self._short_model} > "
-        try:
+
+        if not sys.stdin.isatty():
             line = await loop.run_in_executor(None, lambda: input(prompt_str))
+            return line.strip()
+
+        try:
+            return await loop.run_in_executor(
+                None, lambda: self._interactive_input(prompt_str),
+            )
         except EOFError:
             raise
         except KeyboardInterrupt:
             raise
-        return line.strip()
+
+    # -- Interactive input with slash palette -----------------------------------
+
+    def _interactive_input(self, prompt: str) -> str:
+        """Char-by-char input with an interactive slash command palette."""
+        import select as _sel
+        import termios
+        import tty
+
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+
+        buf = ""
+        palette_lines = 0
+        selected = 0
+
+        try:
+            tty.setcbreak(fd)
+
+            while True:
+                ch = self._read_key(fd)
+
+                # --- Enter ------------------------------------------------
+                if ch in ('\r', '\n'):
+                    if palette_lines > 0:
+                        filtered = self._filter_commands(buf)
+                        if filtered and 0 <= selected < len(filtered):
+                            cmd = filtered[selected][0]
+                            self._replace_input(buf, cmd, prompt)
+                            buf = cmd
+                    self._clear_palette_lines(palette_lines)
+                    sys.stdout.write('\n')
+                    sys.stdout.flush()
+                    return buf.strip()
+
+                # --- Escape (bare) ----------------------------------------
+                if ch == '\x1b':
+                    if palette_lines > 0:
+                        self._clear_palette_lines(palette_lines)
+                        palette_lines = 0
+                    continue
+
+                # --- Arrow Up ---------------------------------------------
+                if ch == '\x1b[A':
+                    if palette_lines > 0:
+                        selected = max(0, selected - 1)
+                        palette_lines = self._render_palette_items(buf, selected)
+                    continue
+
+                # --- Arrow Down -------------------------------------------
+                if ch == '\x1b[B':
+                    if palette_lines > 0:
+                        filtered = self._filter_commands(buf)
+                        selected = min(len(filtered) - 1, selected + 1)
+                        palette_lines = self._render_palette_items(buf, selected)
+                    continue
+
+                # --- Tab — accept selection without executing -------------
+                if ch == '\t':
+                    if palette_lines > 0:
+                        filtered = self._filter_commands(buf)
+                        if filtered and 0 <= selected < len(filtered):
+                            cmd = filtered[selected][0]
+                            self._replace_input(buf, cmd, prompt)
+                            buf = cmd + " "
+                            sys.stdout.write(' ')
+                            sys.stdout.flush()
+                        self._clear_palette_lines(palette_lines)
+                        palette_lines = 0
+                    continue
+
+                # --- Backspace --------------------------------------------
+                if ch in ('\x7f', '\x08'):
+                    if buf:
+                        buf = buf[:-1]
+                        sys.stdout.write('\b \b')
+                        sys.stdout.flush()
+                    if buf.startswith('/') and ' ' not in buf and len(buf) >= 1:
+                        selected = 0
+                        palette_lines = self._render_palette_items(buf, selected)
+                    elif palette_lines > 0:
+                        self._clear_palette_lines(palette_lines)
+                        palette_lines = 0
+                    continue
+
+                # --- Ctrl+C -----------------------------------------------
+                if ch == '\x03':
+                    self._clear_palette_lines(palette_lines)
+                    sys.stdout.write('\n')
+                    sys.stdout.flush()
+                    raise KeyboardInterrupt
+
+                # --- Ctrl+D -----------------------------------------------
+                if ch == '\x04':
+                    self._clear_palette_lines(palette_lines)
+                    raise EOFError
+
+                # --- Printable character ----------------------------------
+                if len(ch) == 1 and ch.isprintable():
+                    buf += ch
+                    sys.stdout.write(ch)
+                    sys.stdout.flush()
+
+                    if buf.startswith('/') and ' ' not in buf:
+                        selected = 0
+                        palette_lines = self._render_palette_items(buf, selected)
+                    elif palette_lines > 0:
+                        self._clear_palette_lines(palette_lines)
+                        palette_lines = 0
+
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+    def _read_key(self, fd: int) -> str:
+        """Read a single key, decoding multi-byte escape sequences."""
+        import select as _sel
+
+        ch = sys.stdin.read(1)
+        if ch == '\x1b':
+            if _sel.select([fd], [], [], 0.05)[0]:
+                ch2 = sys.stdin.read(1)
+                if ch2 == '[' and _sel.select([fd], [], [], 0.05)[0]:
+                    ch3 = sys.stdin.read(1)
+                    return f'\x1b[{ch3}'
+            return '\x1b'
+        return ch
+
+    def _filter_commands(self, prefix: str) -> list[tuple[str, str]]:
+        """Return slash commands whose name starts with *prefix*."""
+        return [
+            (name, desc)
+            for name, desc in self.SLASH_COMMANDS.items()
+            if name.startswith(prefix)
+        ]
+
+    def _render_palette_items(self, prefix: str, selected: int) -> int:
+        """Draw the filtered palette below the cursor. Returns line count."""
+        filtered = self._filter_commands(prefix)
+        if not filtered:
+            return 0
+
+        max_show = min(len(filtered), 10)
+        sys.stdout.write('\0337')  # save cursor (DEC private)
+
+        for i in range(max_show):
+            name, desc = filtered[i]
+            sys.stdout.write('\n\033[K')
+            if i == selected:
+                sys.stdout.write(f'  \033[1;35m\u25b8 {name:<14}\033[0m \033[90m{desc}\033[0m')
+            else:
+                sys.stdout.write(f'    \033[35m{name:<14}\033[0m \033[90m{desc}\033[0m')
+
+        # Clear one extra line in case the list shrank
+        sys.stdout.write('\n\033[K')
+
+        sys.stdout.write('\0338')  # restore cursor (DEC private)
+        sys.stdout.flush()
+        return max_show
+
+    def _clear_palette_lines(self, n: int) -> None:
+        """Erase *n* palette lines below the cursor."""
+        if n <= 0:
+            return
+        sys.stdout.write('\0337')
+        for _ in range(n + 1):
+            sys.stdout.write('\n\033[K')
+        sys.stdout.write('\0338')
+        sys.stdout.flush()
+
+    def _replace_input(self, old: str, new: str, prompt: str) -> None:
+        """Overwrite the visible input buffer with *new*."""
+        sys.stdout.write(f'\r{prompt}{new}')
+        pad = len(old) - len(new)
+        if pad > 0:
+            sys.stdout.write(' ' * pad + '\b' * pad)
+        sys.stdout.flush()
 
     async def _run_prompt(self, prompt: str) -> None:
         """Run a single prompt through the engine and print messages."""
         from harness.core.engine import run
+        from harness.core.steering import SteeringChannel
 
         if self._use_rich:
             from harness.ui.terminal import RichPrinter
@@ -245,6 +423,17 @@ class Repl:
 
         def _cancel_handler(signum: int, frame: Any) -> None:
             self._cancelled = True
+
+        # Set up steering channel for async message injection
+        steering = SteeringChannel()
+        stop_reader = asyncio.Event()
+        reader_task: asyncio.Task[None] | None = None
+
+        # Only start background reader for interactive TTY sessions
+        if sys.stdin.isatty():
+            reader_task = asyncio.create_task(
+                self._background_stdin_reader(steering, stop_reader),
+            )
 
         try:
             signal.signal(signal.SIGINT, _cancel_handler)
@@ -261,6 +450,7 @@ class Repl:
                 permission_mode=self._permission_mode,
                 interactive=True,
                 approval_callback=self._approval_callback,
+                steering=steering,
             ):
                 if self._cancelled:
                     print("\n[cancelled]")
@@ -281,9 +471,55 @@ class Repl:
                 output_fn(msg)
 
         finally:
+            stop_reader.set()
+            if reader_task is not None:
+                reader_task.cancel()
+                try:
+                    await reader_task
+                except asyncio.CancelledError:
+                    pass
+            await steering.close()
             signal.signal(signal.SIGINT, original_handler)
 
         print()
+
+    async def _background_stdin_reader(
+        self,
+        steering: Any,
+        stop: asyncio.Event,
+    ) -> None:
+        """Read stdin in background and feed lines into the steering channel.
+
+        Runs while the agent is executing so the user can inject messages
+        between turns.  Uses ``select`` to poll stdin non-blockingly.
+        """
+        import select as _select
+
+        loop = asyncio.get_running_loop()
+
+        while not stop.is_set():
+            try:
+                # Poll stdin every 300ms (runs in thread pool)
+                has_input = await loop.run_in_executor(
+                    None,
+                    lambda: bool(_select.select([sys.stdin], [], [], 0.3)[0]),
+                )
+                if stop.is_set():
+                    break
+                if has_input:
+                    line = await loop.run_in_executor(None, sys.stdin.readline)
+                    line = line.strip()
+                    if line:
+                        steering.send_nowait(line)
+                        c = self._rc()
+                        if c:
+                            c.print(f"  [{self._B}]\u21b3 message queued[/]")
+                        else:
+                            print("  [queued]")
+            except (EOFError, OSError, ValueError):
+                break
+            except asyncio.CancelledError:
+                break
 
     # -- Slash command dispatch -------------------------------------------------
 
@@ -297,7 +533,6 @@ class Repl:
         sync_handlers = {
             "/help": lambda: self._handle_help(),
             "/exit": lambda: None,  # handled in main loop
-            "/connect": lambda: self._handle_connect(),
             "/model": lambda: self._handle_model(arg),
             "/models": lambda: self._handle_models(),
             "/status": lambda: self._handle_status(),
@@ -313,6 +548,7 @@ class Repl:
 
         # Async handlers — awaited
         async_handlers = {
+            "/connect": lambda: self._handle_connect(),
             "/plan": lambda: self._handle_plan(arg),
             "/review": lambda: self._handle_review(arg),
             "/team": lambda: self._handle_team(arg),
@@ -343,14 +579,8 @@ class Repl:
     # -- Rich console helper ----------------------------------------------------
 
     def _rc(self) -> Any | None:
-        """Return a Rich Console writing to stderr, or None if unavailable."""
-        if not self._use_rich:
-            return None
-        try:
-            from rich.console import Console
-            return Console(stderr=True)
-        except ImportError:
-            return None
+        """Return the cached Rich Console, or None if unavailable."""
+        return self._console
 
     # ── Palette colours (referenced in Rich markup) ──────────────────────────
     # Primary accent:  #a78bfa (violet)     Command names / brand
@@ -374,76 +604,45 @@ class Repl:
 
     def _show_command_palette(self) -> None:
         """Show all commands in a clean, grouped palette — triggered by bare '/'."""
-        c = self._rc()
-        if c:
-            _V, _M = self._V, self._M
+        # Use ANSI codes directly — avoids any Rich Console output issues.
+        V = "\033[1;35m"  # bold magenta (violet)
+        M = "\033[90m"    # grey
+        R = "\033[0m"     # reset
 
-            def _cmd(name: str, desc: str, note: str = "") -> None:
-                n = f"  [{_V} bold]{name:<14}[/]"
-                d = f"[{_M}]{desc}[/]"
-                tail = f"  [dim]{note}[/dim]" if note else ""
-                c.print(f"{n} {d}{tail}")
-
-            c.print()
-            c.print(f"  [bold {_V}]\u2501\u2501 Commands[/]")
-            c.print()
-            _cmd("/connect", "Set up or change your API key")
-            _cmd("/model", "Switch model", "e.g. /model opus")
-            _cmd("/models", "List available models")
-            c.print()
-            c.print(f"  [dim {_M}]\u250a Agents[/]")
-            _cmd("/plan", "Plan implementation", "read-only")
-            _cmd("/review", "Review code changes or a file")
-            _cmd("/team", "Decompose task & run agents in parallel")
-            c.print()
-            c.print(f"  [dim {_M}]\u250a Session[/]")
-            _cmd("/status", "Provider, model, session & cost")
-            _cmd("/cost", "Token usage and cost")
-            _cmd("/compact", "Summarize conversation to free context")
-            _cmd("/session", "Show or switch session")
-            c.print()
-            c.print(f"  [dim {_M}]\u250a Project[/]")
-            _cmd("/diff", "Show uncommitted changes", "git diff")
-            _cmd("/init", "Create HARNESS.md project config")
-            _cmd("/doctor", "Check your setup")
-            _cmd("/permission", "View or change permission mode")
-            c.print()
-            c.print(f"  [dim {_M}]\u250a Other[/]")
-            _cmd("/clear", "Clear the screen")
-            _cmd("/help", "Show help with examples")
-            _cmd("/exit", "Exit", "or Ctrl+D")
-            c.print()
-            return
+        def _cmd(name: str, desc: str, note: str = "") -> None:
+            tail = f"  {M}{note}{R}" if note else ""
+            print(f"  {V}{name:<14}{R} {M}{desc}{R}{tail}")
 
         print()
-        print("  == Commands")
+        print(f"  {V}━━ Commands{R}")
         print()
-        print("  /connect       Set up or change your API key")
-        print("  /model         Switch model (e.g. /model opus)")
-        print("  /models        List available models")
+        _cmd("/connect", "Set up or change your API key")
+        _cmd("/model", "Switch model", "e.g. /model opus")
+        _cmd("/models", "List available models")
         print()
-        print("  : Agents")
-        print("  /plan          Plan implementation (read-only)")
-        print("  /review        Review code changes or a file")
-        print("  /team          Decompose task & run agents in parallel")
+        print(f"  {M}┊ Agents{R}")
+        _cmd("/plan", "Plan implementation", "read-only")
+        _cmd("/review", "Review code changes or a file")
+        _cmd("/team", "Decompose task & run agents in parallel")
         print()
-        print("  : Session")
-        print("  /status        Provider, model, session & cost")
-        print("  /cost          Token usage and cost")
-        print("  /compact       Summarize conversation to free context")
-        print("  /session       Show or switch session")
+        print(f"  {M}┊ Session{R}")
+        _cmd("/status", "Provider, model, session & cost")
+        _cmd("/cost", "Token usage and cost")
+        _cmd("/compact", "Summarize conversation to free context")
+        _cmd("/session", "Show or switch session")
         print()
-        print("  : Project")
-        print("  /diff          Show uncommitted changes (git diff)")
-        print("  /init          Create HARNESS.md project config")
-        print("  /doctor        Check your setup")
-        print("  /permission    View or change permission mode")
+        print(f"  {M}┊ Project{R}")
+        _cmd("/diff", "Show uncommitted changes", "git diff")
+        _cmd("/init", "Create HARNESS.md project config")
+        _cmd("/doctor", "Check your setup")
+        _cmd("/permission", "View or change permission mode")
         print()
-        print("  : Other")
-        print("  /clear         Clear the screen")
-        print("  /help          Show help with examples")
-        print("  /exit          Exit (or Ctrl+D)")
+        print(f"  {M}┊ Other{R}")
+        _cmd("/clear", "Clear the screen")
+        _cmd("/help", "Show help with examples")
+        _cmd("/exit", "Exit", "or Ctrl+D")
         print()
+        sys.stdout.flush()
 
     # -- Command handlers -------------------------------------------------------
 
@@ -1341,8 +1540,9 @@ class Repl:
         "3": "google",
     }
 
-    def _handle_connect(self) -> None:
+    async def _handle_connect(self) -> None:
         """Interactive flow to set up an API key."""
+        loop = asyncio.get_running_loop()
         c = self._rc()
         _V = self._V
         _M = self._M
@@ -1365,7 +1565,9 @@ class Repl:
             print()
 
         try:
-            choice = input("  Enter choice [1]: ").strip() or "1"
+            choice = await loop.run_in_executor(
+                None, lambda: input("  Enter choice [1]: ").strip() or "1",
+            )
         except (EOFError, KeyboardInterrupt):
             print("\n  Cancelled.")
             return
@@ -1376,7 +1578,10 @@ class Repl:
             return
 
         try:
-            api_key = getpass.getpass(f"  API key for {PROVIDER_DISPLAY.get(provider, provider)}: ")
+            prompt_text = f"  API key for {PROVIDER_DISPLAY.get(provider, provider)}: "
+            api_key = await loop.run_in_executor(
+                None, lambda: getpass.getpass(prompt_text),
+            )
         except (EOFError, KeyboardInterrupt):
             print("\n  Cancelled.")
             return
@@ -1390,10 +1595,13 @@ class Repl:
         from harness.core.config import save_api_key, save_defaults
 
         config_path = save_api_key(provider, api_key)
-        save_defaults(provider=provider)
 
         self._provider = provider
         self._api_key = api_key
+        # Set default model for the new provider if none set
+        if not self._model:
+            self._model = DEFAULT_MODELS.get(provider)
+        save_defaults(provider=provider, model=self._model)
 
         if c:
             _G, _W = self._G, self._W
@@ -1448,6 +1656,12 @@ class Repl:
 
     def _print_banner(self) -> None:
         """Print the welcome banner with current model info."""
+        from importlib.metadata import version as pkg_version
+        try:
+            ver = pkg_version("harness-agent")
+        except Exception:
+            ver = "dev"
+
         model = self._display_model
         provider = self._display_provider
         cwd = Path(self._cwd or os.getcwd()).name or "~"
@@ -1456,7 +1670,7 @@ class Repl:
         if c:
             _V, _M, _B = self._V, self._M, self._B
             c.print()
-            c.print(f"  [bold {_V}]\u25c8 Harness[/]", highlight=False)
+            c.print(f"  [bold {_V}]\u25c8 Harness[/]  [dim]v{ver}[/dim]", highlight=False)
             c.print(f"  [{_M}]{provider} \u2215 {model}  \u2502  {cwd}[/]")
             c.print()
             c.print(f"  [{_M}]Type what you need, or press[/] [{_V}]/[/] [{_M}]for commands.[/]")
@@ -1464,7 +1678,7 @@ class Repl:
             return
 
         print()
-        print("  * Harness")
+        print(f"  * Harness v{ver}")
         print(f"  {provider} / {model}  |  {cwd}")
         print()
         print("  Type what you need, or press / for commands.")

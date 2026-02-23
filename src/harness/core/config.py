@@ -130,6 +130,85 @@ def load_defaults() -> dict[str, str]:
         return {}
 
 
+def resolve_saved_session() -> dict[str, str]:
+    """Resolve the best (provider, api_key, model) from saved config.
+
+    Checks multiple sources in priority order:
+
+    1. ``[defaults]`` section for provider/model preferences.
+    2. API key for the default provider (env var → config file).
+    3. If no key found for the default provider, scans ``[providers.*]``
+       for any provider that has a saved key.
+
+    Returns a dict with optional keys ``"provider"``, ``"api_key"``, ``"model"``.
+    An empty dict means nothing useful was found.
+    """
+    config_path = Path.home() / ".harness" / "config.toml"
+    result: dict[str, str] = {}
+
+    # Load defaults section if available
+    defaults = load_defaults()
+    provider = defaults.get("provider")
+    model = defaults.get("model")
+
+    if provider:
+        result["provider"] = provider
+    if model:
+        result["model"] = model
+
+    # Try to resolve an API key for the chosen provider
+    target_provider = provider or "anthropic"
+
+    # Check env var first
+    env_var = ENV_MAP.get(target_provider)
+    if env_var:
+        val = os.environ.get(env_var)
+        if val:
+            result["api_key"] = val
+            if "provider" not in result:
+                result["provider"] = target_provider
+            return result
+
+    # Check config file for the target provider's key
+    if config_path.exists():
+        try:
+            import tomllib
+            with open(config_path, "rb") as f:
+                data = tomllib.load(f)
+
+            # Try the target provider first
+            key = data.get("providers", {}).get(target_provider, {}).get("api_key")
+            if key:
+                result["api_key"] = key
+                if "provider" not in result:
+                    result["provider"] = target_provider
+                return result
+
+            # No key for target — scan all saved providers
+            for prov, prov_conf in data.get("providers", {}).items():
+                if isinstance(prov_conf, dict):
+                    saved_key = prov_conf.get("api_key")
+                    if saved_key:
+                        result["provider"] = prov
+                        result["api_key"] = saved_key
+                        if "model" not in result:
+                            # Don't leave model set to a different provider's model
+                            pass
+                        return result
+        except Exception:
+            pass
+
+    # Last resort: check all env vars
+    for prov, env_name in ENV_MAP.items():
+        val = os.environ.get(env_name)
+        if val:
+            result["provider"] = prov
+            result["api_key"] = val
+            return result
+
+    return result
+
+
 def save_defaults(provider: str | None = None, model: str | None = None) -> Path:
     """Persist provider and/or model as the user's defaults.
 
@@ -211,6 +290,11 @@ def _write_toml(path: Path, data: dict[str, Any]) -> None:
         if isinstance(v, dict):
             _write_toml_section(lines, [k], v)
     path.write_text("\n".join(lines) + "\n")
+    # Restrict permissions — config may contain API keys
+    try:
+        path.chmod(0o600)
+    except OSError:
+        pass  # Windows or other OS that doesn't support chmod
 
 
 def _write_toml_section(lines: list[str], prefix: list[str], d: dict[str, Any]) -> None:

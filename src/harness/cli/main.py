@@ -118,14 +118,16 @@ def cli(
     if dangerously_skip_permissions:
         permission = "bypass"
 
-    # Load saved defaults for provider/model when user didn't pass explicit flags
-    from harness.core.config import load_defaults
-    saved = load_defaults()
+    # Load saved defaults for provider/model/api_key when user didn't pass explicit flags
+    from harness.core.config import resolve_saved_session
+    saved = resolve_saved_session()
     source = ctx.get_parameter_source  # click.core.ParameterSource
     if source("provider") == click.core.ParameterSource.DEFAULT and "provider" in saved:
         provider = saved["provider"]
     if source("model") == click.core.ParameterSource.DEFAULT and "model" in saved:
         model = saved["model"]
+    if api_key is None and "api_key" in saved:
+        api_key = saved["api_key"]
 
     ctx.ensure_object(dict)
     prompt_args = ctx.obj.get("prompt_args", [])

@@ -87,7 +87,8 @@ class GoogleProvider(BaseProvider):
         StreamEvent
             One event per meaningful chunk from the Gemini stream.
         """
-        return self._stream(messages, tools, system, max_tokens)
+        async for event in self._stream(messages, tools, system, max_tokens):
+            yield event
 
     async def _stream(
         self,

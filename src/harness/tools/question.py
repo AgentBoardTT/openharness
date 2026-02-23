@@ -22,8 +22,11 @@ class QuestionTool(BaseTool):
         return ToolDef(
             name="AskUser",
             description=(
-                "Ask the user a question to gather information or clarify requirements. "
-                "Use this when you need user input to proceed."
+                "Ask the user a question. ONLY use this for genuinely ambiguous requests "
+                "where you cannot make a reasonable choice yourself. Do NOT use this to "
+                "ask about implementation details, technology choices, styling preferences, "
+                "or confirmations — just pick good defaults and proceed. Reserve this for "
+                "cases where the wrong assumption would waste significant effort."
             ),
             parameters=(
                 ToolParam(
@@ -66,7 +69,7 @@ class QuestionTool(BaseTool):
         """Prompt the user and return their answer."""
         import asyncio
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
         def _do_prompt() -> str:
             print(f"\n--- Agent Question ---\n{question}")
