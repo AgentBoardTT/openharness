@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+.ruff_cache/
+.pytest_cache/
+.opencode/
+.swebench-repos/
+*.egg-info/
+dist/
+build/
+hello.txt

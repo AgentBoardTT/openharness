@@ -1,0 +1,74 @@
+name: Evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      benchmark:
+        description: "Benchmark to run"
+        required: true
+        default: "harness-bench"
+        type: choice
+        options:
+          - harness-bench
+          - swe-bench-lite
+      provider:
+        description: "LLM provider"
+        required: true
+        default: "anthropic"
+        type: choice
+        options:
+          - anthropic
+          - openai
+          - google
+      model:
+        description: "Model ID (leave empty for default)"
+        required: false
+        type: string
+      max_tasks:
+        description: "Max tasks to run (leave empty for all)"
+        required: false
+        type: string
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --dev --extra eval
+
+      - name: Run evaluation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          MODEL_ARG=""
+          if [ -n "${{ inputs.model }}" ]; then
+            MODEL_ARG="-m ${{ inputs.model }}"
+          fi
+
+          TASKS_ARG=""
+          if [ -n "${{ inputs.max_tasks }}" ]; then
+            TASKS_ARG="--max-tasks ${{ inputs.max_tasks }}"
+          fi
+
+          if [ "${{ inputs.benchmark }}" = "swe-bench-lite" ]; then
+            uv run python -m harness.eval swe-bench \
+              --split lite \
+              -p ${{ inputs.provider }} \
+              $MODEL_ARG $TASKS_ARG \
+              -o eval-results/report.md
+          else
+            uv run python -m harness.eval harness-bench \
+              -p ${{ inputs.provider }} \
+              $MODEL_ARG $TASKS_ARG \
+              -o eval-results/report.md
+          fi
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-${{ inputs.benchmark }}-${{ inputs.provider }}
+          path: eval-results/

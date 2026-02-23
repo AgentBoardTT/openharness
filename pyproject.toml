@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "harness-agent"
+version = "0.1.0"
+description = "Multi-provider coding agent CLI + SDK"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Harness Contributors" }]
+keywords = ["ai", "agent", "coding", "cli", "sdk", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development",
+]
+dependencies = [
+    "anthropic>=0.40",
+    "openai>=1.50",
+    "google-genai>=1.0",
+    "mcp>=1.0",
+    "rich>=13.0",
+    "click>=8.0",
+    "anyio>=4.0",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "pyright", "ruff"]
+eval = ["swebench", "datasets"]
+
+[project.scripts]
+harness = "harness.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/harness"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
