@@ -31,16 +31,22 @@ esac
 info "Installing Harness on $OS..."
 
 # --- Python 3.12+ check ---
+check_python() {
+    local cmd="$1"
+    command -v "$cmd" >/dev/null 2>&1 || return 1
+    local ver
+    ver="$("$cmd" -c 'import sys; v=sys.version_info; print(f"{v.major}.{v.minor}")' 2>/dev/null)" || return 1
+    local major minor
+    major="$(echo "$ver" | cut -d. -f1)"
+    minor="$(echo "$ver" | cut -d. -f2)"
+    [ "$major" -ge 3 ] 2>/dev/null && [ "$minor" -ge 12 ] 2>/dev/null
+}
+
 PYTHON=""
-for cmd in python3 python; do
-    if command -v "$cmd" &>/dev/null; then
-        ver="$("$cmd" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || true)"
-        major="${ver%%.*}"
-        minor="${ver##*.}"
-        if [ "$major" -ge 3 ] 2>/dev/null && [ "$minor" -ge 12 ] 2>/dev/null; then
-            PYTHON="$cmd"
-            break
-        fi
+for cmd in python3.13 python3.12 python3 python; do
+    if check_python "$cmd"; then
+        PYTHON="$cmd"
+        break
     fi
 done
 
