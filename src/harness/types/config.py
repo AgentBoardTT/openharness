@@ -27,6 +27,50 @@ class MCPServerConfig:
     url: str | None = None  # For HTTP transport
 
 
+@dataclass(frozen=True, slots=True)
+class AuditConfig:
+    """Configuration for the audit/compliance engine."""
+
+    enabled: bool = False
+    scan_pii: bool = True
+    retention_days: int = 90
+    retention_max_size_mb: int = 0
+    log_tool_args: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class PolicyConfig:
+    """Configuration for the policy-as-code engine."""
+
+    policy_paths: tuple[str, ...] = ()
+    simulation_mode: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class RouterConfigData:
+    """Configuration for the universal model router."""
+
+    strategy: str = "manual"
+    fallback_chain: tuple[str, ...] = ()
+    max_cost_per_session: float = 0.0
+    max_tokens_per_session: int = 0
+    simple_task_model: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SandboxConfig:
+    """Configuration for the sandboxed execution runtime."""
+
+    enabled: bool = False
+    mode: str = "process"
+    allowed_paths: tuple[str, ...] = ()
+    blocked_commands: tuple[str, ...] = ()
+    max_memory_mb: int = 512
+    max_cpu_seconds: int = 30
+    network_access: bool = False
+    docker_image: str = "python:3.12-slim"
+
+
 @dataclass(slots=True)
 class RunConfig:
     """Configuration for a single harness.run() invocation."""
@@ -46,3 +90,7 @@ class RunConfig:
     api_key: str | None = None
     base_url: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
+    audit: AuditConfig | None = None
+    policy: PolicyConfig | None = None
+    router: RouterConfigData | None = None
+    sandbox: SandboxConfig | None = None

@@ -22,6 +22,7 @@ class HarnessGroup(click.Group):
     _VALUE_OPTS = {
         "-p", "--provider", "-m", "--model", "-s", "--session",
         "--max-turns", "--cwd", "--api-key", "--base-url", "--permission",
+        "--sandbox",
     }
     # Boolean flags (no value argument)
     _FLAG_OPTS = {
@@ -83,6 +84,12 @@ class HarnessGroup(click.Group):
     default=False,
     help="Auto-approve all tool calls (bypass permission checks)",
 )
+@click.option(
+    "--sandbox",
+    type=click.Choice(["none", "process", "docker"]),
+    default=None,
+    help="Sandbox mode for command execution",
+)
 @click.pass_context
 def cli(
     ctx: click.Context,
@@ -98,6 +105,7 @@ def cli(
     rich: bool | None,
     interactive: bool,
     dangerously_skip_permissions: bool,
+    sandbox: str | None,
 ) -> None:
     """Harness -- multi-provider coding agent.
 
@@ -156,6 +164,7 @@ def cli(
                 use_rich=use_rich,
                 interactive=interactive,
                 approval_callback=approval_cb,
+                sandbox_mode=sandbox,
             ))
         else:
             # TTY with no prompt — launch interactive REPL
@@ -195,6 +204,7 @@ def cli(
             use_rich=use_rich,
             interactive=interactive or is_tty,
             approval_callback=approval_cb,
+            sandbox_mode=sandbox,
         ))
 
 
@@ -231,6 +241,7 @@ async def _run_agent(
     use_rich: bool = False,
     interactive: bool = False,
     approval_callback: Any | None = None,
+    sandbox_mode: str | None = None,
 ) -> None:
     """Run the agent and print output."""
     from harness.core.engine import run
@@ -256,6 +267,7 @@ async def _run_agent(
         permission_mode=permission_mode,
         interactive=interactive,
         approval_callback=approval_callback,
+        sandbox_mode=sandbox_mode,
     ):
         output_fn(msg)
 
@@ -269,6 +281,9 @@ def _register_subcommands() -> None:
     cli.add_command(sessions_cmd, "sessions")
     cli.add_command(eval_cmd, "eval")
     cli.add_command(connect_cmd, "connect")
+
+    from harness.cli.ci_commands import ci_cmd
+    cli.add_command(ci_cmd, "ci")
 
 
 _register_subcommands()

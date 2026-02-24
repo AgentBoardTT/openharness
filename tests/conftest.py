@@ -126,3 +126,83 @@ def mock_provider() -> MockProvider:
     return MockProvider(turns=[
         MockTurn(text="I can help with that."),
     ])
+
+
+class FailingMockProvider(MockProvider):
+    """A mock provider that raises ConnectionError on the first N calls."""
+
+    def __init__(
+        self,
+        turns: list[MockTurn],
+        fail_count: int = 1,
+        model: str = "mock-model",
+    ):
+        super().__init__(turns, model=model)
+        self._fail_count = fail_count
+        self._call_count = 0
+
+    async def chat_completion_stream(
+        self,
+        messages: list[ChatMessage],
+        tools: list[ToolDef],
+        system: str,
+        max_tokens: int,
+    ) -> Any:
+        self._call_count += 1
+        if self._call_count <= self._fail_count:
+            raise ConnectionError(f"Simulated failure #{self._call_count}")
+        async for event in super().chat_completion_stream(messages, tools, system, max_tokens):
+            yield event
+
+
+@dataclass
+class MockExecutionResult:
+    """Scripted result for MockSandboxExecutor."""
+
+    stdout: str = ""
+    exit_code: int = 0
+    timed_out: bool = False
+    oom_killed: bool = False
+    error: str | None = None
+
+
+class MockSandboxExecutor:
+    """A mock sandbox executor that returns scripted results."""
+
+    def __init__(self, results: list[MockExecutionResult] | None = None) -> None:
+        self._results = list(results or [MockExecutionResult(stdout="ok")])
+        self._call_index = 0
+        self._calls: list[dict[str, Any]] = []
+
+    async def execute(
+        self, command: str, *, cwd: str | None = None, timeout_sec: float = 30.0,
+    ) -> MockExecutionResult:
+        self._calls.append({"command": command, "cwd": cwd, "timeout_sec": timeout_sec})
+        if self._call_index < len(self._results):
+            result = self._results[self._call_index]
+            self._call_index += 1
+            return result
+        return MockExecutionResult(stdout="(no more scripted results)")
+
+    def validate_command(self, command: str) -> str | None:
+        return None
+
+    async def cleanup(self) -> None:
+        pass
+
+    @property
+    def calls(self) -> list[dict[str, Any]]:
+        return self._calls
+
+
+@pytest.fixture
+def failing_mock_provider() -> FailingMockProvider:
+    return FailingMockProvider(
+        turns=[MockTurn(text="Recovered!")],
+        fail_count=1,
+    )
+
+
+@pytest.fixture
+def mock_sandbox_executor() -> MockSandboxExecutor:
+    return MockSandboxExecutor()

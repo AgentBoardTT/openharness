@@ -1,0 +1,65 @@
+name: "Harness AI Agent"
+description: "Run the Harness AI coding agent in CI"
+inputs:
+  mode:
+    description: "CI mode (review, issue, general)"
+    required: false
+    default: ""
+  prompt:
+    description: "Custom prompt for the agent"
+    required: false
+    default: ""
+  provider:
+    description: "LLM provider"
+    required: false
+    default: "anthropic"
+  model:
+    description: "Model ID or alias"
+    required: false
+    default: ""
+  sandbox:
+    description: "Sandbox mode (none, process, docker)"
+    required: false
+    default: "process"
+  check-name:
+    description: "GitHub check run name"
+    required: false
+    default: "harness-agent"
+  python-version:
+    description: "Python version to use"
+    required: false
+    default: "3.12"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install uv
+      shell: bash
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Install Harness
+      shell: bash
+      run: uv tool install harness-agent
+
+    - name: Run Harness CI
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        HARNESS_CI_MODE: ${{ inputs.mode }}
+        HARNESS_CI_PROMPT: ${{ inputs.prompt }}
+        HARNESS_CI_PROVIDER: ${{ inputs.provider }}
+        HARNESS_CI_MODEL: ${{ inputs.model }}
+        HARNESS_CI_SANDBOX: ${{ inputs.sandbox }}
+        HARNESS_CI_CHECK_NAME: ${{ inputs.check-name }}
+      run: |
+        ARGS="--sandbox ${HARNESS_CI_SANDBOX} --check-name ${HARNESS_CI_CHECK_NAME}"
+        [ -n "${HARNESS_CI_MODE}" ]     && ARGS="${ARGS} --mode ${HARNESS_CI_MODE}"
+        [ -n "${HARNESS_CI_PROMPT}" ]   && ARGS="${ARGS} --prompt ${HARNESS_CI_PROMPT}"
+        [ -n "${HARNESS_CI_PROVIDER}" ] && ARGS="${ARGS} --provider ${HARNESS_CI_PROVIDER}"
+        [ -n "${HARNESS_CI_MODEL}" ]    && ARGS="${ARGS} --model ${HARNESS_CI_MODEL}"
+        harness ci run ${ARGS}

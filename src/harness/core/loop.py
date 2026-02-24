@@ -59,6 +59,8 @@ class AgentLoop:
         hook_manager: Any | None = None,
         steering: Any | None = None,
         approval_callback: Any | None = None,
+        audit_logger: Any | None = None,
+        sandbox_executor: Any | None = None,
     ):
         self._provider = provider
         self._tools = tools
@@ -79,6 +81,8 @@ class AgentLoop:
         self._hook_manager = hook_manager
         self._steering = steering
         self._approval_callback = approval_callback
+        self._audit_logger = audit_logger
+        self._sandbox_executor = sandbox_executor
 
         # Add MCP tool definitions if available
         if self._mcp_manager is not None:
@@ -207,6 +211,33 @@ class AgentLoop:
             total_cost += turn_cost
             self._session.record_turn(tokens=turn_tokens, cost=turn_cost)
 
+            # Audit: log provider call
+            if self._audit_logger:
+                self._audit_logger.log_provider_call(
+                    self._config.provider,
+                    self._provider.model_id,
+                    input_tokens=turn_input_tokens,
+                    output_tokens=turn_output_tokens,
+                    cost=turn_cost,
+                )
+
+            # OTel: record metrics
+            try:
+                from harness.observability.metrics import record_tokens, record_cost
+                record_tokens(
+                    turn_input_tokens, turn_output_tokens,
+                    provider=self._config.provider,
+                    model=self._provider.model_id,
+                )
+                if turn_cost > 0:
+                    record_cost(
+                        turn_cost,
+                        provider=self._config.provider,
+                        model=self._provider.model_id,
+                    )
+            except ImportError:
+                pass
+
             # If no tool calls, we're done
             if stop_reason != "tool_use" or not tool_uses:
                 break
@@ -221,6 +252,12 @@ class AgentLoop:
 
                 # Check permissions before executing
                 decision = self._check_permission(tu["name"], tu["args"])
+
+                # Audit: log permission decision
+                if self._audit_logger:
+                    self._audit_logger.log_permission_decision(
+                        tu["name"], decision.value, self._config.permission_mode.value,
+                    )
 
                 if decision == PermissionDecision.DENY:
                     yield ToolUse(id=tu["id"], name=tu["name"], args=tu["args"])
@@ -302,6 +339,10 @@ class AgentLoop:
         """Execute a tool call and yield ToolUse + ToolResult messages."""
         yield ToolUse(id=tu["id"], name=tu["name"], args=tu["args"])
 
+        # Audit: log tool call
+        if self._audit_logger:
+            self._audit_logger.log_tool_call(tu["name"], tu["args"])
+
         await self._fire_hook(
             HookEvent.PRE_TOOL_USE,
             tool_name=tu["name"],
@@ -317,6 +358,20 @@ class AgentLoop:
             result=result.content,
             is_error=result.is_error,
         )
+
+        # Audit: log tool result
+        if self._audit_logger:
+            self._audit_logger.log_tool_result(
+                tu["name"], is_error=result.is_error,
+                content_length=len(result.content),
+            )
+
+        # OTel: record tool call metric
+        try:
+            from harness.observability.metrics import record_tool_call
+            record_tool_call(tu["name"], is_error=result.is_error)
+        except ImportError:
+            pass
 
         yield ToolResult(
             tool_use_id=tu["id"],
@@ -350,10 +405,14 @@ class AgentLoop:
         """Execute a tool by name. Falls back to MCP if not a local tool."""
         tool = self._tools.get(name)
         if tool is not None:
+            extra: dict[str, Any] = {}
+            if self._sandbox_executor is not None:
+                extra["sandbox_executor"] = self._sandbox_executor
             ctx = ToolContext(
                 cwd=self._cwd,
                 permission_mode=self._config.permission_mode.value,
                 session_id=self._session.session_id,
+                extra=extra,
             )
             try:
                 return await tool.execute(args, ctx)

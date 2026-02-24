@@ -30,8 +30,20 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio", "pyright", "ruff"]
+dev = ["pytest", "pytest-asyncio", "pyright", "ruff", "pyyaml>=6.0"]
 eval = ["swebench", "datasets"]
+observability = [
+    "opentelemetry-api>=1.20",
+    "opentelemetry-sdk>=1.20",
+    "opentelemetry-exporter-otlp>=1.20",
+]
+enterprise = [
+    "opentelemetry-api>=1.20",
+    "opentelemetry-sdk>=1.20",
+    "opentelemetry-exporter-otlp>=1.20",
+    "pyyaml>=6.0",
+]
+ci = ["pyyaml>=6.0"]
 
 [project.scripts]
 harness = "harness.cli.main:main"

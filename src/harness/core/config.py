@@ -325,4 +325,25 @@ def _toml_value(v: Any) -> str:
     if isinstance(v, str):
         escaped = v.replace("\\", "\\\\").replace('"', '\\"')
         return f'"{escaped}"'
+    if isinstance(v, (list, tuple)):
+        items = ", ".join(_toml_value(item) for item in v)
+        return f"[{items}]"
     return repr(v)
+
+
+def load_sandbox_config(cwd: str | None = None) -> dict[str, Any]:
+    """Load [sandbox] section from config."""
+    config = load_toml_config(cwd)
+    return config.get("sandbox", {})
+
+
+def load_policy_config(cwd: str | None = None) -> dict[str, Any]:
+    """Load [policy] section from config."""
+    config = load_toml_config(cwd)
+    return config.get("policy", {})
+
+
+def load_router_config(cwd: str | None = None) -> dict[str, Any]:
+    """Load [router] section from config."""
+    config = load_toml_config(cwd)
+    return config.get("router", {})

@@ -36,16 +36,19 @@ class PermissionManager:
     Evaluation order:
     1. Explicit deny rules (highest priority)
     2. Explicit allow rules
-    3. Mode-based defaults
+    3. PolicyEngine rules (if configured)
+    4. Mode-based defaults
     """
 
     def __init__(
         self,
         mode: PermissionMode = PermissionMode.DEFAULT,
         config: PermissionConfig | None = None,
+        policy_engine: Any | None = None,
     ):
         self._mode = mode
         self._config = config or PermissionConfig()
+        self._policy_engine = policy_engine
 
     @property
     def mode(self) -> PermissionMode:
@@ -73,7 +76,13 @@ class PermissionManager:
             if _matches_rule(rule, tool_name, check_args):
                 return PermissionDecision.ALLOW
 
-        # 3. Mode-based defaults
+        # 3. PolicyEngine rules (returns None if no match — fall through)
+        if self._policy_engine is not None:
+            policy_decision = self._policy_engine.check(tool_name, check_args)
+            if policy_decision is not None:
+                return policy_decision
+
+        # 4. Mode-based defaults
         return self._mode_default(tool_name)
 
     def _mode_default(self, tool_name: str) -> PermissionDecision:

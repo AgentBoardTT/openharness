@@ -693,6 +693,37 @@ MODELS: dict[str, ModelInfo] = {
 }
 
 # ---------------------------------------------------------------------------
+# Routing hints for ModelRouter decisions
+# ---------------------------------------------------------------------------
+
+ROUTING_HINTS: dict[str, dict[str, object]] = {
+    "claude-opus-4-6": {
+        "quality_tier": "premium", "speed_tier": "slow", "code_specialized": True,
+    },
+    "claude-sonnet-4-6": {
+        "quality_tier": "high", "speed_tier": "medium", "code_specialized": True,
+    },
+    "claude-haiku-4-5-20251001": {
+        "quality_tier": "medium", "speed_tier": "fast", "code_specialized": False,
+    },
+    "gpt-4o": {
+        "quality_tier": "high", "speed_tier": "medium", "code_specialized": True,
+    },
+    "gpt-4o-mini": {
+        "quality_tier": "medium", "speed_tier": "fast", "code_specialized": False,
+    },
+    "gemini-2.5-pro": {
+        "quality_tier": "high", "speed_tier": "medium", "code_specialized": True,
+    },
+    "gemini-2.0-flash": {
+        "quality_tier": "medium", "speed_tier": "fast", "code_specialized": False,
+    },
+    "o3": {
+        "quality_tier": "premium", "speed_tier": "slow", "code_specialized": True,
+    },
+}
+
+# ---------------------------------------------------------------------------
 # Alias map — built automatically from ModelInfo.aliases, plus explicit extras
 # ---------------------------------------------------------------------------
 

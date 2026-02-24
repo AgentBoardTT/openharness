@@ -62,6 +62,13 @@ class BashTool(BaseTool):
         timeout_ms = max(1, min(timeout_ms, _MAX_TIMEOUT_MS))
         timeout_sec = timeout_ms / 1000.0
 
+        # Delegate to sandbox if configured
+        sandbox_executor = ctx.extra.get("sandbox_executor")
+        if sandbox_executor is not None:
+            return await self._execute_sandboxed(
+                command, ctx, sandbox_executor, timeout_sec,
+            )
+
         proc: asyncio.subprocess.Process | None = None
         try:
             proc = await asyncio.create_subprocess_shell(
@@ -105,3 +112,45 @@ class BashTool(BaseTool):
             result_text = result_text.rstrip("\n") + f"\n[Exit code: {exit_code}]"
 
         return self._ok(result_text) if exit_code == 0 else self._error(result_text)
+
+    async def _execute_sandboxed(
+        self,
+        command: str,
+        ctx: ToolContext,
+        sandbox_executor: Any,
+        timeout_sec: float,
+    ) -> ToolResultData:
+        """Execute a command through the sandbox executor."""
+        result = await sandbox_executor.execute(
+            command, cwd=str(ctx.cwd), timeout_sec=timeout_sec,
+        )
+
+        # Check specific failure modes first — they provide better messages
+        # than the generic `result.error` string.
+        if result.timed_out:
+            return self._error(
+                f"Command timed out after {timeout_sec}s and was killed: {command}"
+            )
+
+        if result.oom_killed:
+            return self._error(
+                f"Command killed due to memory limit (OOM): {command}"
+            )
+
+        if result.error:
+            return self._error(result.error)
+
+        output = result.stdout
+        if len(output) > _MAX_OUTPUT_CHARS:
+            truncated = len(output) - _MAX_OUTPUT_CHARS
+            output = output[:_MAX_OUTPUT_CHARS] + f"\n[...{truncated} characters truncated]"
+
+        if not output.strip():
+            result_text = "Command completed with no output"
+        else:
+            result_text = output
+
+        if result.exit_code != 0:
+            result_text = result_text.rstrip("\n") + f"\n[Exit code: {result.exit_code}]"
+
+        return self._ok(result_text) if result.exit_code == 0 else self._error(result_text)
