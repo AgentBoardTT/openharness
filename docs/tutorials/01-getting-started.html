@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started — Your First AI Coding Agent | Harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #243147;
+      --accent: #7C3AED;
+      --accent-light: #A78BFA;
+      --text: #E2E8F0;
+      --text-muted: #94A3B8;
+      --heading: #F8FAFC;
+      --border: #334155;
+      --blue: #3B82F6;
+      --amber: #F59E0B;
+      --green: #10B981;
+      --sidebar-width: 280px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 60px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--heading);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot { color: var(--accent); }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-beginner { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-time { background: rgba(124, 58, 237, 0.15); color: var(--accent-light); border: 1px solid rgba(124, 58, 237, 0.3); }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .toc-link.active { color: var(--accent-light); border-left-color: var(--accent); background: rgba(124, 58, 237, 0.08); }
+    .toc-num { font-size: 11px; font-weight: 600; color: var(--accent); min-width: 18px; }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 40px 80px;
+    }
+
+    .content { max-width: 780px; margin: 0 auto; }
+
+    /* ── Page title ── */
+    .page-title-block { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+
+    .page-title-block h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+
+    .page-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 56px; }
+
+    .step-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-heading h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    p { margin-bottom: 16px; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      margin: 20px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 18px 20px !important;
+      background: #1a2332 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      background: none !important;
+    }
+
+    /* ── Tabs ── */
+    .tabs-component { margin: 20px 0; }
+
+    .tab-list {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn[aria-selected="true"] { color: var(--accent-light); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 3px solid;
+    }
+
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+    .callout-body p { font-size: 14px; margin-bottom: 0; color: var(--text); }
+
+    .callout-info { background: rgba(59, 130, 246, 0.08); border-color: #3B82F6; }
+    .callout-info .callout-title { color: #60A5FA; }
+
+    .callout-warning { background: rgba(245, 158, 11, 0.08); border-color: #F59E0B; }
+    .callout-warning .callout-title { color: #FCD34D; }
+
+    .callout-success { background: rgba(16, 185, 129, 0.08); border-color: #10B981; }
+    .callout-success .callout-title { color: #34D399; }
+
+    .callout-tryit { background: rgba(124, 58, 237, 0.08); border-color: #7C3AED; }
+    .callout-tryit .callout-title { color: var(--accent-light); }
+
+    .callout-competitor { background: rgba(124, 58, 237, 0.06); border-color: var(--accent); border-left-width: 3px; border-radius: 8px; }
+    .callout-competitor .callout-title { color: var(--accent-light); }
+
+    /* ── Deep Dive collapsible ── */
+    .deep-dive { margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+    .deep-dive-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: none;
+      color: var(--heading);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .deep-dive-btn:hover { background: var(--surface2); }
+
+    .deep-dive-label { display: flex; align-items: center; gap: 10px; }
+    .deep-dive-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .deep-dive-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .deep-dive-content { display: none; padding: 16px 18px; border-top: 1px solid var(--border); }
+    .deep-dive-content.open { display: block; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--heading);
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) { background: rgba(30, 41, 59, 0.4); }
+
+    code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: rgba(124, 58, 237, 0.12);
+      color: #C4B5FD;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* ── REPL commands table ── */
+    .repl-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--accent-light);
+    }
+
+    /* ── Prev/Next nav ── */
+    .prev-next {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+      gap: 4px;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: var(--surface2); text-decoration: none; }
+
+    .nav-card-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .nav-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    .nav-card-desc { font-size: 13px; color: var(--text-muted); }
+
+    .nav-card.next { text-align: right; }
+    .nav-card.prev-placeholder { pointer-events: none; opacity: 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 60px;
+        height: calc(100vh - 60px);
+        background: var(--bg);
+        z-index: 90;
+        transition: left 0.25s;
+        border-right: 1px solid var(--border);
+      }
+
+      .sidebar.open { left: 0; }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 60px 0 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 89;
+      }
+
+      .sidebar-overlay.open { display: block; }
+
+      .main { padding: 32px 20px 60px; }
+      .mobile-menu-btn { display: flex; align-items: center; }
+    }
+
+    @media (max-width: 640px) {
+      .page-title-block h1 { font-size: 24px; }
+      .prev-next { grid-template-columns: 1fr; }
+      .nav-card.next { text-align: left; }
+    }
+
+    /* Prism overrides */
+    :not(pre) > code[class*="language-"], pre[class*="language-"] {
+      background: #1a2332 !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <a href="index.html" class="brand">Harness<span class="brand-dot">.</span>docs</a>
+  <div class="header-meta">
+    <span class="badge badge-beginner">Beginner</span>
+    <span class="badge badge-time">10 min</span>
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Toggle sidebar">&#9776;</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar" aria-label="Table of contents">
+    <div class="toc-label">On this page</div>
+    <a class="toc-link active" href="#what-is-harness"><span class="toc-num">1</span>What is Harness?</a>
+    <a class="toc-link" href="#installation"><span class="toc-num">2</span>Installation</a>
+    <a class="toc-link" href="#connect-provider"><span class="toc-num">3</span>Connect Your Provider</a>
+    <a class="toc-link" href="#fix-calculator"><span class="toc-num">4</span>Fix a Buggy Calculator</a>
+    <a class="toc-link" href="#switch-providers"><span class="toc-num">5</span>Switch Providers</a>
+    <a class="toc-link" href="#cost-comparison"><span class="toc-num">6</span>Cost Comparison</a>
+    <a class="toc-link" href="#go-local"><span class="toc-num">7</span>Go Local with Ollama</a>
+    <a class="toc-link" href="#repl-tour"><span class="toc-num">8</span>REPL Tour</a>
+    <a class="toc-link" href="#next-steps"><span class="toc-num">9</span>Next Steps</a>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="content">
+
+      <!-- Page title -->
+      <div class="page-title-block">
+        <h1>Getting Started — Your First AI Coding Agent</h1>
+        <p>Go from zero to a running AI agent that fixes real bugs in under 10 minutes.</p>
+        <div class="page-meta">
+          <span class="badge badge-beginner">Beginner</span>
+          <span class="badge badge-time">10 min read</span>
+        </div>
+      </div>
+
+      <!-- ── Section 1 ── -->
+      <section class="section" id="what-is-harness">
+        <div class="step-heading">
+          <div class="step-num">1</div>
+          <h2>What is Harness?</h2>
+        </div>
+
+        <p>
+          <strong style="color: var(--heading)">Harness</strong> is an open-source AI coding agent
+          with MIT license. It connects to <strong>5 AI providers</strong> and <strong>50+ models</strong>
+          — Anthropic, OpenAI, Google, Ollama, and more — through a single, unified interface.
+        </p>
+
+        <p>
+          Unlike single-provider tools, Harness lets you switch models with a single flag, compare
+          costs across providers, and run entirely local with Ollama. Enterprise features like
+          permission modes, audit logging, and custom approval callbacks are built in.
+        </p>
+
+        <div class="callout callout-competitor">
+          <div class="callout-icon">&#9889;</div>
+          <div class="callout-body">
+            <div class="callout-title">What competitors can't do</div>
+            <p>Claude Code only works with Anthropic. Cursor is locked to their proprietary backend.
+            Aider supports multiple providers but has no streaming SDK or enterprise permission system.
+            <strong style="color: var(--heading)">Harness supports 5 providers and 50+ models behind one CLI and one Python API.</strong></p>
+          </div>
+        </div>
+
+        <p>
+          Source code and issues on
+          <a href="https://github.com/AgentBoardTT/openharness" target="_blank" rel="noopener">
+            GitHub &rarr; AgentBoardTT/openharness
+          </a>
+        </p>
+      </section>
+
+      <!-- ── Section 2 ── -->
+      <section class="section" id="installation">
+        <div class="step-heading">
+          <div class="step-num">2</div>
+          <h2>Installation</h2>
+        </div>
+
+        <p>Install Harness using <code>uv</code> (recommended) for isolated, reproducible installs.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">bash</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash"># Install with uv (recommended)
+uv tool install harness-agent
+
+# Verify installation
+harness --version</code></pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">&#10003;</div>
+          <div class="callout-body">
+            <div class="callout-title">Expected output</div>
+            <p><code>harness 0.2.0</code></p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Why uv?</div>
+            <p><code>uv tool install</code> installs Harness into an isolated environment and adds the
+            <code>harness</code> binary to your PATH. No virtualenv management required.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 3 ── -->
+      <section class="section" id="connect-provider">
+        <div class="step-heading">
+          <div class="step-num">3</div>
+          <h2>Connect Your Provider</h2>
+        </div>
+
+        <p>Harness supports four major providers. Pick the tab that matches your setup.</p>
+
+        <div class="tabs-component" role="tablist" aria-label="Provider setup">
+          <div class="tab-list">
+            <button class="tab-btn" role="tab" aria-selected="true" aria-controls="tab-anthropic" id="btn-anthropic" onclick="switchTab(this, 'tab-anthropic', 'provider-tabs')">Anthropic</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-openai" id="btn-openai" onclick="switchTab(this, 'tab-openai', 'provider-tabs')">OpenAI</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-google" id="btn-google" onclick="switchTab(this, 'tab-google', 'provider-tabs')">Google</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-ollama" id="btn-ollama" onclick="switchTab(this, 'tab-ollama', 'provider-tabs')">Ollama</button>
+          </div>
+
+          <div data-tabgroup="provider-tabs">
+            <div class="tab-panel active" id="tab-anthropic" role="tabpanel" aria-labelledby="btn-anthropic">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-bash">harness connect --provider anthropic --api-key sk-ant-...</code></pre>
+              </div>
+              <p style="margin: 12px 0 4px; font-size: 14px; color: var(--text-muted);">Or set the environment variable directly:</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-bash">export ANTHROPIC_API_KEY="sk-ant-..."</code></pre>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-openai" role="tabpanel" aria-labelledby="btn-openai">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-bash">harness connect --provider openai --api-key sk-...</code></pre>
+              </div>
+              <p style="margin: 12px 0 4px; font-size: 14px; color: var(--text-muted);">Or set the environment variable directly:</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-bash">export OPENAI_API_KEY="sk-..."</code></pre>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-google" role="tabpanel" aria-labelledby="btn-google">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-bash">harness connect --provider google --api-key YOUR_KEY</code></pre>
+              </div>
+              <p style="margin: 12px 0 4px; font-size: 14px; color: var(--text-muted);">Or set the environment variable directly:</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-bash">export GOOGLE_API_KEY="..."</code></pre>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-ollama" role="tabpanel" aria-labelledby="btn-ollama">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">bash</span></div>
+                </div>
+                <pre><code class="language-bash"># Install Ollama first
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull llama3.1
+
+# No API key needed!
+harness -p ollama "Hello world"</code></pre>
+              </div>
+              <div class="callout callout-success">
+                <div class="callout-icon">&#128274;</div>
+                <div class="callout-body">
+                  <div class="callout-title">No API key required</div>
+                  <p>Ollama runs models locally. Your code never leaves your machine and there are no usage costs.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 4 ── -->
+      <section class="section" id="fix-calculator">
+        <div class="step-heading">
+          <div class="step-num">4</div>
+          <h2>Fix a Buggy Calculator</h2>
+        </div>
+
+        <p>
+          Let's give the agent a real task. Create the file below — it has three intentional bugs.
+          Can you spot them before the agent does?
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">calculator.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># calculator.py — spot the bugs!
+
+def add(a: float, b: float) -> float:
+    return a + b
+
+def subtract(a: float, b: float) -> float:
+    return a + b  # Bug: should be a - b
+
+def multiply(a: float, b: float) -> float:
+    return a * b
+
+def divide(a: float, b: float) -> float:
+    return a / b  # Bug: no zero division check
+
+def percentage(value: float, total: float) -> float:
+    return value / total * 100  # Bug: no zero check on total</code></pre>
+        </div>
+
+        <p>Now run the agent:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">harness "Fix all bugs in calculator.py and add proper error handling"</code></pre>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">Try it — expected agent output</div>
+            <p>The agent reads the file, identifies all three bugs, applies fixes, and reports what it changed. It typically completes in 2–4 tool calls.</p>
+          </div>
+        </div>
+
+        <p>The agent produces the fixed functions:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">calculator.py (fixed)</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">def subtract(a: float, b: float) -> float:
+    return a - b
+
+def divide(a: float, b: float) -> float:
+    if b == 0:
+        raise ValueError("Cannot divide by zero")
+    return a / b
+
+def percentage(value: float, total: float) -> float:
+    if total == 0:
+        raise ValueError("Total cannot be zero")
+    return value / total * 100</code></pre>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              What exactly did the agent do?
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content">
+            <p>Under the hood, the agent executed these tool calls in sequence:</p>
+            <ol style="padding-left: 20px; font-size: 14px; line-height: 2;">
+              <li><strong>Read</strong> — read <code>calculator.py</code> to understand the full file</li>
+              <li><strong>Analysis</strong> — reasoned about each function's correctness</li>
+              <li><strong>Edit</strong> — applied precise edits for each of the three bugs</li>
+              <li><strong>Read</strong> — re-read the file to verify the changes</li>
+            </ol>
+            <p style="margin-top: 12px;">The agent never blindly rewrites files — it uses targeted edits to minimize diff noise and preserve your existing code style.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 5 ── -->
+      <section class="section" id="switch-providers">
+        <div class="step-heading">
+          <div class="step-num">5</div>
+          <h2>Switch Providers</h2>
+        </div>
+
+        <p>Run the exact same task with any provider using the <code>-p</code> flag. No code changes required.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash"># Same task, different providers
+harness -p anthropic "Fix calculator.py"
+harness -p openai "Fix calculator.py"
+harness -p google "Fix calculator.py"</code></pre>
+        </div>
+
+        <div class="callout callout-competitor">
+          <div class="callout-icon">&#9889;</div>
+          <div class="callout-body">
+            <div class="callout-title">What competitors can't do</div>
+            <p>Claude Code only works with Anthropic. Cursor is locked to their proprietary backend.
+            With Harness, switch providers with a single <code>-p</code> flag — no config changes, no re-authentication, no workflow disruption.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 6 ── -->
+      <section class="section" id="cost-comparison">
+        <div class="step-heading">
+          <div class="step-num">6</div>
+          <h2>Cost Comparison</h2>
+        </div>
+
+        <p>The calculator fix uses roughly 2,000 tokens. Here's what that costs across providers:</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Model</th>
+                <th>Input $/1M</th>
+                <th>Output $/1M</th>
+                <th>This Task (~2K tokens)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Anthropic</td>
+                <td>Claude Sonnet 4</td>
+                <td>$3.00</td>
+                <td>$15.00</td>
+                <td>~$0.03</td>
+              </tr>
+              <tr>
+                <td>OpenAI</td>
+                <td>GPT-4o</td>
+                <td>$2.50</td>
+                <td>$10.00</td>
+                <td>~$0.02</td>
+              </tr>
+              <tr>
+                <td>Google</td>
+                <td>Gemini 2.5 Pro</td>
+                <td>$1.25</td>
+                <td>$10.00</td>
+                <td>~$0.02</td>
+              </tr>
+              <tr>
+                <td>Ollama</td>
+                <td>Llama 3.1 70B</td>
+                <td style="color: #34D399;">Free</td>
+                <td style="color: #34D399;">Free</td>
+                <td style="color: #34D399; font-weight: 600;">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Track your costs</div>
+            <p>Run <code>harness /cost</code> in the REPL at any time to see your cumulative token usage and estimated spend for the current session.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 7 ── -->
+      <section class="section" id="go-local">
+        <div class="step-heading">
+          <div class="step-num">7</div>
+          <h2>Go Local with Ollama</h2>
+        </div>
+
+        <p>
+          For sensitive codebases, run a fully local model. No data leaves your machine,
+          no API key required, no cost.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">harness -p ollama -m llama3.1 "Fix calculator.py"</code></pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">&#128274;</div>
+          <div class="callout-body">
+            <div class="callout-title">Full privacy. Zero cost.</div>
+            <p>Your code never leaves your machine. Ollama runs Llama 3.1, Mistral, CodeLlama, and dozens more models completely offline.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 8 ── -->
+      <section class="section" id="repl-tour">
+        <div class="step-heading">
+          <div class="step-num">8</div>
+          <h2>REPL Tour</h2>
+        </div>
+
+        <p>
+          Run <code>harness</code> with no arguments to enter the interactive REPL — a persistent
+          session where the agent remembers context across messages.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash"># Start interactive mode
+harness
+
+# Try these commands:
+/status    # Show provider, model, session info
+/models    # List available models
+/cost      # Show token usage and cost
+/help      # See all commands
+/model gpt-4o  # Switch model mid-session</code></pre>
+        </div>
+
+        <div class="table-wrap">
+          <table class="repl-table">
+            <thead>
+              <tr>
+                <th>Command</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>/status</td><td>Show current provider, model, and session ID</td></tr>
+              <tr><td>/models</td><td>List all available models for the current provider</td></tr>
+              <tr><td>/cost</td><td>Show cumulative token usage and estimated cost</td></tr>
+              <tr><td>/model &lt;name&gt;</td><td>Switch to a different model mid-session</td></tr>
+              <tr><td>/connect</td><td>Set up or change your API key interactively</td></tr>
+              <tr><td>/help</td><td>Show all available commands</td></tr>
+              <tr><td>/exit</td><td>Exit the REPL</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">Try it</div>
+            <p>Start the REPL, ask the agent to fix the calculator, then switch to <code>gpt-4o</code> with <code>/model gpt-4o</code> and ask it to add unit tests — the context is preserved.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 9 ── -->
+      <section class="section" id="next-steps">
+        <div class="step-heading">
+          <div class="step-num">9</div>
+          <h2>Next Steps</h2>
+        </div>
+
+        <p>
+          You've installed Harness, connected a provider, fixed real bugs, and explored multi-provider
+          switching. The next tutorial covers the Python SDK — building custom AI-powered tools programmatically
+          with full async streaming.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8594;</div>
+          <div class="callout-body">
+            <div class="callout-title">Tutorial 2: The Python SDK</div>
+            <p>Learn to integrate Harness directly into Python scripts. Build a streaming AI security code reviewer in 50 lines of Python.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Prev / Next ── -->
+      <nav class="prev-next" aria-label="Tutorial navigation">
+        <div class="nav-card prev-placeholder"></div>
+        <a href="02-sdk-basics.html" class="nav-card next">
+          <span class="nav-card-dir">Next &rarr;</span>
+          <span class="nav-card-title">The Python SDK</span>
+          <span class="nav-card-desc">Building AI-powered tools with async streaming</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+  // ── Copy to clipboard ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  // ── Tab switching ──
+  function switchTab(btn, panelId, groupName) {
+    const allBtns = btn.closest('.tabs-component').querySelectorAll('.tab-btn');
+    allBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+    btn.setAttribute('aria-selected', 'true');
+
+    const group = btn.closest('.tabs-component').querySelector('[data-tabgroup]');
+    group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  // ── Collapsible deep dive ──
+  function toggleDeepDive(btn) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    const content = btn.nextElementSibling;
+    content.classList.toggle('open', !expanded);
+  }
+
+  // ── Mobile sidebar ──
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  // ── TOC scroll highlight ──
+  const sections = document.querySelectorAll('section[id]');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-60px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Close sidebar on TOC link click (mobile)
+  tocLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

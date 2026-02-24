@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Logging &amp; Compliance — Harness Tutorials</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js tomorrow theme -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0F172A;
+      --surface:     #1E293B;
+      --accent:      #7C3AED;
+      --accent-light:#A78BFA;
+      --text:        #E2E8F0;
+      --heading:     #F8FAFC;
+      --muted:       #94A3B8;
+      --border:      #334155;
+      --info:        #3B82F6;
+      --warning:     #F59E0B;
+      --success:     #10B981;
+      --error:       #EF4444;
+      --sidebar-w:   280px;
+      --header-h:    60px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--heading);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .header-meta {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .badge-intermediate {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-time {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - var(--header-h));
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 28px 0;
+    }
+
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-track { background: transparent; }
+    aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-list { list-style: none; }
+
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-list a:hover,
+    .toc-list a.active {
+      color: var(--accent-light);
+      border-left-color: var(--accent);
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .toc-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 18px;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      padding: 48px 40px 80px;
+      max-width: 780px;
+    }
+
+    /* ── Page header ── */
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    .page-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    /* ── Section headings ── */
+    .section-anchor { display: block; }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 48px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--heading);
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    /* ── Step indicator ── */
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Steps list with connecting lines ── */
+    .steps-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 20px 0 24px;
+    }
+
+    .steps-list li {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      padding-bottom: 24px;
+    }
+
+    .steps-list li:last-child { padding-bottom: 0; }
+
+    .steps-list li::before {
+      content: '';
+      position: absolute;
+      left: 13px;
+      top: 28px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .steps-list li:last-child::before { display: none; }
+
+    .step-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .step-content { flex: 1; }
+
+    .step-title {
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 4px;
+    }
+
+    /* ── Code blocks ── */
+    .code-block {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0 24px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 16px 20px !important;
+      background: transparent !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block pre::-webkit-scrollbar { height: 4px; }
+    .code-block pre::-webkit-scrollbar-track { background: transparent; }
+    .code-block pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Inline code ── */
+    code:not([class]) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: var(--accent-light);
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 20px 0;
+      border-left: 3px solid;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .callout-header {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .callout-info    { border-color: var(--info);    }
+    .callout-info    .callout-header { color: var(--info); }
+    .callout-warning { border-color: var(--warning); }
+    .callout-warning .callout-header { color: var(--warning); }
+    .callout-success { border-color: var(--success); }
+    .callout-success .callout-header { color: var(--success); }
+    .callout-error   { border-color: var(--error);   }
+    .callout-error   .callout-header { color: var(--error); }
+    .callout-tryit   { border-color: var(--accent);  }
+    .callout-tryit   .callout-header { color: var(--accent-light); }
+    .callout-competitor { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+    .callout-competitor .callout-header { color: var(--accent-light); }
+
+    /* ── Tabs ── */
+    .tab-group { margin: 20px 0 24px; }
+
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 10px 18px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--accent-light);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Collapsible ── */
+    .collapsible { margin: 20px 0; }
+
+    .collapsible-trigger {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s;
+    }
+
+    .collapsible-trigger:hover { border-color: var(--accent); }
+    .collapsible-trigger[aria-expanded="true"] {
+      border-radius: 8px 8px 0 0;
+      border-color: var(--accent);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .collapsible-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .collapsible-content {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 16px;
+      display: none;
+    }
+
+    .collapsible-content.open { display: block; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51,65,85,0.5);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .td-normal { font-family: 'Inter', sans-serif; }
+    .check { color: var(--success); font-family: 'Inter', sans-serif; font-size: 15px; }
+    .cross { color: var(--error); font-family: 'Inter', sans-serif; font-size: 15px; }
+
+    /* ── Prev/Next nav ── */
+    .page-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 60px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+    .nav-card.next { text-align: right; }
+
+    .nav-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
+    .nav-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      aside {
+        position: fixed;
+        left: -100%;
+        top: var(--header-h);
+        height: calc(100vh - var(--header-h));
+        background: var(--bg);
+        z-index: 90;
+        border-right: 1px solid var(--border);
+        transition: left 0.25s;
+      }
+      aside.open { left: 0; }
+      .mobile-menu-btn { display: block; }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .page-nav { grid-template-columns: 1fr; }
+    }
+
+    /* ── Misc ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 5px; }
+    strong { color: var(--heading); font-weight: 600; }
+
+    /* ── Sidebar overlay ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      top: var(--header-h);
+      background: rgba(0,0,0,0.5);
+      z-index: 89;
+    }
+    .sidebar-overlay.open { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  <a href="index.html" class="brand">
+    <span class="brand-dot"></span>
+    Harness
+  </a>
+  <span style="color:var(--border);font-size:18px;margin:0 4px">/</span>
+  <span style="color:var(--muted);font-size:14px">Tutorials</span>
+  <div class="header-meta">
+    <span class="badge badge-intermediate">Intermediate</span>
+    <span class="badge badge-time">20 min</span>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ── Layout ── -->
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside id="sidebar" role="navigation" aria-label="Table of contents">
+    <div class="toc-label">On this page</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#why-audit" class="toc-link"><span class="toc-num">1</span>Why Audit Logging?</a></li>
+      <li><a href="#enable-audit" class="toc-link"><span class="toc-num">2</span>Enable Audit Logging</a></li>
+      <li><a href="#inspect-trail" class="toc-link"><span class="toc-num">3</span>Run a Session &amp; Inspect the Trail</a></li>
+      <li><a href="#hash-chain" class="toc-link"><span class="toc-num">4</span>Hash Chain Integrity</a></li>
+      <li><a href="#tamper-demo" class="toc-link"><span class="toc-num">5</span>Tamper Detection Demo</a></li>
+      <li><a href="#pii-scanning" class="toc-link"><span class="toc-num">6</span>PII Scanning</a></li>
+      <li><a href="#retention" class="toc-link"><span class="toc-num">7</span>Retention Policies</a></li>
+      <li><a href="#export" class="toc-link"><span class="toc-num">8</span>Export for Compliance</a></li>
+      <li><a href="#compliance-script" class="toc-link"><span class="toc-num">9</span>Build a Compliance Check Script</a></li>
+      <li><a href="#next-steps" class="toc-link"><span class="toc-num">10</span>Next Steps</a></li>
+    </ul>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <h1 class="page-title">Audit Logging &amp; Compliance</h1>
+    <p class="page-subtitle">Generate tamper-proof, SHA-256 hash-chained audit trails of every agent action — with built-in PII scanning for regulated environments.</p>
+    <div class="page-tags">
+      <span class="badge badge-intermediate">Intermediate</span>
+      <span class="badge badge-time">20 min read</span>
+    </div>
+
+    <!-- ── 1. Why Audit Logging? ── -->
+    <span class="section-anchor" id="why-audit"></span>
+    <h2><span class="step-num">1</span>Why Audit Logging?</h2>
+
+    <p>
+      Regulatory frameworks don't just require controls — they require <strong>proof</strong> that controls were enforced.
+      When an AI agent modifies production code, you need a tamper-proof record of every action it took.
+    </p>
+
+    <p>
+      Harness audit logging addresses three major compliance frameworks:
+    </p>
+
+    <ul>
+      <li><strong>SOC 2</strong> — requires complete audit trails for all system access and changes</li>
+      <li><strong>HIPAA</strong> — requires access logs for any system that touches patient-adjacent data</li>
+      <li><strong>PCI-DSS</strong> — requires monitoring and logging of all access to cardholder data environments</li>
+    </ul>
+
+    <div class="callout callout-competitor">
+      <div class="callout-header">&#9889; Unique to Harness</div>
+      <p>No other coding agent provides audit logging. Claude Code has no audit trail. Cursor has no compliance features.
+      Harness gives you SHA-256 hash-chained logs that auditors can verify.</p>
+      <div class="table-wrap" style="margin-top:14px;margin-bottom:0">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Harness</th>
+              <th>Claude Code</th>
+              <th>Cursor</th>
+              <th>Copilot</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-normal">Audit trail</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">Hash chain verification</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">PII scanning</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">Tamper detection</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">Retention policies</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 2. Enable Audit Logging ── -->
+    <span class="section-anchor" id="enable-audit"></span>
+    <h2><span class="step-num">2</span>Enable Audit Logging</h2>
+
+    <p>
+      Audit logging is disabled by default. Enable it in your <code>.harness/config.toml</code>:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">TOML</span>
+          <span class="filename">.harness/config.toml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-toml">[audit]
+enabled = true
+scan_pii = true
+retention_days = 90
+retention_max_size_mb = 500
+log_tool_args = true</code></pre>
+    </div>
+
+    <p>Once enabled, audit logging is fully automatic — every session creates a new JSONL file:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Bash</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-bash">harness "Fix the login bug"
+# Audit logging is automatic when enabled in config
+# Log written to ~/.harness/audit/audit-&lt;id&gt;.jsonl</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Log Location</div>
+      Audit logs are written to <code>~/.harness/audit/</code> by default. Each session gets its own
+      <code>audit-&lt;id&gt;.jsonl</code> file. You can override the directory with the
+      <code>audit_dir</code> constructor parameter when using the SDK directly.
+    </div>
+
+    <!-- ── 3. Run a Session & Inspect the Trail ── -->
+    <span class="section-anchor" id="inspect-trail"></span>
+    <h2><span class="step-num">3</span>Run a Session &amp; Inspect the Trail</h2>
+
+    <p>Run a task that involves reading and editing a file:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Bash</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-bash">harness "Add input validation to user_form.py"</code></pre>
+    </div>
+
+    <p>The resulting audit log is a JSONL file — one JSON object per line, each linked to the previous via SHA-256:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">JSON</span>
+          <span class="filename">~/.harness/audit/audit-abc123.jsonl</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-json">{"event_id": "evt_001", "timestamp": "2025-01-15T10:30:00Z", "event_type": "session_start", "session_id": "abc123", "data": {"provider": "anthropic", "model": "claude-sonnet-4-20250514"}, "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000", "hash": "a1b2c3d4e5f6..."}
+{"event_id": "evt_002", "timestamp": "2025-01-15T10:30:01Z", "event_type": "tool_call", "session_id": "abc123", "data": {"tool": "Read", "args": {"file_path": "user_form.py"}}, "prev_hash": "a1b2c3d4e5f6...", "hash": "e5f6g7h8..."}
+{"event_id": "evt_003", "timestamp": "2025-01-15T10:30:02Z", "event_type": "tool_result", "session_id": "abc123", "data": {"tool": "Read", "is_error": false, "content_length": 1234}, "prev_hash": "e5f6g7h8...", "hash": "i9j0k1l2..."}
+{"event_id": "evt_004", "timestamp": "2025-01-15T10:30:03Z", "event_type": "permission_decision", "session_id": "abc123", "data": {"tool": "Edit", "decision": "allow", "mode": "accept_edits"}, "prev_hash": "i9j0k1l2...", "hash": "m3n4o5p6..."}
+{"event_id": "evt_005", "timestamp": "2025-01-15T10:30:04Z", "event_type": "tool_call", "session_id": "abc123", "data": {"tool": "Edit", "args": {"file_path": "user_form.py", "old_string": "...", "new_string": "..."}}, "prev_hash": "m3n4o5p6...", "hash": "q7r8s9t0..."}
+{"event_id": "evt_006", "timestamp": "2025-01-15T10:30:10Z", "event_type": "provider_call", "session_id": "abc123", "data": {"provider": "anthropic", "model": "claude-sonnet-4-20250514", "input_tokens": 2500, "output_tokens": 800, "cost": 0.0195}, "prev_hash": "q7r8s9t0...", "hash": "u1v2w3x4..."}
+{"event_id": "evt_007", "timestamp": "2025-01-15T10:30:11Z", "event_type": "session_end", "session_id": "abc123", "data": {"turns": 3, "total_tokens": 5200, "total_cost": 0.042}, "prev_hash": "u1v2w3x4...", "hash": "y5z6a7b8..."}</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Hash Chain Structure</div>
+      Each event contains a SHA-256 hash of the previous event, creating a tamper-proof chain.
+      If any line is modified, the chain breaks. The first event has <code>"prev_hash"</code> set to
+      a 64-character string of zeros as the chain anchor.
+    </div>
+
+    <h3>Event Types</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Event Type</th>
+            <th>Triggered When</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>session_start</code></td>
+            <td class="td-normal">Agent session begins — records provider, model</td>
+          </tr>
+          <tr>
+            <td><code>tool_call</code></td>
+            <td class="td-normal">Agent invokes a tool (Read, Edit, Bash, etc.)</td>
+          </tr>
+          <tr>
+            <td><code>tool_result</code></td>
+            <td class="td-normal">Tool execution completes — records success/error, content length</td>
+          </tr>
+          <tr>
+            <td><code>permission_decision</code></td>
+            <td class="td-normal">Permission system allows or denies a tool call</td>
+          </tr>
+          <tr>
+            <td><code>provider_call</code></td>
+            <td class="td-normal">LLM API call — records tokens used and cost</td>
+          </tr>
+          <tr>
+            <td><code>pii_detected</code></td>
+            <td class="td-normal">PII scanner finds a sensitive pattern in tool output</td>
+          </tr>
+          <tr>
+            <td><code>session_end</code></td>
+            <td class="td-normal">Session completes — records total turns, tokens, cost</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── 4. Hash Chain Integrity ── -->
+    <span class="section-anchor" id="hash-chain"></span>
+    <h2><span class="step-num">4</span>Hash Chain Integrity</h2>
+
+    <p>
+      Use <code>AuditLogger.verify_chain()</code> to verify the integrity of any audit log.
+      This is a static method — you don't need a running session:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from pathlib import Path
+from harness.audit.logger import AuditLogger
+
+log_path = Path("~/.harness/audit/audit-abc123.jsonl").expanduser()
+valid, errors = AuditLogger.verify_chain(log_path)
+
+if valid:
+    print("✓ Audit chain is intact — no tampering detected")
+else:
+    print("✗ Chain broken!")
+    for err in errors:
+        print(f"  - {err}")</code></pre>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-header">&#10003; What verify_chain checks</div>
+      <ul style="margin-bottom:0">
+        <li>Every event's <code>hash</code> matches the SHA-256 of its own content</li>
+        <li>Every event's <code>prev_hash</code> matches the <code>hash</code> of the preceding event</li>
+        <li>The first event has <code>prev_hash</code> equal to a 64-character string of zeros</li>
+        <li>Returns <code>(True, [])</code> if intact, <code>(False, [error_messages])</code> if broken</li>
+      </ul>
+    </div>
+
+    <!-- ── 5. Tamper Detection Demo ── -->
+    <span class="section-anchor" id="tamper-demo"></span>
+    <h2><span class="step-num">5</span>Tamper Detection Demo</h2>
+
+    <p>
+      The following script demonstrates how tamper detection works. It verifies the chain,
+      modifies an event, then verifies again to show the failure:
+    </p>
+
+    <ul class="steps-list">
+      <li>
+        <span class="step-circle">1</span>
+        <div class="step-content">
+          <div class="step-title">Run a session to generate an audit log</div>
+          <p style="color:var(--muted);font-size:13.5px">Any <code>harness</code> command with audit enabled creates a JSONL file.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-circle">2</span>
+        <div class="step-content">
+          <div class="step-title">Verify chain — passes</div>
+          <p style="color:var(--muted);font-size:13.5px"><code>verify_chain()</code> returns <code>(True, [])</code>.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-circle">3</span>
+        <div class="step-content">
+          <div class="step-title">Edit one line in the JSONL — change "Read" to "Bash"</div>
+          <p style="color:var(--muted);font-size:13.5px">Simulates a malicious actor trying to hide that a file was read.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-circle">4</span>
+        <div class="step-content">
+          <div class="step-title">Verify chain again — fails, shows which event broke</div>
+          <p style="color:var(--muted);font-size:13.5px">The hash of the modified event no longer matches what the next event recorded as <code>prev_hash</code>.</p>
+        </div>
+      </li>
+    </ul>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">tamper_demo.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python"># tamper_demo.py
+import json
+from pathlib import Path
+from harness.audit.logger import AuditLogger
+
+log_path = Path("~/.harness/audit/audit-abc123.jsonl").expanduser()
+
+# Step 1: Verify before tampering
+valid, errors = AuditLogger.verify_chain(log_path)
+print(f"Before: valid={valid}, errors={len(errors)}")  # valid=True, errors=0
+
+# Step 2: Tamper with line 2 (change tool name)
+lines = log_path.read_text().strip().split("\n")
+event = json.loads(lines[1])
+event["tool"] = "Bash"  # Change Read to Bash
+lines[1] = json.dumps(event)
+log_path.write_text("\n".join(lines) + "\n")
+
+# Step 3: Verify after tampering
+valid, errors = AuditLogger.verify_chain(log_path)
+print(f"After: valid={valid}, errors={len(errors)}")  # valid=False, errors=1
+print(f"Broken at: {errors[0]}")  # "Hash mismatch at event evt_003"</code></pre>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-header">&#9888; Demo Only</div>
+      This demo intentionally tampers with an audit log to show detection. In production, audit logs
+      should be on append-only storage (e.g., AWS S3 with Object Lock, or a WORM-compliant log management
+      system) to prevent modification entirely.
+    </div>
+
+    <!-- ── 6. PII Scanning ── -->
+    <span class="section-anchor" id="pii-scanning"></span>
+    <h2><span class="step-num">6</span>PII Scanning</h2>
+
+    <p>
+      When <code>scan_pii = true</code>, Harness inspects all tool outputs for sensitive data patterns
+      before logging. Detections are recorded as <code>pii_detected</code> events — the actual value
+      is never stored, only the pattern name and context.
+    </p>
+
+    <p>Harness ships with 12 built-in patterns:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>Example Match</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>email</td><td>user@example.com</td></tr>
+          <tr><td>phone_us</td><td>+1-555-123-4567</td></tr>
+          <tr><td>ssn</td><td>123-45-6789</td></tr>
+          <tr><td>credit_card</td><td>4111-1111-1111-1111</td></tr>
+          <tr><td>aws_access_key</td><td>AKIA...</td></tr>
+          <tr><td>aws_secret_key</td><td>wJalrXUtnFEMI/K7MDENG/...</td></tr>
+          <tr><td>github_token</td><td>ghp_xxxxxxxxxxxxxxxxxxxx</td></tr>
+          <tr><td>jwt</td><td>eyJhbGciOi...</td></tr>
+          <tr><td>slack_token</td><td>xoxb-...</td></tr>
+          <tr><td>private_key_header</td><td>-----BEGIN RSA PRIVATE KEY-----</td></tr>
+          <tr><td>generic_api_key</td><td>api_key = "..."</td></tr>
+          <tr><td>ip_address</td><td>192.168.1.100</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Enable it in config:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">TOML</span>
+          <span class="filename">.harness/config.toml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-toml">[audit]
+enabled = true
+scan_pii = true  # Enable PII scanning on all tool outputs</code></pre>
+    </div>
+
+    <p>When PII is detected, it's logged as a separate event:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">JSON</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-json">{"event_type": "pii_detected", "session_id": "abc123", "data": {"pattern_name": "email", "context": "Found in tool output for Read(user_data.csv)"}}</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Privacy-Preserving Design</div>
+      The actual PII value is never stored in the audit log. Only the pattern name
+      (<code>"email"</code>, <code>"ssn"</code>, etc.) and the context (which tool produced it)
+      are recorded. This satisfies audit requirements without creating a secondary data exposure risk.
+    </div>
+
+    <!-- ── 7. Retention Policies ── -->
+    <span class="section-anchor" id="retention"></span>
+    <h2><span class="step-num">7</span>Retention Policies</h2>
+
+    <p>
+      Harness automatically enforces retention policies at session end. Configure time-based
+      or size-based limits, or both:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">TOML</span>
+          <span class="filename">.harness/config.toml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-toml">[audit]
+retention_days = 90          # Delete logs older than 90 days
+retention_max_size_mb = 500  # Cap at 500MB total</code></pre>
+    </div>
+
+    <div class="tab-group" role="tablist" aria-label="Retention policy examples">
+      <div class="tab-nav">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="ret-soc2" data-tab="soc2">SOC 2</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="ret-hipaa" data-tab="hipaa">HIPAA</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="ret-pci" data-tab="pci">PCI-DSS</button>
+      </div>
+
+      <div class="tab-panel active" id="ret-soc2" role="tabpanel">
+        <p style="margin-top:12px">SOC 2 typically requires 12 months of audit log retention:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">TOML</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-toml">[audit]
+enabled = true
+retention_days = 365          # 12 months
+retention_max_size_mb = 2048  # 2GB cap</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="ret-hipaa" role="tabpanel">
+        <p style="margin-top:12px">HIPAA requires 6 years of access log retention:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">TOML</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-toml">[audit]
+enabled = true
+scan_pii = true
+retention_days = 2190         # 6 years
+retention_max_size_mb = 0     # No size limit (0 = unlimited)</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="ret-pci" role="tabpanel">
+        <p style="margin-top:12px">PCI-DSS requires 12 months with 3 months immediately available:</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">TOML</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-toml">[audit]
+enabled = true
+scan_pii = true
+retention_days = 365
+retention_max_size_mb = 1024</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 8. Export for Compliance ── -->
+    <span class="section-anchor" id="export"></span>
+    <h2><span class="step-num">8</span>Export for Compliance</h2>
+
+    <p>
+      Audit logs are JSONL — easy to parse and transform. The script below collects all
+      sessions and produces a single CSV that auditors can review in a spreadsheet:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">compliance_export.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python"># compliance_export.py
+import json
+import csv
+from pathlib import Path
+
+audit_dir = Path("~/.harness/audit").expanduser()
+rows = []
+
+for log_file in sorted(audit_dir.glob("*.jsonl")):
+    for line in log_file.read_text().strip().split("\n"):
+        event = json.loads(line)
+        rows.append({
+            "timestamp": event.get("timestamp", ""),
+            "session": log_file.stem,
+            "event_type": event.get("event_type", ""),
+            "tool": event.get("data", {}).get("tool", ""),
+            "decision": event.get("data", {}).get("decision", ""),
+            "cost": event.get("data", {}).get("cost", 0),
+            "tokens": event.get("data", {}).get("input_tokens", 0) + event.get("data", {}).get("output_tokens", 0),
+        })
+
+if not rows:
+    print("No audit events found.")
+else:
+    with open("audit_report.csv", "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Exported {len(rows)} events to audit_report.csv")</code></pre>
+    </div>
+
+    <div class="callout callout-tryit">
+      <div class="callout-header">&#9654; Try It</div>
+      Run this script with <code>uv run compliance_export.py</code> after completing a few Harness sessions.
+      Open <code>audit_report.csv</code> in a spreadsheet to browse your agent's full action history,
+      including token costs per session.
+    </div>
+
+    <!-- ── 9. Build a Compliance Check Script ── -->
+    <span class="section-anchor" id="compliance-script"></span>
+    <h2><span class="step-num">9</span>Build a Compliance Check Script</h2>
+
+    <p>
+      Automate compliance verification in CI/CD. This script checks all audit logs for
+      chain integrity and PII detections, then exits non-zero if any issues are found:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">compliance_check.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python"># compliance_check.py
+import json
+from pathlib import Path
+from harness.audit.logger import AuditLogger
+
+def run_compliance_check():
+    audit_dir = Path("~/.harness/audit").expanduser()
+    results = {"passed": 0, "failed": 0, "warnings": 0}
+
+    for log_file in sorted(audit_dir.glob("*.jsonl")):
+        # Check 1: Hash chain integrity
+        valid, errors = AuditLogger.verify_chain(log_file)
+        if valid:
+            results["passed"] += 1
+            print(f"  ✓ {log_file.name}: chain intact")
+        else:
+            results["failed"] += 1
+            print(f"  ✗ {log_file.name}: chain BROKEN ({len(errors)} errors)")
+
+        # Check 2: PII detections
+        pii_events = []
+        for line in log_file.read_text().strip().split("\n"):
+            event = json.loads(line)
+            if event.get("event_type") == "pii_detected":
+                pii_events.append(event)
+        if pii_events:
+            results["warnings"] += 1
+            print(f"  ⚠ {log_file.name}: {len(pii_events)} PII detections")
+
+    print(f"\nResults: {results['passed']} passed, {results['failed']} failed, {results['warnings']} warnings")
+    return results["failed"] == 0
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(0 if run_compliance_check() else 1)</code></pre>
+    </div>
+
+    <div class="collapsible" id="deep-sdk">
+      <button class="collapsible-trigger" aria-expanded="false" aria-controls="deep-sdk-content" onclick="toggleCollapsible(this)">
+        <span>&#128216; Deep Dive: Full AuditLogger SDK Reference</span>
+        <span class="chevron">&#8964;</span>
+      </button>
+      <div class="collapsible-content" id="deep-sdk-content">
+        <p style="margin-bottom:14px">The full <code>AuditLogger</code> API — use this when integrating audit logging into custom pipelines:</p>
+        <div class="code-block" style="margin-top:0">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.audit.logger import AuditLogger, AuditEventType
+from pathlib import Path
+
+# Use as a context manager (auto-closes on exit)
+with AuditLogger(
+    session_id="my_session_001",
+    enabled=True,
+    log_tool_args=True,
+    audit_dir=Path("/var/log/harness/audit"),
+) as logger:
+    # Record session start
+    logger.log_session_start(provider="anthropic", model="claude-sonnet-4-20250514")
+
+    # Record a tool call
+    logger.log_tool_call("Read", args={"file_path": "app.py"})
+    logger.log_tool_result("Read", is_error=False, content_length=4200)
+
+    # Record permission decision
+    logger.log_permission_decision("Edit", decision="allow", mode="accept_edits")
+
+    # Record provider call (LLM API usage)
+    logger.log_provider_call(
+        "anthropic", "claude-sonnet-4-20250514",
+        input_tokens=1800, output_tokens=450, cost=0.0125
+    )
+
+    # Record session end
+    logger.log_session_end(turns=2, total_tokens=4500, total_cost=0.031)
+
+    print(f"Log path: {logger.log_path}")
+    print(f"Events logged: {logger.event_count}")
+
+# Verify after the fact
+valid, errors = AuditLogger.verify_chain(logger.log_path)
+print(f"Chain valid: {valid}")</code></pre>
+        </div>
+        <p style="margin-bottom:0;color:var(--muted);font-size:13.5px">
+          The <code>AuditConfig</code> dataclass mirrors the TOML config: <code>enabled</code>, <code>scan_pii</code>,
+          <code>retention_days</code>, <code>retention_max_size_mb</code>, <code>log_tool_args</code>.
+          Note: <code>enabled</code> defaults to <code>False</code> — audit logging is off unless explicitly enabled.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── 10. Next Steps ── -->
+    <span class="section-anchor" id="next-steps"></span>
+    <h2><span class="step-num">10</span>Next Steps</h2>
+
+    <p>You now have a complete audit logging setup. Here is what to explore next:</p>
+
+    <ul>
+      <li>Add the compliance check script to your CI pipeline — exit code 1 blocks deploys on tampered logs</li>
+      <li>Configure append-only storage (S3 Object Lock, Wasabi WORM) for production audit logs</li>
+      <li>Combine audit logging with Policy-as-Code (Tutorial 05) for a complete compliance posture</li>
+      <li>Use <code>retention_max_size_mb = 0</code> to disable size limits for HIPAA 6-year retention</li>
+    </ul>
+
+    <!-- ── Prev/Next nav ── -->
+    <nav class="page-nav" aria-label="Tutorial navigation">
+      <a href="05-policy-as-code.html" class="nav-card">
+        <span class="nav-dir">&#8592; Previous</span>
+        <span class="nav-title">Policy-as-Code</span>
+      </a>
+      <a href="07-sandboxed-execution.html" class="nav-card next">
+        <span class="nav-dir">Next &#8594;</span>
+        <span class="nav-title">Sandboxed Execution</span>
+      </a>
+    </nav>
+
+  </main>
+</div><!-- /.layout -->
+
+<script>
+  // ── Copy to clipboard ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      // Fallback for browsers without clipboard API
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // ── Tab switching ──
+  document.querySelectorAll('.tab-group').forEach(group => {
+    const btns = group.querySelectorAll('.tab-btn');
+    const panels = group.querySelectorAll('.tab-panel');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        btns.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        const panel = group.querySelector('#' + btn.getAttribute('aria-controls'));
+        if (panel) panel.classList.add('active');
+      });
+    });
+  });
+
+  // ── Collapsible toggle ──
+  function toggleCollapsible(trigger) {
+    const expanded = trigger.getAttribute('aria-expanded') === 'true';
+    const contentId = trigger.getAttribute('aria-controls');
+    const content = document.getElementById(contentId);
+    trigger.setAttribute('aria-expanded', String(!expanded));
+    if (content) content.classList.toggle('open', !expanded);
+  }
+
+  // ── Mobile sidebar ──
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    mobileMenuBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  mobileMenuBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+
+  // ── TOC scroll highlight (IntersectionObserver) ──
+  const tocLinks = document.querySelectorAll('.toc-link');
+  const sections = document.querySelectorAll('.section-anchor');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        tocLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, {
+    rootMargin: '-60px 0px -70% 0px',
+    threshold: 0
+  });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

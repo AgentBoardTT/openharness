@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Policy-as-Code — Harness Tutorials</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js tomorrow theme -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0F172A;
+      --surface:     #1E293B;
+      --accent:      #7C3AED;
+      --accent-light:#A78BFA;
+      --text:        #E2E8F0;
+      --heading:     #F8FAFC;
+      --muted:       #94A3B8;
+      --border:      #334155;
+      --info:        #3B82F6;
+      --warning:     #F59E0B;
+      --success:     #10B981;
+      --error:       #EF4444;
+      --sidebar-w:   280px;
+      --header-h:    60px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--heading);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .header-meta {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .badge-intermediate {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-time {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - var(--header-h));
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 28px 0;
+    }
+
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-track { background: transparent; }
+    aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-list { list-style: none; }
+
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-list a:hover,
+    .toc-list a.active {
+      color: var(--accent-light);
+      border-left-color: var(--accent);
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .toc-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 18px;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      padding: 48px 40px 80px;
+      max-width: 780px;
+    }
+
+    /* ── Page header ── */
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    .page-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    /* ── Section headings ── */
+    .section-anchor { display: block; }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 48px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--heading);
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    /* ── Step indicator ── */
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Code blocks ── */
+    .code-block {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0 24px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 16px 20px !important;
+      background: transparent !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block pre::-webkit-scrollbar { height: 4px; }
+    .code-block pre::-webkit-scrollbar-track { background: transparent; }
+    .code-block pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Inline code ── */
+    code:not([class]) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: var(--accent-light);
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 20px 0;
+      border-left: 3px solid;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .callout-header {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .callout-info    { border-color: var(--info);    }
+    .callout-info    .callout-header { color: var(--info); }
+    .callout-warning { border-color: var(--warning); }
+    .callout-warning .callout-header { color: var(--warning); }
+    .callout-success { border-color: var(--success); }
+    .callout-success .callout-header { color: var(--success); }
+    .callout-error   { border-color: var(--error);   }
+    .callout-error   .callout-header { color: var(--error); }
+    .callout-tryit   { border-color: var(--accent);  }
+    .callout-tryit   .callout-header { color: var(--accent-light); }
+    .callout-competitor { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+    .callout-competitor .callout-header { color: var(--accent-light); }
+
+    /* ── Tabs ── */
+    .tab-group { margin: 20px 0 24px; }
+
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 10px 18px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--accent-light);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Collapsible ── */
+    .collapsible { margin: 20px 0; }
+
+    .collapsible-trigger {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s;
+    }
+
+    .collapsible-trigger:hover { border-color: var(--accent); }
+    .collapsible-trigger[aria-expanded="true"] {
+      border-radius: 8px 8px 0 0;
+      border-color: var(--accent);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .collapsible-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .collapsible-content {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 16px;
+      display: none;
+    }
+
+    .collapsible-content.open { display: block; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51,65,85,0.5);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .td-normal { font-family: 'Inter', sans-serif; }
+
+    /* ── Inheritance diagram ── */
+    .inherit-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 20px 0 28px;
+    }
+
+    .inherit-level {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .inherit-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 40px;
+      flex-shrink: 0;
+    }
+
+    .inherit-line {
+      width: 2px;
+      flex: 1;
+      background: var(--border);
+      min-height: 20px;
+    }
+
+    .inherit-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .inherit-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 4px;
+    }
+
+    .inherit-box:hover { border-color: var(--accent); }
+
+    .inherit-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent-light);
+      margin-bottom: 2px;
+    }
+
+    .inherit-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .inherit-desc {
+      font-size: 12px;
+      color: var(--text);
+      margin-top: 4px;
+    }
+
+    .inherit-arrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0 4px 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .inherit-arrow-line {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin-left: 20px;
+    }
+
+    /* ── Prev/Next nav ── */
+    .page-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 60px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+    .nav-card.next { text-align: right; }
+
+    .nav-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
+    .nav-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      aside {
+        position: fixed;
+        left: -100%;
+        top: var(--header-h);
+        height: calc(100vh - var(--header-h));
+        background: var(--bg);
+        z-index: 90;
+        border-right: 1px solid var(--border);
+        transition: left 0.25s;
+      }
+      aside.open { left: 0; }
+      .mobile-menu-btn { display: block; }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .page-nav { grid-template-columns: 1fr; }
+    }
+
+    /* ── Misc ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 5px; }
+    strong { color: var(--heading); font-weight: 600; }
+
+    /* ── Comment line in YAML ── */
+    .yaml-comment { color: #6B7280; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  <a href="index.html" class="brand">
+    <span class="brand-dot"></span>
+    Harness
+  </a>
+  <span style="color:var(--border);font-size:18px;margin:0 4px">/</span>
+  <span style="color:var(--muted);font-size:14px">Tutorials</span>
+  <div class="header-meta">
+    <span class="badge badge-intermediate">Intermediate</span>
+    <span class="badge badge-time">20 min</span>
+  </div>
+</header>
+
+<!-- ── Layout ── -->
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside id="sidebar" role="complementary" aria-label="Table of contents">
+    <nav aria-label="On this page">
+    <div class="toc-label">On this page</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#why-policy" class="toc-link"><span class="toc-num">1</span>Why Policy-as-Code?</a></li>
+      <li><a href="#first-policy" class="toc-link"><span class="toc-num">2</span>Your First Policy File</a></li>
+      <li><a href="#condition-types" class="toc-link"><span class="toc-num">3</span>Condition Types</a></li>
+      <li><a href="#inheritance" class="toc-link"><span class="toc-num">4</span>Policy Inheritance</a></li>
+      <li><a href="#simulation" class="toc-link"><span class="toc-num">5</span>Simulation Mode</a></li>
+      <li><a href="#production-policy" class="toc-link"><span class="toc-num">6</span>Production Safety Policy</a></li>
+      <li><a href="#sdk-usage" class="toc-link"><span class="toc-num">7</span>PolicyEngine SDK Usage</a></li>
+      <li><a href="#next-steps" class="toc-link"><span class="toc-num">8</span>Next Steps</a></li>
+    </ul>
+    </nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <h1 class="page-title">Policy-as-Code</h1>
+    <p class="page-subtitle">Govern exactly what your AI agent can do using YAML rules — version-controlled, auditable, and enforced at runtime.</p>
+    <div class="page-tags">
+      <span class="badge badge-intermediate">Intermediate</span>
+      <span class="badge badge-time">20 min read</span>
+    </div>
+
+    <!-- ── 1. Why Policy-as-Code? ── -->
+    <span class="section-anchor" id="why-policy"></span>
+    <h2><span class="step-num">1</span>Why Policy-as-Code?</h2>
+
+    <p>
+      Compliance frameworks like <strong>SOC 2</strong>, <strong>HIPAA</strong>, and <strong>PCI-DSS</strong> require
+      documented access controls. When your auditor asks <em>"How do you control what AI agents can do in
+      production?"</em> — with Harness, you hand them a YAML file.
+    </p>
+
+    <p>
+      Policy-as-Code means your agent's permission rules live in source control alongside your application code.
+      Every change is tracked, reviewed in pull requests, and rolled back with a single <code>git revert</code>.
+    </p>
+
+    <div class="callout callout-competitor">
+      <div class="callout-header">&#9889; Unique to Harness</div>
+      No other coding agent has a policy engine. Claude Code has basic permission modes — <code>default</code>,
+      <code>auto-edit</code>, <code>bypass</code> — but no rule matching. Cursor has no programmatic controls at
+      all. Harness is the only agent where access control is declarative, auditable, and composable.
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; What Policies Control</div>
+      Policies govern tool calls: <code>Read</code>, <code>Write</code>, <code>Edit</code>, <code>Bash</code>,
+      <code>Glob</code>, <code>Grep</code>, and any custom tools you register. Each rule can <code>allow</code>,
+      <code>deny</code>, or <code>ask</code> (prompt the user at runtime) based on pattern-matched conditions.
+    </div>
+
+    <!-- ── 2. Your First Policy File ── -->
+    <span class="section-anchor" id="first-policy"></span>
+    <h2><span class="step-num">2</span>Your First Policy File</h2>
+
+    <p>
+      Create a file at <code>.harness/policy.yml</code> in your project root. Harness loads this automatically
+      on every run when <code>permission_mode</code> is <code>"default"</code> or <code>"policy"</code>.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">YAML</span>
+          <span class="filename">.harness/policy.yml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-yaml">version: 1
+
+defaults:
+  decision: ask  # Default: ask for permission on any unmatched tool
+
+rules:
+  - tool: Read
+    decision: allow
+    description: "Allow reading any file"
+
+  - tool: Glob
+    decision: allow
+    description: "Allow file searching"
+
+  - tool: Grep
+    decision: allow
+    description: "Allow content searching"
+
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "rm -rf*"
+    description: "Block recursive deletion"
+
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.env"
+    description: "Protect environment files"</code></pre>
+    </div>
+
+    <p>Run the agent with your policy active:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Bash</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-bash">harness --permission default "Clean up the project"
+# The agent can read files freely, but will be blocked from rm -rf and .env writes</code></pre>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-header">&#10003; Rules are evaluated in order</div>
+      The first matching rule wins. If no rule matches a tool call, the <code>defaults.decision</code> applies.
+      Put more specific rules before more general ones.
+    </div>
+
+    <!-- ── 3. Condition Types ── -->
+    <span class="section-anchor" id="condition-types"></span>
+    <h2><span class="step-num">3</span>Condition Types</h2>
+
+    <p>
+      Each rule can have zero or more conditions. A rule without conditions matches <em>all</em> calls to that tool.
+      When conditions are present, <em>all</em> conditions must match for the rule to apply.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Condition</th>
+            <th>Field</th>
+            <th>Description</th>
+            <th>Example Pattern</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>command_matches</code></td>
+            <td class="td-normal"><code>pattern</code></td>
+            <td class="td-normal">fnmatch glob match on Bash command string</td>
+            <td><code>rm -rf*</code></td>
+          </tr>
+          <tr>
+            <td><code>path_matches</code></td>
+            <td class="td-normal"><code>pattern</code></td>
+            <td class="td-normal">fnmatch glob match on file path argument</td>
+            <td><code>*.env</code></td>
+          </tr>
+          <tr>
+            <td><code>not_path_matches</code></td>
+            <td class="td-normal"><code>pattern</code></td>
+            <td class="td-normal">Inverse — denies if path does NOT match (fnmatch glob)</td>
+            <td><code>src/*.py</code></td>
+          </tr>
+          <tr>
+            <td><code>content_matches</code></td>
+            <td class="td-normal"><code>pattern</code></td>
+            <td class="td-normal">Regex match on content being written (re.search)</td>
+            <td><code>password</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tab-group" role="tablist" aria-label="Condition type examples">
+      <div class="tab-nav">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="cond-command" data-tab="command">command_matches</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="cond-path" data-tab="path">path_matches</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="cond-notpath" data-tab="notpath">not_path_matches</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="cond-content" data-tab="content">content_matches</button>
+      </div>
+
+      <div class="tab-panel active" id="cond-command" role="tabpanel">
+        <p style="margin-top:12px">Match the shell command string passed to the <code>Bash</code> tool using an fnmatch glob pattern. Use one rule per pattern — fnmatch does not support <code>|</code> alternation.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">YAML</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-yaml"># Block network exfiltration tools (one rule per command)
+- tool: Bash
+  decision: deny
+  when:
+    command_matches: "curl*"
+  description: "Block curl"
+
+- tool: Bash
+  decision: deny
+  when:
+    command_matches: "wget*"
+  description: "Block wget"
+
+- tool: Bash
+  decision: deny
+  when:
+    command_matches: "nc *"
+  description: "Block netcat"</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="cond-path" role="tabpanel">
+        <p style="margin-top:12px">Match the file path argument to <code>Write</code>, <code>Edit</code>, or <code>Read</code> using an fnmatch glob pattern. Use one rule per extension — fnmatch does not support <code>|</code> alternation.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">YAML</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-yaml"># Protect secrets and certificate files (one rule per extension)
+- tool: Write
+  decision: deny
+  when:
+    path_matches: "*.env"
+  description: "Protect .env files"
+
+- tool: Write
+  decision: deny
+  when:
+    path_matches: "*.pem"
+  description: "Protect PEM certificates"
+
+- tool: Write
+  decision: deny
+  when:
+    path_matches: "*.key"
+  description: "Protect private keys"
+
+- tool: Write
+  decision: deny
+  when:
+    path_matches: "*.crt"
+  description: "Protect certificate files"
+
+- tool: Write
+  decision: deny
+  when:
+    path_matches: "*.p12"
+  description: "Protect PKCS12 keystores"</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="cond-notpath" role="tabpanel">
+        <p style="margin-top:12px">Deny when the path does NOT match. Useful for restricting writes to a specific directory. Uses fnmatch glob pattern matching.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">YAML</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-yaml"># Only allow writes inside src/ — deny everything else
+- tool: Write
+  decision: deny
+  when:
+    not_path_matches: "src/*"
+  description: "Only allow writes to src/"</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="cond-content" role="tabpanel">
+        <p style="margin-top:12px">Inspect the actual file content the agent is trying to write. Prevents leaking secrets into source files. <code>content_matches</code> uses <code>re.search()</code> (Python regex), so regex patterns apply here.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">YAML</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-yaml"># Block writing secrets to any file
+- tool: Write
+  decision: deny
+  when:
+    content_matches: "(api_key|secret|password)\\s*="
+  description: "Block writing secrets to files"</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. Policy Inheritance ── -->
+    <span class="section-anchor" id="inheritance"></span>
+    <h2><span class="step-num">4</span>Policy Inheritance</h2>
+
+    <p>
+      Policies can inherit from a parent policy using <code>inherit_from</code>. Child rules are evaluated
+      first; unmatched calls fall through to the parent. This lets you build a hierarchy:
+      org-level baseline → team customization → project specifics.
+    </p>
+
+    <!-- Inheritance diagram -->
+    <div class="inherit-diagram" aria-label="Policy inheritance hierarchy diagram">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:4px">
+        <div style="width:40px;display:flex;justify-content:center">
+          <div class="inherit-dot"></div>
+        </div>
+        <div class="inherit-box" style="margin-bottom:0">
+          <div class="inherit-label">Org Level</div>
+          <div class="inherit-path">~/.harness/policy.yml</div>
+          <div class="inherit-desc">Global rules for all projects on this machine</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px">
+        <div style="width:40px;display:flex;justify-content:center">
+          <div class="inherit-line"></div>
+        </div>
+        <div style="flex:1"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:4px">
+        <div style="width:40px;display:flex;justify-content:center">
+          <div class="inherit-dot"></div>
+        </div>
+        <div class="inherit-box" style="margin-bottom:0">
+          <div class="inherit-label">Team Level</div>
+          <div class="inherit-path">~/team/.harness/policy.yml</div>
+          <div class="inherit-desc">Shared across projects in a team repo; inherits org rules</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px">
+        <div style="width:40px;display:flex;justify-content:center">
+          <div class="inherit-line"></div>
+        </div>
+        <div style="flex:1"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="width:40px;display:flex;justify-content:center">
+          <div class="inherit-dot"></div>
+        </div>
+        <div class="inherit-box" style="margin-bottom:0">
+          <div class="inherit-label">Project Level</div>
+          <div class="inherit-path">.harness/policy.yml</div>
+          <div class="inherit-desc">Project-specific rules; inherits team rules</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Org-Level Policy</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">YAML</span>
+          <span class="filename">~/.harness/policy.yml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-yaml">version: 1
+defaults:
+  decision: ask
+
+rules:
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "rm -rf /*"
+    description: "Org: Never rm -rf root paths"</code></pre>
+    </div>
+
+    <h3>Team-Level Policy</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">YAML</span>
+          <span class="filename">~/team/.harness/policy.yml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-yaml">version: 1
+inherit_from: "~/.harness/policy.yml"  # Pull in org rules first
+
+rules:
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.prod.*"
+    description: "Team: Protect production configs"</code></pre>
+    </div>
+
+    <h3>Project-Level Policy</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">YAML</span>
+          <span class="filename">.harness/policy.yml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-yaml">version: 1
+inherit_from: "../team-policy.yml"  # Pull in team rules
+
+rules:
+  - tool: Read
+    decision: allow
+    description: "Project: Allow all reads without prompting"</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Evaluation Order</div>
+      Harness evaluates rules from the most specific (project) to least specific (org). The first matching rule
+      wins across the entire chain. This means project rules can override org rules — so be intentional about
+      what you allow at the project level.
+    </div>
+
+    <!-- ── 5. Simulation Mode ── -->
+    <span class="section-anchor" id="simulation"></span>
+    <h2><span class="step-num">5</span>Simulation Mode</h2>
+
+    <p>
+      Before enforcing a new policy, run it in simulation mode. Harness will log every decision it <em>would</em>
+      have made — without actually blocking anything. Fix false positives before going live.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">simulate_policy.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from harness.permissions.policy import PolicyEngine
+
+engine = PolicyEngine(simulation_mode=True)
+engine.load_file(".harness/policy.yml")
+
+# Test what would happen — no actual enforcement
+results = engine.simulate("Bash", {"command": "rm -rf /tmp/test"})
+for r in results:
+    print(f"Rule:       {r['description']}")
+    print(f"Decision:   {r['decision']}")
+    print(f"Conditions: {r['conditions']}")
+    print("---")</code></pre>
+    </div>
+
+    <p>Enable simulation mode in TOML to use it with the CLI:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">TOML</span>
+          <span class="filename">.harness/config.toml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-toml">[policy]
+policy_paths = [".harness/policy.yml"]
+simulation_mode = true  # Log decisions but don't enforce them</code></pre>
+    </div>
+
+    <div class="callout callout-tryit">
+      <div class="callout-header">&#9654; Try It</div>
+      Run simulation mode first to see what your policy would block. Check the audit log for unexpected denies
+      (false positives) and unexpected allows (gaps). Only set <code>simulation_mode = false</code> when the
+      log looks correct.
+    </div>
+
+    <div class="collapsible">
+      <button class="collapsible-trigger" aria-expanded="false" aria-controls="deepdive-sim">
+        <span>Deep Dive: PolicyEngine class reference</span>
+        <span class="chevron">&#8964;</span>
+      </button>
+      <div class="collapsible-content" id="deepdive-sim" role="region">
+        <div class="code-block" style="margin:0">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">Python</span>
+              <span class="filename">harness/permissions/policy.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from pathlib import Path
+from typing import Any
+from harness.permissions.policy import PolicyEngine, Policy, PolicyRule
+from harness.permissions.rules import PermissionDecision
+
+class PolicyEngine:
+    def __init__(self, *, simulation_mode: bool = False): ...
+
+    @property
+    def policies(self) -> list[Policy]:
+        """All loaded Policy objects, in evaluation order."""
+        ...
+
+    @property
+    def audit_log(self) -> list[dict[str, Any]]:
+        """Every tool check recorded since engine was created."""
+        ...
+
+    def load_file(self, path: str | Path) -> None:
+        """Load a single YAML policy file."""
+        ...
+
+    def load_files(self, paths: list[str | Path]) -> None:
+        """Load multiple YAML policy files at once."""
+        ...
+
+    def check(
+        self,
+        tool_name: str,
+        args: dict | None = None,
+    ) -> PermissionDecision | None:
+        """
+        Evaluate all loaded rules for this tool call.
+        Returns the winning decision, or None if no rule matched
+        (caller should apply defaults).
+        In simulation_mode, always returns None but logs the decision.
+        """
+        ...
+
+    def simulate(
+        self,
+        tool_name: str,
+        args: dict | None = None,
+    ) -> list[dict]:
+        """
+        Run the policy engine against a hypothetical tool call.
+        Returns a list of rule evaluation results — use for testing.
+        Does not modify the audit_log.
+        """
+        ...</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6. Build a Production Safety Policy ── -->
+    <span class="section-anchor" id="production-policy"></span>
+    <h2><span class="step-num">6</span>Build a Production Safety Policy</h2>
+
+    <p>
+      Here is a complete policy for production environments. Copy this as a starting point and tune the
+      patterns to your directory structure.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">YAML</span>
+          <span class="filename">.harness/policy.yml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-yaml">version: 1
+defaults:
+  decision: ask
+
+rules:
+  # === ALLOW: Safe read operations ===
+  - tool: Read
+    decision: allow
+    description: "Allow reading source files"
+
+  - tool: Glob
+    decision: allow
+    description: "Allow file discovery"
+
+  - tool: Grep
+    decision: allow
+    description: "Allow code search"
+
+  # === DENY: Dangerous shell operations ===
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "rm -rf*"
+    description: "Block recursive deletion"
+
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "curl*"
+    description: "Block curl (network exfiltration)"
+
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "wget*"
+    description: "Block wget (network exfiltration)"
+
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "nc *"
+    description: "Block netcat"
+
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "ncat*"
+    description: "Block ncat"
+
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "chmod 777*"
+    description: "Block world-writable permission changes"
+
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "chmod +x*"
+    description: "Block making files executable"
+
+  # === DENY: Secrets and certificates ===
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.env"
+    description: "Protect .env files"
+
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.pem"
+    description: "Protect PEM certificates"
+
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.key"
+    description: "Protect private keys"
+
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.crt"
+    description: "Protect certificate files"
+
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.p12"
+    description: "Protect PKCS12 keystores"
+
+  - tool: Edit
+    decision: deny
+    when:
+      path_matches: "*.env"
+    description: "Protect .env files"
+
+  - tool: Edit
+    decision: deny
+    when:
+      path_matches: "*.pem"
+    description: "Protect PEM certificates"
+
+  - tool: Edit
+    decision: deny
+    when:
+      path_matches: "*.key"
+    description: "Protect private keys"
+
+  - tool: Edit
+    decision: deny
+    when:
+      path_matches: "*.crt"
+    description: "Protect certificate files"
+
+  - tool: Edit
+    decision: deny
+    when:
+      path_matches: "*.p12"
+    description: "Protect PKCS12 keystores"
+
+  - tool: Write
+    decision: deny
+    when:
+      content_matches: "(BEGIN (RSA |EC )?PRIVATE KEY|password\\s*=|api_key\\s*=)"
+    description: "Block writing secrets to any file"</code></pre>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-header">&#9888; Pattern Syntax by Condition Type</div>
+      <code>command_matches</code>, <code>path_matches</code>, and <code>not_path_matches</code> use
+      <strong>fnmatch glob patterns</strong> — use <code>*</code> for wildcards, <code>?</code> for a single
+      character. <code>content_matches</code> is the only condition that uses <strong>Python regex</strong>
+      (<code>re.search</code>). In YAML double-quoted strings, regex backslashes must be escaped:
+      <code>\\s</code> for whitespace, <code>\\.</code> for a literal dot.
+    </div>
+
+    <div class="collapsible">
+      <button class="collapsible-trigger" aria-expanded="false" aria-controls="deepdive-policy-data">
+        <span>Deep Dive: PolicyRule and Policy dataclasses</span>
+        <span class="chevron">&#8964;</span>
+      </button>
+      <div class="collapsible-content" id="deepdive-policy-data" role="region">
+        <div class="code-block" style="margin:0">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">Python</span>
+              <span class="filename">harness/permissions/policy.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from dataclasses import dataclass, field
+from harness.permissions.rules import PermissionDecision
+
+# harness/permissions/policy.py
+@dataclass(frozen=True)
+class PolicyRule:
+    tool: str
+    decision: PermissionDecision  # PermissionDecision.ALLOW | .DENY | .ASK
+    when: dict[str, str] = field(default_factory=dict)  # condition_type -> pattern
+    description: str = ""
+
+@dataclass(frozen=True)
+class Policy:
+    version: int = 1
+    rules: tuple[PolicyRule, ...] = ()
+    defaults: dict[str, str] = field(default_factory=dict)
+    inherit_from: str | None = None  # Path to parent policy file
+
+# harness/types/config.py
+@dataclass
+class PolicyConfig:
+    policy_paths: tuple[str, ...] = ()
+    simulation_mode: bool = False</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 7. PolicyEngine SDK Usage ── -->
+    <span class="section-anchor" id="sdk-usage"></span>
+    <h2><span class="step-num">7</span>PolicyEngine SDK Usage</h2>
+
+    <p>
+      You can use the policy engine directly in Python for custom workflows, CI enforcement, or policy testing.
+    </p>
+
+    <h3>Basic Check and Audit Log</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">policy_check.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from harness.permissions.policy import PolicyEngine
+from harness.permissions.rules import PermissionDecision
+
+# Load and check
+engine = PolicyEngine()
+engine.load_file(".harness/policy.yml")
+
+# Check a tool call
+decision = engine.check("Bash", {"command": "rm -rf /tmp"})
+if decision == PermissionDecision.DENY:
+    print("Blocked by policy!")
+elif decision == PermissionDecision.ALLOW:
+    print("Permitted.")
+elif decision is None:
+    print("No rule matched — applying defaults.")
+
+# View the complete audit log
+for entry in engine.audit_log:
+    tool     = entry["tool"]
+    decision = entry["decision"]
+    rule     = entry.get("description", "default")
+    print(f"{tool:10} -> {decision:6}  [{rule}]")</code></pre>
+    </div>
+
+    <h3>Loading Multiple Policy Files</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from harness.permissions.policy import PolicyEngine
+
+engine = PolicyEngine()
+
+# Load org + team + project in one call (evaluated in list order)
+engine.load_files([
+    "~/.harness/policy.yml",
+    "~/team/.harness/policy.yml",
+    ".harness/policy.yml",
+])</code></pre>
+    </div>
+
+    <h3>Integration with harness.run()</h3>
+
+    <p>
+      When using the CLI with <code>--permission default</code>, Harness automatically loads
+      <code>.harness/policy.yml</code> and <code>~/.harness/policy.yml</code>. In Python, the same applies:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">run_with_policy.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">import asyncio
+import harness
+
+async def main():
+    # Policy is automatically loaded from:
+    #   1. ~/.harness/policy.yml  (org/user level)
+    #   2. .harness/policy.yml    (project level)
+    # when permission_mode is "default"
+    async for msg in harness.run(
+        "Deploy to production",
+        permission_mode="default",
+    ):
+        print(msg)
+
+asyncio.run(main())</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Policy Config in TOML</div>
+      You can override which policy files are loaded and enable simulation mode via <code>.harness/config.toml</code>:
+      <div class="code-block" style="margin-top:12px;margin-bottom:0">
+        <div class="code-header">
+          <div class="code-header-left"><span class="lang-badge">TOML</span></div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-toml">[policy]
+policy_paths = [
+    "~/.harness/policy.yml",
+    ".harness/policy.yml",
+]
+simulation_mode = false  # Set to true to log without enforcing</code></pre>
+      </div>
+    </div>
+
+    <div class="collapsible">
+      <button class="collapsible-trigger" aria-expanded="false" aria-controls="deepdive-ci">
+        <span>Deep Dive: Using PolicyEngine in CI for policy testing</span>
+        <span class="chevron">&#8964;</span>
+      </button>
+      <div class="collapsible-content" id="deepdive-ci" role="region">
+        <p style="margin-bottom:10px">
+          You can write pytest tests to assert that your policy allows and blocks the right operations.
+          Run these in CI to catch policy regressions before they reach production.
+        </p>
+        <div class="code-block" style="margin:0">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">Python</span>
+              <span class="filename">tests/test_policy.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">import pytest
+from harness.permissions.policy import PolicyEngine
+from harness.permissions.rules import PermissionDecision
+
+@pytest.fixture
+def engine():
+    e = PolicyEngine()
+    e.load_file(".harness/policy.yml")
+    return e
+
+def test_read_is_allowed(engine):
+    decision = engine.check("Read", {"path": "src/main.py"})
+    assert decision == PermissionDecision.ALLOW
+
+def test_rm_rf_is_denied(engine):
+    decision = engine.check("Bash", {"command": "rm -rf /"})
+    assert decision == PermissionDecision.DENY
+
+def test_env_write_is_denied(engine):
+    decision = engine.check("Write", {"path": ".env"})
+    assert decision == PermissionDecision.DENY
+
+def test_src_write_is_asked(engine):
+    # No rule matches — should use default (ask)
+    decision = engine.check("Write", {"path": "src/utils.py"})
+    assert decision is None  # No rule matched; caller applies default</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 8. Next Steps ── -->
+    <span class="section-anchor" id="next-steps"></span>
+    <h2><span class="step-num">8</span>Next Steps</h2>
+
+    <p>You now have declarative, auditable control over your agent's behavior. Here is how to roll this out:</p>
+
+    <ol>
+      <li>Start with the production safety policy from Section 6 as your baseline</li>
+      <li>Run with <code>simulation_mode = true</code> for one day — review the audit log for false positives</li>
+      <li>Add project-specific rules for your directory structure</li>
+      <li>Commit <code>.harness/policy.yml</code> to version control and require reviews on changes to it</li>
+      <li>Add pytest tests (see Deep Dive in Section 7) to catch policy regressions in CI</li>
+    </ol>
+
+    <div class="callout callout-tryit">
+      <div class="callout-header">&#9654; Try It Now</div>
+      Create <code>.harness/policy.yml</code> with the production safety policy, then run:
+      <div class="code-block" style="margin-top:12px;margin-bottom:0">
+        <div class="code-header">
+          <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-bash">harness --permission default "List all Python files and summarize what each does"
+# The agent will read and glob freely, but ask before any write or bash command</code></pre>
+      </div>
+    </div>
+
+    <p>
+      The next tutorial covers <strong>Audit Logging</strong> — how to export, query, and ship Harness audit
+      events to your SIEM or compliance dashboard.
+    </p>
+
+    <!-- ── Prev/Next nav ── -->
+    <nav class="page-nav" aria-label="Tutorial navigation">
+      <a href="04-budget-cost-controls.html" class="nav-card prev">
+        <span class="nav-dir">&#8592; Previous</span>
+        <span class="nav-title">Budget Controls</span>
+      </a>
+      <a href="06-audit-compliance.html" class="nav-card next">
+        <span class="nav-dir">Next &#8594;</span>
+        <span class="nav-title">Audit Logging</span>
+      </a>
+    </nav>
+
+  </main>
+</div>
+
+<script>
+  // ── Copy to clipboard ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      btn.textContent = 'Failed';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    });
+  }
+
+  // ── Tab switching ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.closest('.tab-group');
+      const tabId = btn.dataset.tab;
+
+      group.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      const panel = group.querySelector('#cond-' + tabId);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // ── Collapsible toggle ──
+  document.querySelectorAll('.collapsible-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const expanded = trigger.getAttribute('aria-expanded') === 'true';
+      trigger.setAttribute('aria-expanded', String(!expanded));
+      const contentId = trigger.getAttribute('aria-controls');
+      const content = document.getElementById(contentId);
+      if (content) content.classList.toggle('open', !expanded);
+    });
+  });
+
+  // ── Mobile sidebar toggle ──
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.getElementById('sidebar');
+
+  mobileBtn.addEventListener('click', () => {
+    const isOpen = sidebar.classList.toggle('open');
+    mobileBtn.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth < 1024 &&
+        !sidebar.contains(e.target) &&
+        e.target !== mobileBtn) {
+      sidebar.classList.remove('open');
+      mobileBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // ── TOC scroll highlight ──
+  const sections = document.querySelectorAll('.section-anchor');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  function updateTOC() {
+    let current = '';
+    sections.forEach(anchor => {
+      if (anchor.getBoundingClientRect().top <= 100) current = anchor.id;
+    });
+    tocLinks.forEach(link => {
+      const href = link.getAttribute('href').slice(1);
+      link.classList.toggle('active', href === current);
+    });
+  }
+
+  window.addEventListener('scroll', updateTOC, { passive: true });
+  updateTOC();
+</script>
+</body>
+</html>

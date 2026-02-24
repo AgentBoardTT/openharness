@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CI/CD Integration — AI Agent in Your Pipeline | Harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #243147;
+      --accent: #7C3AED;
+      --accent-light: #A78BFA;
+      --text: #E2E8F0;
+      --text-muted: #94A3B8;
+      --heading: #F8FAFC;
+      --border: #334155;
+      --blue: #3B82F6;
+      --amber: #F59E0B;
+      --green: #10B981;
+      --red: #EF4444;
+      --sidebar-width: 280px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 60px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--heading);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot { color: var(--accent); }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-advanced { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-time { background: rgba(124, 58, 237, 0.15); color: var(--accent-light); border: 1px solid rgba(124, 58, 237, 0.3); }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .toc-link.active { color: var(--accent-light); border-left-color: var(--accent); background: rgba(124, 58, 237, 0.08); }
+    .toc-num { font-size: 11px; font-weight: 600; color: var(--accent); min-width: 18px; }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 40px 80px;
+    }
+
+    .content { max-width: 780px; margin: 0 auto; }
+
+    /* ── Page title ── */
+    .page-title-block { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+
+    .page-title-block h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+
+    .page-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 56px; }
+
+    .step-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-heading h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    p { margin-bottom: 16px; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      margin: 20px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 18px 20px !important;
+      background: #1a2332 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      background: none !important;
+    }
+
+    /* ── Tabs ── */
+    .tabs-component { margin: 20px 0; }
+
+    .tab-list {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn[aria-selected="true"] { color: var(--accent-light); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 3px solid;
+    }
+
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+    .callout-body p { font-size: 14px; margin-bottom: 0; color: var(--text); }
+
+    .callout-info { background: rgba(59, 130, 246, 0.08); border-color: #3B82F6; }
+    .callout-info .callout-title { color: #60A5FA; }
+
+    .callout-warning { background: rgba(245, 158, 11, 0.08); border-color: #F59E0B; }
+    .callout-warning .callout-title { color: #FCD34D; }
+
+    .callout-success { background: rgba(16, 185, 129, 0.08); border-color: #10B981; }
+    .callout-success .callout-title { color: #34D399; }
+
+    .callout-error { background: rgba(239, 68, 68, 0.08); border-color: #EF4444; }
+    .callout-error .callout-title { color: #F87171; }
+
+    .callout-tryit { background: rgba(124, 58, 237, 0.08); border-color: #7C3AED; }
+    .callout-tryit .callout-title { color: var(--accent-light); }
+
+    .callout-competitor { background: rgba(124, 58, 237, 0.06); border-color: var(--accent); border-left-width: 3px; border-radius: 8px; }
+    .callout-competitor .callout-title { color: var(--accent-light); }
+
+    /* ── Deep Dive collapsible ── */
+    .deep-dive { margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+    .deep-dive-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: none;
+      color: var(--heading);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .deep-dive-btn:hover { background: var(--surface2); }
+
+    .deep-dive-label { display: flex; align-items: center; gap: 10px; }
+    .deep-dive-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .deep-dive-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .deep-dive-content { display: none; padding: 16px 18px; border-top: 1px solid var(--border); }
+    .deep-dive-content.open { display: block; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--heading);
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) { background: rgba(30, 41, 59, 0.4); }
+
+    code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: rgba(124, 58, 237, 0.12);
+      color: #C4B5FD;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* ── Flow diagram ── */
+    .flow-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 24px;
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .flow-node {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--heading);
+      text-align: center;
+      width: fit-content;
+      min-width: 200px;
+    }
+
+    .flow-node.accent { border-color: var(--accent); color: var(--accent-light); background: rgba(124, 58, 237, 0.1); }
+
+    .flow-arrow {
+      color: var(--text-muted);
+      font-size: 18px;
+      line-height: 1;
+      margin: 4px 0;
+    }
+
+    .flow-branch {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 4px 0;
+    }
+
+    .flow-branch-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .flow-branch-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .flow-results {
+      display: flex;
+      gap: 12px;
+      margin: 4px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .flow-result-node {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #34D399;
+      text-align: center;
+    }
+
+    /* ── Numbered steps list ── */
+    .steps-list {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .steps-list li {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 0;
+      position: relative;
+    }
+
+    .steps-list li:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 34px;
+      bottom: -16px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .steps-list li:not(:last-child) { margin-bottom: 16px; }
+
+    .step-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.2);
+      border: 2px solid var(--accent);
+      color: var(--accent-light);
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-text { padding-top: 4px; font-size: 14px; color: var(--text); flex: 1; }
+
+    /* ── Review output box ── */
+    .review-output {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .review-output h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 12px;
+    }
+
+    .review-issue {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 7px;
+      margin-bottom: 10px;
+    }
+
+    .review-issue:last-child { margin-bottom: 0; }
+
+    .issue-critical { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .issue-warning { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .issue-suggestion { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    .issue-dot { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .issue-body { flex: 1; }
+    .issue-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+    .issue-critical .issue-title { color: #F87171; }
+    .issue-warning .issue-title { color: #FCD34D; }
+    .issue-suggestion .issue-title { color: #34D399; }
+    .issue-desc { font-size: 13px; color: var(--text-muted); }
+
+    /* ── Prev/Next nav ── */
+    .prev-next {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+      gap: 4px;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: var(--surface2); text-decoration: none; }
+
+    .nav-card-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .nav-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    .nav-card-desc { font-size: 13px; color: var(--text-muted); }
+    .nav-card.next { text-align: right; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 60px;
+        height: calc(100vh - 60px);
+        background: var(--bg);
+        z-index: 90;
+        transition: left 0.25s;
+        border-right: 1px solid var(--border);
+      }
+
+      .sidebar.open { left: 0; }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 60px 0 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 89;
+      }
+
+      .sidebar-overlay.open { display: block; }
+
+      .main { padding: 32px 20px 60px; }
+      .mobile-menu-btn { display: flex; align-items: center; }
+    }
+
+    @media (max-width: 640px) {
+      .page-title-block h1 { font-size: 24px; }
+      .prev-next { grid-template-columns: 1fr; }
+      .nav-card.next { text-align: left; }
+      .flow-results { flex-direction: column; align-items: center; }
+    }
+
+    /* Prism overrides */
+    :not(pre) > code[class*="language-"], pre[class*="language-"] {
+      background: #1a2332 !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <a href="index.html" class="brand">Harness<span class="brand-dot">.</span>docs</a>
+  <div class="header-meta">
+    <span class="badge badge-advanced">Advanced</span>
+    <span class="badge badge-time">25 min</span>
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar" aria-label="Table of contents">
+    <div class="toc-label">On this page</div>
+    <a class="toc-link active" href="#why-cicd"><span class="toc-num">1</span>Why CI/CD?</a>
+    <a class="toc-link" href="#github-actions-setup"><span class="toc-num">2</span>GitHub Actions Setup</a>
+    <a class="toc-link" href="#ci-configuration"><span class="toc-num">3</span>CI Configuration</a>
+    <a class="toc-link" href="#auto-detect-mode"><span class="toc-num">4</span>Auto-Detect Mode</a>
+    <a class="toc-link" href="#pr-review-automation"><span class="toc-num">5</span>PR Review Automation</a>
+    <a class="toc-link" href="#issue-triage"><span class="toc-num">6</span>Issue Triage</a>
+    <a class="toc-link" href="#security-best-practices"><span class="toc-num">7</span>Security Best Practices</a>
+    <a class="toc-link" href="#gitlab-bitbucket"><span class="toc-num">8</span>GitLab CI &amp; Bitbucket</a>
+    <a class="toc-link" href="#next-steps"><span class="toc-num">9</span>Next Steps</a>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="content">
+
+      <!-- Page title -->
+      <div class="page-title-block">
+        <h1>CI/CD Integration &mdash; AI Agent in Your Pipeline</h1>
+        <p>Auto-review every pull request, triage issues automatically, and enforce code standards with a native GitHub Actions integration.</p>
+        <div class="page-meta">
+          <span class="badge badge-advanced">Advanced</span>
+          <span class="badge badge-time">25 min read</span>
+        </div>
+      </div>
+
+      <!-- ── Section 1 ── -->
+      <section class="section" id="why-cicd">
+        <div class="step-heading">
+          <div class="step-num">1</div>
+          <h2>Why CI/CD?</h2>
+        </div>
+
+        <p>
+          Your AI agent shouldn't just help during development — it should be part of your pipeline.
+          Auto-review PRs, triage issues, enforce standards. Every commit benefits from the same
+          analysis quality, consistently, without developer overhead.
+        </p>
+
+        <p>
+          Three workflows that become automatic with Harness CI/CD:
+        </p>
+
+        <ul style="padding-left: 22px; margin-bottom: 16px; line-height: 2.1;">
+          <li><strong style="color: var(--heading)">PR Review</strong> — catch bugs, security issues, and style violations before merge</li>
+          <li><strong style="color: var(--heading)">Issue Triage</strong> — classify severity, suggest labels, and propose fixes automatically</li>
+          <li><strong style="color: var(--heading)">Standards Enforcement</strong> — run custom audits on every push</li>
+        </ul>
+
+        <div class="callout callout-competitor">
+          <div class="callout-icon">&#9889;</div>
+          <div class="callout-body">
+            <div class="callout-title">Native CI/CD — unique to Harness</div>
+            <p>No other coding agent has native CI/CD integration. Claude Code requires manual pipeline setup. Cursor is IDE-only. Aider and OpenHands have no CI runner. <strong style="color: var(--heading)">Harness ships with GitHub Actions support, webhook parsing, and GitHub Check Runs reporting out of the box.</strong></p>
+          </div>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" aria-controls="dd-ci-sig" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              run_ci() API signature
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content" id="dd-ci-sig">
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">python</span>
+                </div>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code class="language-python"># From harness.ci.runner
+async def run_ci(
+    *,
+    mode: str | None = None,
+    prompt: str | None = None,
+    provider: str = "anthropic",
+    model: str | None = None,
+    sandbox: str = "process",
+    check_name: str = "harness-agent",
+) -> dict[str, Any]:
+    """Run the CI agent. Auto-detects mode from GitHub webhook event if not specified."""</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 2 ── -->
+      <section class="section" id="github-actions-setup">
+        <div class="step-heading">
+          <div class="step-num">2</div>
+          <h2>GitHub Actions Setup</h2>
+        </div>
+
+        <p>
+          Drop this workflow file into your repository. It triggers on pull requests and new issues,
+          runs Harness in a sandboxed process, and reports results back via Check Runs and PR comments:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">yaml</span>
+              <span class="filename">.github/workflows/harness.yml</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-yaml">name: Harness AI Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  issues: write
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Harness
+        run: |
+          pip install uv
+          uv tool install harness-agent
+
+      - name: Run Harness Agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          harness ci run</code></pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">&#10003;</div>
+          <div class="callout-body">
+            <div class="callout-title">That's the entire setup</div>
+            <p>Commit this file. Harness auto-detects the event type, runs the appropriate review or issue workflow, and posts results back to GitHub. No further configuration required to get started.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Required secrets</div>
+            <p>Add <code>ANTHROPIC_API_KEY</code> in your repository Settings &rarr; Secrets and variables &rarr; Actions. <code>GITHUB_TOKEN</code> is provided automatically by GitHub Actions — no manual setup needed.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 3 ── -->
+      <section class="section" id="ci-configuration">
+        <div class="step-heading">
+          <div class="step-num">3</div>
+          <h2>CI Configuration</h2>
+        </div>
+
+        <p>
+          Customize prompts, mode behavior, and runtime settings in <code>.harness/ci.yml</code>
+          at the root of your repository:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">yaml</span>
+              <span class="filename">.harness/ci.yml</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-yaml"># .harness/ci.yml
+provider: anthropic
+model: claude-sonnet-4-20250514
+sandbox: process
+check_name: harness-agent
+max_turns: 30
+permission_mode: plan
+
+review_prompt: |
+  Review this pull request for:
+  1. Code quality and best practices
+  2. Security vulnerabilities
+  3. Test coverage gaps
+  4. Performance concerns
+  Provide actionable feedback as PR comments.
+
+issue_prompt: |
+  Analyze this issue and:
+  1. Classify severity (critical/high/medium/low)
+  2. Suggest relevant labels
+  3. Identify affected components
+  4. Propose a solution approach</code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Per-mode prompts</div>
+            <p><code>review_prompt</code> is used when a pull request event is detected; <code>issue_prompt</code> is used when a new issue is opened. Both fields are optional — if omitted, Harness falls back to sensible built-in defaults. The <code>max_turns</code> and <code>permission_mode</code> fields apply globally to all CI runs from this config.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 4 ── -->
+      <section class="section" id="auto-detect-mode">
+        <div class="step-heading">
+          <div class="step-num">4</div>
+          <h2>Auto-Detect Mode</h2>
+        </div>
+
+        <p>
+          When you run <code>harness ci run</code> with no arguments, Harness reads the GitHub webhook payload
+          from the environment and picks the right mode automatically:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># Harness auto-detects the CI context from GitHub webhook events
+# PR opened/updated  → review mode
+# Issue opened       → issue mode
+# Manual             → uses provided prompt</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">bash</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash"># Automatic mode detection
+harness ci run
+
+# Override mode explicitly
+harness ci run --mode review
+
+# Custom prompt (overrides ci.yml prompt)
+harness ci run --prompt "Run security audit on all changed files"</code></pre>
+        </div>
+
+        <p>The full event routing flow:</p>
+
+        <div class="flow-diagram" role="img" aria-label="CI mode detection flow">
+          <div class="flow-node accent">GitHub Event</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-node">Webhook Payload</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-node accent">Auto-Detect Mode</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-branch">
+            <div class="flow-branch-col">
+              <div class="flow-branch-label">pull_request</div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-node" style="font-size:12px; min-width:130px;">review mode</div>
+            </div>
+            <div class="flow-branch-col">
+              <div class="flow-branch-label">issues</div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-node" style="font-size:12px; min-width:130px;">issue mode</div>
+            </div>
+            <div class="flow-branch-col">
+              <div class="flow-branch-label">manual</div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-node" style="font-size:12px; min-width:130px;">Custom Prompt</div>
+            </div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-node">Run Agent (sandboxed, budgeted)</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-node accent">Report Results</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-results">
+            <div class="flow-result-node">GitHub Check Run<br/>(pass/fail)</div>
+            <div class="flow-result-node">PR Comments<br/>(inline)</div>
+            <div class="flow-result-node">Issue Labels<br/>&amp; Comments</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 5 ── -->
+      <section class="section" id="pr-review-automation">
+        <div class="step-heading">
+          <div class="step-num">5</div>
+          <h2>PR Review Automation</h2>
+        </div>
+
+        <p>When a pull request is opened or updated, Harness:</p>
+
+        <ul class="steps-list" style="margin-bottom: 20px;">
+          <li>
+            <div class="step-circle">1</div>
+            <div class="step-text">Reads the diff via <code>git diff</code> to understand exactly what changed</div>
+          </li>
+          <li>
+            <div class="step-circle">2</div>
+            <div class="step-text">Reads each changed file for full context (not just the diff lines)</div>
+          </li>
+          <li>
+            <div class="step-circle">3</div>
+            <div class="step-text">Posts inline review comments on the PR at the relevant line numbers</div>
+          </li>
+          <li>
+            <div class="step-circle">4</div>
+            <div class="step-text">Creates a GitHub Check Run with a pass or fail status and summary</div>
+          </li>
+        </ul>
+
+        <p>A typical PR review output looks like this:</p>
+
+        <div class="review-output">
+          <h3>AI Code Review</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            This PR adds user authentication with JWT tokens. Overall looks good with a few concerns.
+          </p>
+
+          <div class="review-issue issue-critical">
+            <div class="issue-dot">&#128308;</div>
+            <div class="issue-body">
+              <div class="issue-title">Critical: SQL injection in auth.py:45</div>
+              <div class="issue-desc">
+                Current code uses string interpolation in a query. Use parameterized queries instead.
+              </div>
+            </div>
+          </div>
+
+          <div class="review-issue issue-warning">
+            <div class="issue-dot">&#128992;</div>
+            <div class="issue-body">
+              <div class="issue-title">Warning: Missing token expiry in jwt_handler.py:23</div>
+              <div class="issue-desc">JWT tokens should have an expiration time to limit the impact of token leakage.</div>
+            </div>
+          </div>
+
+          <div class="review-issue issue-suggestion">
+            <div class="issue-dot">&#128994;</div>
+            <div class="issue-body">
+              <div class="issue-title">Suggestion: Add type hints to login() in routes.py:12</div>
+              <div class="issue-desc">Adding type annotations improves IDE support and catches type errors early.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">auth.py (example fix)</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># Current (vulnerable)
+query = f"SELECT * FROM users WHERE username = '{username}'"
+
+# Suggested fix (parameterized)
+query = "SELECT * FROM users WHERE username = %s"
+cursor.execute(query, (username,))</code></pre>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">Test it on a real PR</div>
+            <p>Open a PR in a repo where you have added the workflow. Within 60 seconds you will see a "harness-agent" check appear and inline comments on any issues found.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 6 ── -->
+      <section class="section" id="issue-triage">
+        <div class="step-heading">
+          <div class="step-num">6</div>
+          <h2>Issue Triage</h2>
+        </div>
+
+        <p>
+          When a new issue is opened, Harness analyzes the report, classifies severity, suggests labels,
+          identifies affected components, and proposes a solution approach — all as an issue comment:
+        </p>
+
+        <div class="review-output">
+          <h3>AI Issue Analysis</h3>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+            <span style="background: rgba(239,68,68,0.15); color: #F87171; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">High severity</span>
+            <span style="background: rgba(59,130,246,0.15); color: #60A5FA; padding: 3px 10px; border-radius: 9999px; font-size: 12px;">bug</span>
+            <span style="background: rgba(59,130,246,0.15); color: #60A5FA; padding: 3px 10px; border-radius: 9999px; font-size: 12px;">auth</span>
+            <span style="background: rgba(59,130,246,0.15); color: #60A5FA; padding: 3px 10px; border-radius: 9999px; font-size: 12px;">security</span>
+          </div>
+
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"><strong style="color: var(--heading)">Components:</strong> src/auth/, src/middleware/</p>
+
+          <p style="font-size: 14px; margin-bottom: 12px;">
+            The reported login failure appears to be caused by a race condition in the session
+            validation middleware when multiple requests arrive simultaneously.
+          </p>
+
+          <p style="font-size: 13px; font-weight: 600; color: var(--heading); margin-bottom: 8px;">Suggested Fix</p>
+          <ol style="padding-left: 20px; font-size: 13px; color: var(--text-muted); line-height: 2;">
+            <li>Add mutex lock on session validation</li>
+            <li>Implement idempotent session creation</li>
+            <li>Add retry logic in the client</li>
+          </ol>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Labels are applied automatically</div>
+            <p>If your repository has matching labels configured, Harness applies them directly via the GitHub API. No manual triage needed for straightforward issues.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 7 ── -->
+      <section class="section" id="security-best-practices">
+        <div class="step-heading">
+          <div class="step-num">7</div>
+          <h2>Security Best Practices</h2>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;</div>
+          <div class="callout-body">
+            <div class="callout-title">Never expose API keys in workflow files</div>
+            <p>Always use GitHub Secrets. Any key committed to a workflow file is visible in your git history and to anyone with repository access.</p>
+          </div>
+        </div>
+
+        <p>Follow this security checklist when setting up Harness in CI:</p>
+
+        <ul class="steps-list">
+          <li>
+            <div class="step-circle">1</div>
+            <div class="step-text">Store API keys as GitHub Secrets (<code>ANTHROPIC_API_KEY</code>) — never hardcode them</div>
+          </li>
+          <li>
+            <div class="step-circle">2</div>
+            <div class="step-text">Use <code>process</code> or <code>docker</code> sandbox mode — never <code>none</code> in CI</div>
+          </li>
+          <li>
+            <div class="step-circle">3</div>
+            <div class="step-text">Set <code>max_turns</code> in <code>.harness/ci.yml</code> to cap how long each CI run can execute</div>
+          </li>
+          <li>
+            <div class="step-circle">4</div>
+            <div class="step-text">Limit permissions scope — only grant what is needed (<code>pull-requests: write</code>)</div>
+          </li>
+          <li>
+            <div class="step-circle">5</div>
+            <div class="step-text">Use read-only permission mode where possible for review-only tasks</div>
+          </li>
+        </ul>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">yaml</span>
+              <span class="filename">.github/workflows/harness.yml (secure env block)</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-yaml"># Secure configuration
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  # Never use: ANTHROPIC_API_KEY: "sk-ant-..."</code></pre>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" aria-controls="dd-sandbox-modes" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Sandbox modes explained
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content" id="dd-sandbox-modes">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mode</th>
+                    <th>Isolation</th>
+                    <th>Recommended for</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>none</code></td>
+                    <td>No isolation</td>
+                    <td>Local development only</td>
+                  </tr>
+                  <tr>
+                    <td><code>process</code></td>
+                    <td>Subprocess with restricted env</td>
+                    <td>GitHub Actions, GitLab CI</td>
+                  </tr>
+                  <tr>
+                    <td><code>docker</code></td>
+                    <td>Full container isolation</td>
+                    <td>High-security environments</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size: 14px; margin-top: 12px;">In <code>process</code> mode, the agent runs in a child process with a minimal environment — only the variables you explicitly pass are available. File system access is scoped to the checked-out repository.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 8 ── -->
+      <section class="section" id="gitlab-bitbucket">
+        <div class="step-heading">
+          <div class="step-num">8</div>
+          <h2>GitLab CI &amp; Bitbucket Pipelines</h2>
+        </div>
+
+        <p>
+          Harness CI works with any pipeline that can run a shell command. Below are ready-to-use
+          configurations for the three most common platforms:
+        </p>
+
+        <div class="tabs-component">
+          <div class="tab-list" role="tablist" aria-label="CI platform">
+            <button class="tab-btn" role="tab" aria-selected="true" aria-controls="tab-github" id="btn-github" onclick="switchTab(this, 'tab-github')">GitHub Actions</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-gitlab" id="btn-gitlab" onclick="switchTab(this, 'tab-gitlab')">GitLab CI</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-bitbucket" id="btn-bitbucket" onclick="switchTab(this, 'tab-bitbucket')">Bitbucket</button>
+          </div>
+
+          <div data-tabgroup="ci-platforms">
+            <div class="tab-panel active" id="tab-github" role="tabpanel" aria-labelledby="btn-github">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left">
+                    <span class="lang-badge">yaml</span>
+                    <span class="filename">.github/workflows/harness.yml</span>
+                  </div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">name: Harness AI Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  issues: write
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Harness
+        run: |
+          pip install uv
+          uv tool install harness-agent
+
+      - name: Run Harness Agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          harness ci run</code></pre>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-gitlab" role="tabpanel" aria-labelledby="btn-gitlab">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left">
+                    <span class="lang-badge">yaml</span>
+                    <span class="filename">.gitlab-ci.yml</span>
+                  </div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">harness-review:
+  image: python:3.12
+  stage: review
+  script:
+    - pip install uv && uv tool install harness-agent
+    - harness ci run --mode review
+  variables:
+    ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"</code></pre>
+              </div>
+              <div class="callout callout-info" style="margin-top: 16px;">
+                <div class="callout-icon">&#8505;</div>
+                <div class="callout-body">
+                  <div class="callout-title">GitLab setup</div>
+                  <p>Add <code>ANTHROPIC_API_KEY</code> in Settings &rarr; CI/CD &rarr; Variables. Set it to masked and protected to prevent exposure in logs.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="tab-bitbucket" role="tabpanel" aria-labelledby="btn-bitbucket">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left">
+                    <span class="lang-badge">yaml</span>
+                    <span class="filename">bitbucket-pipelines.yml</span>
+                  </div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-yaml">pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: Harness AI Review
+          image: python:3.12
+          script:
+            - pip install uv && uv tool install harness-agent
+            - harness ci run --mode review</code></pre>
+              </div>
+              <div class="callout callout-info" style="margin-top: 16px;">
+                <div class="callout-icon">&#8505;</div>
+                <div class="callout-body">
+                  <div class="callout-title">Bitbucket setup</div>
+                  <p>Add <code>ANTHROPIC_API_KEY</code> in Repository settings &rarr; Repository variables. Mark it as secured so it is masked in pipeline logs.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">&#10003;</div>
+          <div class="callout-body">
+            <div class="callout-title">Same harness binary, any platform</div>
+            <p>The <code>harness ci run</code> command works identically across GitHub Actions, GitLab CI, and Bitbucket Pipelines. Platform-specific behavior (Check Runs vs MR notes) is auto-detected from environment variables.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 9 ── -->
+      <section class="section" id="next-steps">
+        <div class="step-heading">
+          <div class="step-num">9</div>
+          <h2>Next Steps</h2>
+        </div>
+
+        <p>
+          You now have Harness running in CI, automatically reviewing PRs and triaging issues across
+          GitHub, GitLab, and Bitbucket. The next tutorial covers enterprise and production deployment:
+          multi-tenant setups, audit logging, SSO, and self-hosted model configurations.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8594;</div>
+          <div class="callout-body">
+            <div class="callout-title">Tutorial 10: Enterprise Production</div>
+            <p>Multi-tenant deployment, audit logging, SSO integration, self-hosted model routing, and compliance configuration for enterprise environments.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Prev / Next ── -->
+      <nav class="prev-next" aria-label="Tutorial navigation">
+        <a href="08-sub-agents-parallel.html" class="nav-card">
+          <span class="nav-card-dir">&larr; Previous</span>
+          <span class="nav-card-title">Sub-Agents</span>
+          <span class="nav-card-desc">Parallel execution with specialized agents</span>
+        </a>
+        <a href="10-enterprise-production.html" class="nav-card next">
+          <span class="nav-card-dir">Next &rarr;</span>
+          <span class="nav-card-title">Enterprise Production</span>
+          <span class="nav-card-desc">Multi-tenant, audit logging, SSO</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+  // ── Copy to clipboard ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // ── Tab switching ──
+  function switchTab(btn, panelId) {
+    const allBtns = btn.closest('.tabs-component').querySelectorAll('.tab-btn');
+    allBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+    btn.setAttribute('aria-selected', 'true');
+
+    const group = btn.closest('.tabs-component').querySelector('[data-tabgroup]');
+    group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  // ── Collapsible deep dive ──
+  function toggleDeepDive(btn) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    const content = btn.nextElementSibling;
+    content.classList.toggle('open', !expanded);
+  }
+
+  // ── Mobile sidebar ──
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    menuBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  menuBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', () => {
+    closeSidebar();
+  });
+
+  // ── TOC scroll highlight ──
+  const sections = document.querySelectorAll('section[id]');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-60px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Close sidebar on TOC link click (mobile)
+  tocLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

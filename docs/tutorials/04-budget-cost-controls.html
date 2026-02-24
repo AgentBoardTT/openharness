@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget Controls &amp; Cost Optimization — Harness Tutorials</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js tomorrow theme -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <!-- Prism core + languages -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0F172A;
+      --surface:   #1E293B;
+      --accent:    #7C3AED;
+      --accent-light: #A78BFA;
+      --text:      #E2E8F0;
+      --heading:   #F8FAFC;
+      --muted:     #94A3B8;
+      --border:    #334155;
+      --info:      #3B82F6;
+      --warning:   #F59E0B;
+      --success:   #10B981;
+      --error:     #EF4444;
+      --sidebar-w: 280px;
+      --header-h:  60px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--heading);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .header-meta {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .badge-intermediate {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-time {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - var(--header-h));
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 0;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 28px 0;
+    }
+
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-track { background: transparent; }
+    aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-list { list-style: none; }
+
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-list a:hover,
+    .toc-list a.active {
+      color: var(--accent-light);
+      border-left-color: var(--accent);
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .toc-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 18px;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      padding: 48px 40px 80px;
+      max-width: 780px;
+    }
+
+    /* ── Page header ── */
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    .page-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    /* ── Section headings ── */
+    .section-anchor { display: block; }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 48px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--heading);
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    /* ── Step indicator ── */
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Code blocks ── */
+    .code-block {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0 24px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 16px 20px !important;
+      background: transparent !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block pre::-webkit-scrollbar { height: 4px; }
+    .code-block pre::-webkit-scrollbar-track { background: transparent; }
+    .code-block pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Inline code ── */
+    code:not([class]) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: var(--accent-light);
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 20px 0;
+      border-left: 3px solid;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .callout-header {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .callout-info    { border-color: var(--info);    }
+    .callout-info    .callout-header { color: var(--info); }
+    .callout-warning { border-color: var(--warning); }
+    .callout-warning .callout-header { color: var(--warning); }
+    .callout-success { border-color: var(--success); }
+    .callout-success .callout-header { color: var(--success); }
+    .callout-error   { border-color: var(--error);   }
+    .callout-error   .callout-header { color: var(--error); }
+    .callout-tryit   { border-color: var(--accent);  }
+    .callout-tryit   .callout-header { color: var(--accent-light); }
+    .callout-competitor { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+    .callout-competitor .callout-header { color: var(--accent-light); }
+
+    /* ── Tabs ── */
+    .tab-group { margin: 20px 0 24px; }
+
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 10px 18px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--accent-light);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Collapsible ── */
+    .collapsible { margin: 20px 0; }
+
+    .collapsible-trigger {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s;
+    }
+
+    .collapsible-trigger:hover { border-color: var(--accent); }
+    .collapsible-trigger[aria-expanded="true"] { border-radius: 8px 8px 0 0; border-color: var(--accent); }
+
+    .chevron {
+      transition: transform 0.2s;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .collapsible-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .collapsible-content {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 16px;
+      display: none;
+    }
+
+    .collapsible-content.open { display: block; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51,65,85,0.5);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    .td-normal { font-family: 'Inter', sans-serif; }
+
+    .free-tag {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .cost-highlight { color: var(--accent-light); }
+
+    /* ── Prev/Next nav ── */
+    .page-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 60px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+
+    .nav-card.next { text-align: right; }
+
+    .nav-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
+    .nav-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    .nav-arrow { color: var(--accent-light); font-size: 16px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      aside {
+        position: fixed;
+        left: -100%;
+        top: var(--header-h);
+        height: calc(100vh - var(--header-h));
+        background: var(--bg);
+        z-index: 90;
+        border-right: 1px solid var(--border);
+        transition: left 0.25s;
+      }
+      aside.open { left: 0; }
+      .mobile-menu-btn { display: block; }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .page-nav { grid-template-columns: 1fr; }
+    }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 5px; }
+
+    strong { color: var(--heading); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  <a href="index.html" class="brand">
+    <span class="brand-dot"></span>
+    Harness
+  </a>
+  <span style="color:var(--border);font-size:18px;margin:0 4px">/</span>
+  <span style="color:var(--muted);font-size:14px">Tutorials</span>
+  <div class="header-meta">
+    <span class="badge badge-intermediate">Intermediate</span>
+    <span class="badge badge-time">15 min</span>
+  </div>
+</header>
+
+<!-- ── Layout ── -->
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside id="sidebar" role="complementary" aria-label="Table of contents">
+    <nav aria-label="On this page">
+    <div class="toc-label">On this page</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#cost-problem" class="toc-link"><span class="toc-num">1</span>The Cost Problem</a></li>
+      <li><a href="#cost-catalog" class="toc-link"><span class="toc-num">2</span>Model Cost Catalog</a></li>
+      <li><a href="#toml-config" class="toc-link"><span class="toc-num">3</span>TOML Budget Configuration</a></li>
+      <li><a href="#token-tracker" class="toc-link"><span class="toc-num">4</span>TokenBudgetTracker SDK</a></li>
+      <li><a href="#budget-error" class="toc-link"><span class="toc-num">5</span>BudgetExhaustedError</a></li>
+      <li><a href="#router-strategies" class="toc-link"><span class="toc-num">6</span>Model Router Strategies</a></li>
+      <li><a href="#auto-fallback" class="toc-link"><span class="toc-num">7</span>Automatic Fallback</a></li>
+      <li><a href="#next-steps" class="toc-link"><span class="toc-num">8</span>Next Steps</a></li>
+    </ul>
+    </nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <h1 class="page-title">Budget Controls &amp; Cost Optimization</h1>
+    <p class="page-subtitle">Set hard token and dollar limits that automatically switch models or stop execution before you get a surprise bill.</p>
+    <div class="page-tags">
+      <span class="badge badge-intermediate">Intermediate</span>
+      <span class="badge badge-time">15 min read</span>
+    </div>
+
+    <!-- ── 1. The Cost Problem ── -->
+    <span class="section-anchor" id="cost-problem"></span>
+    <h2><span class="step-num">1</span>The Cost Problem</h2>
+
+    <p>
+      AI coding agents can be expensive. A Cursor Pro subscription costs <strong>$240/year</strong>, but power users
+      report spending <strong>$7,000+ annually</strong> with usage-based pricing. One poorly scoped prompt asking an
+      agent to "refactor the entire codebase" can burn through $50 in tokens in minutes.
+    </p>
+
+    <div class="callout callout-warning">
+      <div class="callout-header">&#9888; Cost Risk</div>
+      Without budget controls, a single <code>harness --permission bypass 'Refactor entire codebase'</code>
+      could cost hundreds of dollars. The model has no way to stop itself once it starts.
+    </div>
+
+    <p>
+      Harness solves this with a three-layer approach: <strong>per-session token limits</strong>,
+      <strong>per-session cost limits</strong>, and <strong>automatic model fallback</strong> when limits are reached.
+    </p>
+
+    <div class="callout callout-competitor">
+      <div class="callout-header">&#9889; Harness Advantage</div>
+      Token and cost budgets with automatic fallback are unique to Harness. Claude Code, Cursor, and Copilot
+      have no programmatic budget controls — you only find out what you spent after the invoice arrives.
+    </div>
+
+    <!-- ── 2. Model Cost Catalog ── -->
+    <span class="section-anchor" id="cost-catalog"></span>
+    <h2><span class="step-num">2</span>Model Cost Catalog</h2>
+
+    <p>
+      Different models have drastically different price points. Use the table below to understand what a
+      typical 100K-token task costs across providers. The <em>100K task cost</em> assumes roughly 70K input
+      tokens and 30K output tokens.
+    </p>
+
+    <div class="table-wrap">
+      <table id="costTable">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Model</th>
+            <th>Input $/1M</th>
+            <th>Output $/1M</th>
+            <th>100K Task Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-normal">Anthropic</td>
+            <td>claude-opus-4</td>
+            <td>$15.00</td>
+            <td>$75.00</td>
+            <td class="cost-highlight">~$9.00</td>
+          </tr>
+          <tr>
+            <td class="td-normal">Anthropic</td>
+            <td>claude-sonnet-4</td>
+            <td>$3.00</td>
+            <td>$15.00</td>
+            <td class="cost-highlight">~$1.80</td>
+          </tr>
+          <tr>
+            <td class="td-normal">OpenAI</td>
+            <td>gpt-4o</td>
+            <td>$2.50</td>
+            <td>$10.00</td>
+            <td class="cost-highlight">~$1.25</td>
+          </tr>
+          <tr>
+            <td class="td-normal">OpenAI</td>
+            <td>o3-mini</td>
+            <td>$1.10</td>
+            <td>$4.40</td>
+            <td class="cost-highlight">~$0.55</td>
+          </tr>
+          <tr>
+            <td class="td-normal">Google</td>
+            <td>gemini-2.5-pro</td>
+            <td>$1.25</td>
+            <td>$10.00</td>
+            <td class="cost-highlight">~$1.13</td>
+          </tr>
+          <tr>
+            <td class="td-normal">Ollama</td>
+            <td>any local model</td>
+            <td class="free-tag">Free</td>
+            <td class="free-tag">Free</td>
+            <td class="free-tag">$0.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Pricing Note</div>
+      Prices shown are approximate list prices as of early 2025. Check each provider's pricing page for current
+      rates. Harness cost tracking uses the actual token counts reported by each API.
+    </div>
+
+    <!-- ── 3. TOML Budget Configuration ── -->
+    <span class="section-anchor" id="toml-config"></span>
+    <h2><span class="step-num">3</span>TOML Budget Configuration</h2>
+
+    <p>
+      The simplest way to set budgets is in your <code>.harness/config.toml</code>. These limits are enforced
+      automatically on every <code>harness</code> invocation without any code changes.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">TOML</span>
+          <span class="filename">.harness/config.toml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-toml">[router]
+strategy = "cost_optimized"
+fallback_chain = ["anthropic", "openai", "google"]
+max_cost_per_session = 1.00     # Hard limit: $1 per session
+max_tokens_per_session = 500000  # Hard limit: 500K tokens
+simple_task_model = "claude-haiku-4-5-20251001"  # Use cheap model for simple tasks</code></pre>
+    </div>
+
+    <p>
+      When <code>max_cost_per_session</code> or <code>max_tokens_per_session</code> is reached, Harness raises
+      a <code>BudgetExhaustedError</code> and stops the agent loop cleanly before issuing another API call.
+    </p>
+
+    <div class="collapsible">
+      <button class="collapsible-trigger" aria-expanded="false" aria-controls="deepdive-toml">
+        <span>Deep Dive: RouterConfigData dataclass</span>
+        <span class="chevron">&#8964;</span>
+      </button>
+      <div class="collapsible-content" id="deepdive-toml" role="region">
+        <p style="margin-bottom:10px">The TOML <code>[router]</code> section maps directly to <code>RouterConfigData</code>:</p>
+        <div class="code-block" style="margin:0">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">Python</span>
+              <span class="filename">harness/config.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">@dataclass
+class RouterConfigData:
+    strategy: str = "manual"
+    fallback_chain: tuple[str, ...] = ()
+    max_cost_per_session: float = 0.0   # 0.0 means unlimited
+    max_tokens_per_session: int = 0     # 0 means unlimited
+    simple_task_model: str | None = None</code></pre>
+        </div>
+        <p style="margin-top:10px">A value of <code>0</code> (default) means unlimited — Harness will not enforce a budget unless you explicitly set a positive value.</p>
+      </div>
+    </div>
+
+    <!-- ── 4. TokenBudgetTracker in the SDK ── -->
+    <span class="section-anchor" id="token-tracker"></span>
+    <h2><span class="step-num">4</span>TokenBudgetTracker in the SDK</h2>
+
+    <p>
+      For programmatic control, use <code>TokenBudgetTracker</code> directly. It tracks cumulative usage across
+      multiple API calls and raises an error the moment a limit is exceeded.
+    </p>
+
+    <h3>Class Reference</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">harness/providers/budget.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from harness.providers.budget import (
+    BudgetSnapshot,
+    BudgetExhaustedError,
+    TokenBudgetTracker,
+)
+
+# BudgetSnapshot — immutable point-in-time view
+@dataclass
+class BudgetSnapshot:
+    input_tokens_used: int = 0
+    output_tokens_used: int = 0
+    total_tokens_used: int = 0
+    cost_used: float = 0.0
+    tokens_remaining: int = 0   # 0 when no limit is configured
+    cost_remaining: float = 0.0  # 0.0 when no limit is configured
+
+# TokenBudgetTracker — stateful accumulator
+class TokenBudgetTracker:
+    def __init__(self, *, max_tokens: int = 0, max_cost: float = 0.0): ...
+    @property
+    def total_tokens(self) -> int: ...       # Tokens used so far
+    @property
+    def total_cost(self) -> float: ...       # Cost accrued so far
+    def record_usage(
+        self, input_tokens=0, output_tokens=0, cost=0.0
+    ) -> BudgetSnapshot: ...                 # Returns snapshot after recording
+    def snapshot(self) -> BudgetSnapshot: ... # Current state without modifying
+    def is_exhausted(self) -> bool: ...      # True if any limit exceeded
+    def check_budget(self) -> None: ...      # Raises BudgetExhaustedError if exhausted
+    def reset(self) -> None: ...             # Reset counters (new session)</code></pre>
+    </div>
+
+    <h3>Full Example</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">cost_runner.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">import asyncio
+import harness
+from harness.providers.budget import TokenBudgetTracker, BudgetExhaustedError
+
+async def main():
+    # Create a budget: max $0.50 or 100K tokens (whichever hits first)
+    budget = TokenBudgetTracker(max_tokens=100_000, max_cost=0.50)
+
+    try:
+        async for msg in harness.run(
+            "Analyze and document this codebase",
+            provider="anthropic",
+            model="claude-sonnet-4-20250514",
+        ):
+            if isinstance(msg, harness.Result):
+                # Record usage from each Result message
+                budget.record_usage(
+                    # Note: total_tokens doesn't split input/output.
+                    # This 50/50 approximation is for budget tracking only.
+                    input_tokens=msg.total_tokens // 2,
+                    output_tokens=msg.total_tokens // 2,
+                    cost=msg.total_cost,
+                )
+
+                snap = budget.snapshot()
+                print(f"Used: ${snap.cost_used:.4f} / ${snap.cost_remaining:.4f} remaining")
+                print(f"Tokens: {snap.total_tokens_used:,} / {snap.tokens_remaining:,} remaining")
+
+                # Manually check before issuing the next turn
+                budget.check_budget()
+
+    except BudgetExhaustedError as e:
+        print(f"Budget exceeded! {e}")
+        print(f"Final: ${e.snapshot.cost_used:.4f} spent, "
+              f"{e.snapshot.total_tokens_used:,} tokens used")
+
+asyncio.run(main())</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Result Message</div>
+      <code>harness.Result</code> is yielded at the end of each agent turn. It contains <code>total_tokens</code>
+      and <code>total_cost</code> attributes that reflect the entire turn's usage.
+    </div>
+
+    <!-- ── 5. Handling BudgetExhaustedError ── -->
+    <span class="section-anchor" id="budget-error"></span>
+    <h2><span class="step-num">5</span>Handling BudgetExhaustedError</h2>
+
+    <p>
+      <code>BudgetExhaustedError</code> carries a <code>snapshot</code> attribute so you can inspect
+      <em>why</em> the budget was exhausted and take different recovery actions.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from harness.providers.budget import BudgetExhaustedError
+
+try:
+    budget.check_budget()
+except BudgetExhaustedError as e:
+    snap = e.snapshot
+
+    if snap.cost_remaining <= 0:
+        print(f"Cost limit hit! Spent ${snap.cost_used:.4f}")
+        print("Switching to free local model via Ollama...")
+        # Re-run with Ollama provider (free)
+        async for msg in harness.run(task, provider="ollama", model="llama3.2"):
+            ...
+
+    elif snap.tokens_remaining <= 0:
+        print(f"Token limit hit! Used {snap.total_tokens_used:,} tokens")
+        print("Compacting context and retrying with summary...")
+        # Summarize results so far and continue with compact context
+        summary = summarize_progress(results_so_far)
+        budget.reset()
+        async for msg in harness.run(
+            f"Continue from: {summary}",
+            provider="anthropic",
+            model="claude-haiku-4-5-20251001",  # Cheaper model for remainder
+        ):
+            ...</code></pre>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-header">&#10003; Best Practice</div>
+      Always inspect <code>snap.cost_remaining</code> vs <code>snap.tokens_remaining</code> to choose the right
+      recovery strategy. A cost limit often means switching to a free model; a token limit often means compacting context.
+    </div>
+
+    <!-- ── 6. Model Router Strategies ── -->
+    <span class="section-anchor" id="router-strategies"></span>
+    <h2><span class="step-num">6</span>Model Router Strategies</h2>
+
+    <p>
+      <code>ModelRouter</code> wraps a primary provider and automatically selects the right model based on
+      your chosen strategy. This lets you save money on simple tasks without sacrificing quality for complex ones.
+    </p>
+
+    <div class="tab-group" role="tablist" aria-label="Routing strategy examples">
+      <div class="tab-nav">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-manual" data-tab="manual">Manual</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-cost" data-tab="cost">Cost Optimized</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-quality" data-tab="quality">Quality First</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-latency" data-tab="latency">Latency First</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-manual" role="tabpanel">
+        <p style="margin-top:12px">You explicitly choose the model for every run. Useful when you need deterministic behavior.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.providers.router import ModelRouter, RoutingStrategy
+
+router = ModelRouter(
+    primary=anthropic_provider,
+    strategy=RoutingStrategy.MANUAL,
+    # No automatic switching — you control the model
+)</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-cost" role="tabpanel">
+        <p style="margin-top:12px">Harness analyzes each task and routes simple requests (short prompts, single-file edits) to the cheaper <code>simple_task_provider</code>.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.providers.router import ModelRouter, RoutingStrategy
+from harness.providers.budget import TokenBudgetTracker
+
+budget = TokenBudgetTracker(max_cost=5.00)
+
+router = ModelRouter(
+    primary=anthropic_provider,           # Sonnet 4 for complex tasks
+    strategy=RoutingStrategy.COST_OPTIMIZED,
+    simple_task_provider=haiku_provider,  # Haiku for simple tasks
+    budget=budget,
+)</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-quality" role="tabpanel">
+        <p style="margin-top:12px">Always uses the highest-quality available model, regardless of cost, until the budget is exhausted — then falls back.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.providers.router import ModelRouter, RoutingStrategy
+
+router = ModelRouter(
+    primary=opus_provider,   # Always try Opus first
+    strategy=RoutingStrategy.QUALITY_FIRST,
+    budget=budget,           # Falls back when budget is hit
+)</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-latency" role="tabpanel">
+        <p style="margin-top:12px">Selects the fastest model (typically a smaller, cheaper model) for each task to minimize response time in latency-sensitive workflows.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.providers.router import ModelRouter, RoutingStrategy
+
+router = ModelRouter(
+    primary=haiku_provider,  # Fast model as primary
+    strategy=RoutingStrategy.LATENCY_FIRST,
+    # Optimizes for time-to-first-token
+)</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <h3>RoutingStrategy Enum</h3>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">harness/providers/router.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from enum import Enum
+
+class RoutingStrategy(Enum):
+    MANUAL         = "manual"          # You choose the model explicitly
+    COST_OPTIMIZED = "cost_optimized"  # Routes simple tasks to cheaper models
+    QUALITY_FIRST  = "quality_first"   # Always uses best model, budget permitting
+    LATENCY_FIRST  = "latency_first"   # Uses fastest model for each task
+
+class ModelRouter:
+    def __init__(
+        self,
+        primary,                         # Primary ProviderAdapter
+        *,
+        strategy=RoutingStrategy.MANUAL,
+        simple_task_provider=None,       # Cheap provider for simple tasks
+        budget=None,                     # TokenBudgetTracker instance
+    ): ...</code></pre>
+    </div>
+
+    <!-- ── 7. Automatic Fallback ── -->
+    <span class="section-anchor" id="auto-fallback"></span>
+    <h2><span class="step-num">7</span>Automatic Fallback</h2>
+
+    <p>
+      <code>FallbackProvider</code> wraps a list of providers and tries each in order if the previous one
+      fails (network error, rate limit, service outage). Your agent keeps running even if a provider goes down.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">fallback_example.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python">from harness.providers.fallback import FallbackProvider
+
+# Try Anthropic first, then OpenAI, then Google
+fallback = FallbackProvider([
+    anthropic_provider,
+    openai_provider,
+    google_provider,
+])
+
+# active_provider reflects whichever is currently serving requests
+print(f"Active: {fallback.active_provider}")
+
+# If Anthropic is down, automatically tries OpenAI
+# If OpenAI is down, automatically tries Google
+async for msg in harness.run(
+    "Review this PR",
+    # Advanced: pass a pre-configured provider instance
+    # (internal API — prefer TOML fallback_chain config instead)
+    _provider=fallback,
+):
+    print(msg)</code></pre>
+    </div>
+
+    <h3>TOML Equivalent</h3>
+    <p>The same fallback chain can be configured in TOML — no code required:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">TOML</span>
+          <span class="filename">.harness/config.toml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-toml">[router]
+fallback_chain = ["anthropic", "openai", "google"]
+# Harness will try providers in this order on failure</code></pre>
+    </div>
+
+    <div class="callout callout-competitor">
+      <div class="callout-header">&#9889; No Other Agent Has This</div>
+      No other coding agent has automatic provider failover. When Anthropic has an outage, Claude Code stops
+      working entirely — there is no fallback. Cursor is locked to a single provider. Harness keeps running
+      by switching to the next healthy provider in your chain automatically.
+    </div>
+
+    <div class="collapsible">
+      <button class="collapsible-trigger" aria-expanded="false" aria-controls="deepdive-fallback">
+        <span>Deep Dive: FallbackProvider internals</span>
+        <span class="chevron">&#8964;</span>
+      </button>
+      <div class="collapsible-content" id="deepdive-fallback" role="region">
+        <p style="margin-bottom:10px">
+          <code>FallbackProvider</code> catches <code>ConnectionError</code>, <code>OSError</code>, and <code>TimeoutError</code> — if the current provider fails with any of these, it automatically tries the next provider in the chain. It does <em>not</em> catch
+          <code>BudgetExhaustedError</code> — budget limits always propagate to the caller.
+        </p>
+        <div class="code-block" style="margin:0">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">Python</span>
+              <span class="filename">harness/providers/fallback.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">class FallbackProvider:
+    def __init__(self, providers: list[ProviderAdapter]): ...
+
+    @property
+    def active_provider(self) -> ProviderAdapter:
+        """Returns the currently active (healthy) provider."""
+        ...</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 8. Next Steps ── -->
+    <span class="section-anchor" id="next-steps"></span>
+    <h2><span class="step-num">8</span>Next Steps</h2>
+
+    <p>You now have full control over what your agents spend. Here is a recommended workflow:</p>
+
+    <ol>
+      <li>Set <code>max_cost_per_session = 1.00</code> in <code>.harness/config.toml</code> as a safety net</li>
+      <li>Use <code>strategy = "cost_optimized"</code> with a cheap <code>simple_task_model</code> to reduce spend by 60-80%</li>
+      <li>Add a <code>fallback_chain</code> so your workflows survive provider outages</li>
+      <li>In scripts, wrap <code>harness.run()</code> with a <code>TokenBudgetTracker</code> and handle <code>BudgetExhaustedError</code></li>
+    </ol>
+
+    <div class="callout callout-tryit">
+      <div class="callout-header">&#9654; Try It Now</div>
+      Add this to your <code>.harness/config.toml</code> and run any harness command — you will see a cost
+      summary printed at the end of each session:
+      <div class="code-block" style="margin-top:12px;margin-bottom:0">
+        <div class="code-header">
+          <div class="code-header-left"><span class="lang-badge">TOML</span></div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-toml">[router]
+max_cost_per_session = 0.50
+max_tokens_per_session = 100000</code></pre>
+      </div>
+    </div>
+
+    <p>Next, learn how to govern <em>what</em> your agent can do (not just how much it costs) with Policy-as-Code.</p>
+
+    <!-- ── Prev/Next nav ── -->
+    <nav class="page-nav" aria-label="Tutorial navigation">
+      <a href="03-permissions-safety.html" class="nav-card prev">
+        <span class="nav-dir">&#8592; Previous</span>
+        <span class="nav-title">Permission Modes</span>
+      </a>
+      <a href="05-policy-as-code.html" class="nav-card next">
+        <span class="nav-dir">Next &#8594;</span>
+        <span class="nav-title">Policy-as-Code</span>
+      </a>
+    </nav>
+
+  </main>
+</div>
+
+<script>
+  // ── Copy to clipboard ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      btn.textContent = 'Failed';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    });
+  }
+
+  // ── Tab switching ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.closest('.tab-group');
+      const tabId = btn.dataset.tab;
+
+      group.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      const panel = group.querySelector('#tab-' + tabId);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // ── Collapsible toggle ──
+  document.querySelectorAll('.collapsible-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const expanded = trigger.getAttribute('aria-expanded') === 'true';
+      trigger.setAttribute('aria-expanded', String(!expanded));
+      const contentId = trigger.getAttribute('aria-controls');
+      const content = document.getElementById(contentId);
+      if (content) content.classList.toggle('open', !expanded);
+    });
+  });
+
+  // ── Mobile sidebar toggle ──
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.getElementById('sidebar');
+
+  mobileBtn.addEventListener('click', () => {
+    const isOpen = sidebar.classList.toggle('open');
+    mobileBtn.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth < 1024 &&
+        !sidebar.contains(e.target) &&
+        e.target !== mobileBtn) {
+      sidebar.classList.remove('open');
+      mobileBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // ── TOC scroll highlight ──
+  const sections = document.querySelectorAll('.section-anchor');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  function updateTOC() {
+    let current = '';
+    sections.forEach(anchor => {
+      const top = anchor.getBoundingClientRect().top;
+      if (top <= 100) current = anchor.id;
+    });
+    tocLinks.forEach(link => {
+      const href = link.getAttribute('href').slice(1);
+      link.classList.toggle('active', href === current);
+    });
+  }
+
+  window.addEventListener('scroll', updateTOC, { passive: true });
+  updateTOC();
+</script>
+</body>
+</html>

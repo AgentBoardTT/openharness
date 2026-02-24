@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Python SDK — Building AI-Powered Tools | Harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #243147;
+      --accent: #7C3AED;
+      --accent-light: #A78BFA;
+      --text: #E2E8F0;
+      --text-muted: #94A3B8;
+      --heading: #F8FAFC;
+      --border: #334155;
+      --blue: #3B82F6;
+      --amber: #F59E0B;
+      --green: #10B981;
+      --sidebar-width: 280px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 60px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--heading);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot { color: var(--accent); }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-beginner { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-time { background: rgba(124, 58, 237, 0.15); color: var(--accent-light); border: 1px solid rgba(124, 58, 237, 0.3); }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .toc-link.active { color: var(--accent-light); border-left-color: var(--accent); background: rgba(124, 58, 237, 0.08); }
+    .toc-num { font-size: 11px; font-weight: 600; color: var(--accent); min-width: 18px; }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 40px 80px;
+    }
+
+    .content { max-width: 780px; margin: 0 auto; }
+
+    /* ── Page title ── */
+    .page-title-block { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+
+    .page-title-block h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+
+    .page-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 56px; }
+
+    .step-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-heading h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    p { margin-bottom: 16px; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      margin: 20px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 18px 20px !important;
+      background: #1a2332 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      background: none !important;
+    }
+
+    /* ── Tabs ── */
+    .tabs-component { margin: 20px 0; }
+
+    .tab-list {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn[aria-selected="true"] { color: var(--accent-light); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 3px solid;
+    }
+
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+    .callout-body p { font-size: 14px; margin-bottom: 0; color: var(--text); }
+
+    .callout-info { background: rgba(59, 130, 246, 0.08); border-color: #3B82F6; }
+    .callout-info .callout-title { color: #60A5FA; }
+
+    .callout-warning { background: rgba(245, 158, 11, 0.08); border-color: #F59E0B; }
+    .callout-warning .callout-title { color: #FCD34D; }
+
+    .callout-success { background: rgba(16, 185, 129, 0.08); border-color: #10B981; }
+    .callout-success .callout-title { color: #34D399; }
+
+    .callout-tryit { background: rgba(124, 58, 237, 0.08); border-color: #7C3AED; }
+    .callout-tryit .callout-title { color: var(--accent-light); }
+
+    .callout-competitor { background: rgba(124, 58, 237, 0.06); border-color: var(--accent); border-left-width: 3px; border-radius: 8px; }
+    .callout-competitor .callout-title { color: var(--accent-light); }
+
+    /* ── Deep Dive collapsible ── */
+    .deep-dive { margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+    .deep-dive-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: none;
+      color: var(--heading);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .deep-dive-btn:hover { background: var(--surface2); }
+
+    .deep-dive-label { display: flex; align-items: center; gap: 10px; }
+    .deep-dive-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .deep-dive-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .deep-dive-content { display: none; padding: 16px 18px; border-top: 1px solid var(--border); }
+    .deep-dive-content.open { display: block; }
+
+    /* ── Message type cards ── */
+    .msg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .msg-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .msg-card-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent-light);
+      margin-bottom: 6px;
+    }
+
+    .msg-card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--heading);
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) { background: rgba(30, 41, 59, 0.4); }
+
+    code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: rgba(124, 58, 237, 0.12);
+      color: #C4B5FD;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* ── Prev/Next nav ── */
+    .prev-next {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+      gap: 4px;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: var(--surface2); text-decoration: none; }
+
+    .nav-card-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .nav-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    .nav-card-desc { font-size: 13px; color: var(--text-muted); }
+    .nav-card.next { text-align: right; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 60px;
+        height: calc(100vh - 60px);
+        background: var(--bg);
+        z-index: 90;
+        transition: left 0.25s;
+        border-right: 1px solid var(--border);
+      }
+
+      .sidebar.open { left: 0; }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 60px 0 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 89;
+      }
+
+      .sidebar-overlay.open { display: block; }
+
+      .main { padding: 32px 20px 60px; }
+      .mobile-menu-btn { display: flex; align-items: center; }
+    }
+
+    @media (max-width: 640px) {
+      .page-title-block h1 { font-size: 24px; }
+      .prev-next { grid-template-columns: 1fr; }
+      .nav-card.next { text-align: left; }
+      .msg-grid { grid-template-columns: 1fr; }
+    }
+
+    :not(pre) > code[class*="language-"], pre[class*="language-"] {
+      background: #1a2332 !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <a href="index.html" class="brand">Harness<span class="brand-dot">.</span>docs</a>
+  <div class="header-meta">
+    <span class="badge badge-beginner">Beginner</span>
+    <span class="badge badge-time">15 min</span>
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Toggle sidebar">&#9776;</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar" aria-label="Table of contents">
+    <div class="toc-label">On this page</div>
+    <a class="toc-link active" href="#why-sdk"><span class="toc-num">1</span>Why Use the SDK?</a>
+    <a class="toc-link" href="#first-script"><span class="toc-num">2</span>Your First SDK Script</a>
+    <a class="toc-link" href="#message-types"><span class="toc-num">3</span>Message Types</a>
+    <a class="toc-link" href="#pattern-matching"><span class="toc-num">4</span>Pattern Matching</a>
+    <a class="toc-link" href="#security-reviewer"><span class="toc-num">5</span>Build an AI Security Reviewer</a>
+    <a class="toc-link" href="#provider-selection"><span class="toc-num">6</span>Provider &amp; Model Selection</a>
+    <a class="toc-link" href="#cost-data"><span class="toc-num">7</span>Capturing Cost Data</a>
+    <a class="toc-link" href="#next-steps"><span class="toc-num">8</span>Next Steps</a>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="content">
+
+      <!-- Page title -->
+      <div class="page-title-block">
+        <h1>The Python SDK — Building AI-Powered Tools</h1>
+        <p>Go beyond the CLI. Build custom AI-powered Python tools with full async streaming in under 50 lines of code.</p>
+        <div class="page-meta">
+          <span class="badge badge-beginner">Beginner</span>
+          <span class="badge badge-time">15 min read</span>
+        </div>
+      </div>
+
+      <!-- ── Section 1 ── -->
+      <section class="section" id="why-sdk">
+        <div class="step-heading">
+          <div class="step-num">1</div>
+          <h2>Why Use the SDK?</h2>
+        </div>
+
+        <p>
+          The CLI is great for interactive use, but real-world applications need programmatic access.
+          The Harness SDK gives you a fully async streaming Python interface — so you can integrate
+          AI agent capabilities directly into scripts, pipelines, and services.
+        </p>
+
+        <div class="callout callout-competitor">
+          <div class="callout-icon">&#9889;</div>
+          <div class="callout-body">
+            <div class="callout-title">What competitors can't do</div>
+            <p>Claude Code and Cursor are CLI/IDE only. Aider has no streaming SDK.
+            <strong style="color: var(--heading)">Harness gives you full async streaming — build custom AI tools in Python, integrate with your pipelines, and react to every event in real time.</strong></p>
+          </div>
+        </div>
+
+        <p>With the SDK you can:</p>
+        <ul style="padding-left: 20px; line-height: 2; font-size: 15px;">
+          <li>React to individual text chunks as they stream</li>
+          <li>Intercept and log every tool call the agent makes</li>
+          <li>Capture precise cost and token data per session</li>
+          <li>Switch providers and models programmatically</li>
+          <li>Wire in custom approval logic before any tool executes</li>
+        </ul>
+      </section>
+
+      <!-- ── Section 2 ── -->
+      <section class="section" id="first-script">
+        <div class="step-heading">
+          <div class="step-num">2</div>
+          <h2>Your First SDK Script</h2>
+        </div>
+
+        <p>Create this file and run it — you'll see the agent's response stream token by token,
+        then a cost summary at the end.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">hello_harness.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># hello_harness.py
+import asyncio
+import harness
+
+async def main():
+    async for message in harness.run("What is 2 + 2?"):
+        if isinstance(message, harness.TextMessage) and not message.is_partial:
+            print(message.text)
+        elif isinstance(message, harness.Result):
+            print(f"\nDone! Tokens: {message.total_tokens}, Cost: ${message.total_cost:.4f}")
+
+asyncio.run(main())</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">uv run hello_harness.py</code></pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">&#10003;</div>
+          <div class="callout-body">
+            <div class="callout-title">Expected output</div>
+            <p>2 + 2 = 4</p>
+            <p style="margin-top: 4px;">Done! Tokens: 142, Cost: $0.0002</p>
+          </div>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Why check is_partial?
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content">
+            <p>
+              <code>harness.run()</code> yields every streaming chunk as a <code>TextMessage</code>
+              with <code>is_partial=True</code>. The final, complete message has <code>is_partial=False</code>.
+            </p>
+            <p style="margin-top: 10px;">
+              Checking <code>not message.is_partial</code> lets you skip partial chunks and only
+              process complete assistant turns. For a live typing effect, iterate partial chunks instead.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 3 ── -->
+      <section class="section" id="message-types">
+        <div class="step-heading">
+          <div class="step-num">3</div>
+          <h2>Message Types</h2>
+        </div>
+
+        <p>
+          <code>harness.run()</code> is an async generator that yields a union of message types.
+          Each type represents a different event in the agent's execution lifecycle.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+            </div>
+          </div>
+          <pre><code class="language-python">Message = TextMessage | ToolUse | ToolResult | Result | CompactionEvent | SystemEvent</code></pre>
+        </div>
+
+        <div class="msg-grid">
+          <div class="msg-card">
+            <div class="msg-card-name">TextMessage</div>
+            <div class="msg-card-desc">Streaming text from the agent. <code>is_partial=True</code> for in-flight chunks, <code>False</code> for the complete turn.</div>
+          </div>
+          <div class="msg-card">
+            <div class="msg-card-name">ToolUse</div>
+            <div class="msg-card-desc">The agent wants to call a tool. Contains <code>name</code> (tool name) and <code>args</code> (dict of arguments).</div>
+          </div>
+          <div class="msg-card">
+            <div class="msg-card-name">ToolResult</div>
+            <div class="msg-card-desc">The result from a tool execution. Contains <code>content</code> and <code>is_error</code> to distinguish failures.</div>
+          </div>
+          <div class="msg-card">
+            <div class="msg-card-name">Result</div>
+            <div class="msg-card-desc">Final message when the agent is done. Contains <code>text</code>, <code>turns</code>, <code>tool_calls</code>, <code>total_tokens</code>, <code>total_cost</code>, <code>session_id</code>.</div>
+          </div>
+          <div class="msg-card">
+            <div class="msg-card-name">CompactionEvent</div>
+            <div class="msg-card-desc">Emitted when the agent compresses its context window to free up token space for long-running sessions.</div>
+          </div>
+          <div class="msg-card">
+            <div class="msg-card-name">SystemEvent</div>
+            <div class="msg-card-desc">Lifecycle events — session start, model switch, provider change, and other internal state transitions.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Type-safe event handling</div>
+            <p>Every message type is a Python dataclass. Use <code>isinstance()</code> checks or Python 3.10+ <code>match</code> statements for exhaustive, type-safe handling.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 4 ── -->
+      <section class="section" id="pattern-matching">
+        <div class="step-heading">
+          <div class="step-num">4</div>
+          <h2>Pattern Matching</h2>
+        </div>
+
+        <p>
+          Python 3.10+ structural pattern matching is the cleanest way to handle the message union.
+          Each <code>case</code> extracts fields directly from the matched type.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">async for msg in harness.run("Refactor utils.py"):
+    match msg:
+        case harness.TextMessage(text=t, is_partial=False):
+            print(f"Agent: {t}")
+        case harness.ToolUse(name=name, args=args):
+            print(f"Tool call: {name}({args})")
+        case harness.ToolResult(content=c, is_error=True):
+            print(f"Error: {c}")
+        case harness.Result() as r:
+            print(f"Done in {r.turns} turns, {r.tool_calls} tool calls")
+            print(f"Cost: ${r.total_cost:.4f}")</code></pre>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">Try it</div>
+            <p>Replace <code>"Refactor utils.py"</code> with any task and point it at a real file in your project. Watch the <code>ToolUse</code> events fire as the agent reads and edits files.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 5 ── -->
+      <section class="section" id="security-reviewer">
+        <div class="step-heading">
+          <div class="step-num">5</div>
+          <h2>Build an AI Security Reviewer</h2>
+        </div>
+
+        <p>
+          Let's build something real: a security code reviewer that scans a file for vulnerabilities
+          and outputs a structured report. First, create the file to review:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">review_target.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># review_target.py — can you spot the security issues?
+
+import pickle
+import subprocess
+
+SECRET_KEY = "hardcoded_password_123"  # Security issue: hardcoded secret
+
+def load_data(filepath):
+    with open(filepath, "rb") as f:
+        return pickle.load(f)  # Security issue: arbitrary code execution
+
+def process_input(user_input):
+    result = eval(user_input)  # Security issue: code injection
+    return result
+
+def run_command(cmd):
+    return subprocess.run(cmd, shell=True, capture_output=True)  # Security issue: command injection
+
+def get_user(user_id):
+    query = f"SELECT * FROM users WHERE id = {user_id}"  # Security issue: SQL injection
+    return query</code></pre>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;</div>
+          <div class="callout-body">
+            <div class="callout-title">5 security issues in 20 lines</div>
+            <p>Hardcoded secret, pickle deserialization (arbitrary code execution), eval injection, command injection via shell=True, and SQL injection. The agent will find all five.</p>
+          </div>
+        </div>
+
+        <p>Now create the reviewer script. Note the use of <code>permission_mode="plan"</code> —
+        this makes the agent <strong>read-only</strong>. It can analyse files but cannot modify them.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">security_reviewer.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># security_reviewer.py
+import asyncio
+import harness
+
+REVIEW_PROMPT = """Review the file review_target.py for security vulnerabilities.
+For each issue found, report:
+1. Line number
+2. Severity (Critical/High/Medium/Low)
+3. Issue description
+4. Recommended fix
+
+Format as a markdown table."""
+
+async def main():
+    findings = []
+    async for msg in harness.run(
+        REVIEW_PROMPT,
+        provider="anthropic",
+        model="claude-sonnet-4-20250514",
+        permission_mode="plan",  # Read-only — don't modify files
+    ):
+        if isinstance(msg, harness.TextMessage) and not msg.is_partial:
+            findings.append(msg.text)
+        elif isinstance(msg, harness.Result):
+            print(f"Review complete. Cost: ${msg.total_cost:.4f}")
+
+    print("\n".join(findings))
+
+asyncio.run(main())</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">uv run security_reviewer.py</code></pre>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Why plan mode for a reviewer?
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content">
+            <p>
+              <code>permission_mode="plan"</code> blocks all write and bash tool calls at the
+              engine level — the agent physically cannot modify files, run commands, or exfiltrate
+              data, regardless of what the prompt says.
+            </p>
+            <p style="margin-top: 10px;">
+              This makes it safe to run the reviewer on production code. Even a prompt-injected
+              payload hidden in a source file can't cause the agent to execute anything harmful.
+            </p>
+            <p style="margin-top: 10px;">
+              Tutorial 3 covers all four permission modes in depth, including custom allow/deny
+              rules and the 4-tier precedence engine.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 6 ── -->
+      <section class="section" id="provider-selection">
+        <div class="step-heading">
+          <div class="step-num">6</div>
+          <h2>Provider &amp; Model Selection</h2>
+        </div>
+
+        <p>Pass <code>provider</code> and <code>model</code> kwargs to <code>harness.run()</code>
+        to target any supported provider. The same SDK call works across all providers.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># Use different providers
+async for msg in harness.run("task", provider="openai", model="gpt-4o"):
+    ...
+
+async for msg in harness.run("task", provider="google", model="gemini-2.5-pro"):
+    ...
+
+async for msg in harness.run("task", provider="ollama", model="llama3.1"):
+    ...</code></pre>
+        </div>
+
+        <div class="tabs-component" role="tablist" aria-label="Provider examples">
+          <div class="tab-list">
+            <button class="tab-btn" role="tab" aria-selected="true" aria-controls="sdk-tab-anthropic" onclick="switchTab(this, 'sdk-tab-anthropic', 'sdk-provider-tabs')">Anthropic</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="sdk-tab-openai" onclick="switchTab(this, 'sdk-tab-openai', 'sdk-provider-tabs')">OpenAI</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="sdk-tab-google" onclick="switchTab(this, 'sdk-tab-google', 'sdk-provider-tabs')">Google</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="sdk-tab-ollama" onclick="switchTab(this, 'sdk-tab-ollama', 'sdk-provider-tabs')">Ollama</button>
+          </div>
+
+          <div data-tabgroup="sdk-provider-tabs">
+            <div class="tab-panel active" id="sdk-tab-anthropic" role="tabpanel">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">python</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-python">async for msg in harness.run(
+    "Analyze this code for bugs",
+    provider="anthropic",
+    model="claude-sonnet-4-20250514",
+):
+    ...</code></pre>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="sdk-tab-openai" role="tabpanel">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">python</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-python">async for msg in harness.run(
+    "Analyze this code for bugs",
+    provider="openai",
+    model="gpt-4o",
+):
+    ...</code></pre>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="sdk-tab-google" role="tabpanel">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">python</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-python">async for msg in harness.run(
+    "Analyze this code for bugs",
+    provider="google",
+    model="gemini-2.5-pro",
+):
+    ...</code></pre>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="sdk-tab-ollama" role="tabpanel">
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">python</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-python"># Runs fully local — no API key, no cost
+async for msg in harness.run(
+    "Analyze this code for bugs",
+    provider="ollama",
+    model="llama3.1",
+):
+    ...</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 7 ── -->
+      <section class="section" id="cost-data">
+        <div class="step-heading">
+          <div class="step-num">7</div>
+          <h2>Capturing Cost Data</h2>
+        </div>
+
+        <p>
+          Every session ends with a <code>Result</code> message containing complete cost and
+          usage statistics. Use this to track spend, audit sessions, or enforce budgets.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">async for msg in harness.run("Analyze this codebase"):
+    if isinstance(msg, harness.Result):
+        print(f"Session: {msg.session_id}")
+        print(f"Turns: {msg.turns}")
+        print(f"Tool calls: {msg.tool_calls}")
+        print(f"Tokens: {msg.total_tokens:,}")
+        print(f"Cost: ${msg.total_cost:.4f}")</code></pre>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Result field</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>session_id</code></td><td>str</td><td>Unique identifier for this agent run</td></tr>
+              <tr><td><code>text</code></td><td>str</td><td>Final agent response text</td></tr>
+              <tr><td><code>turns</code></td><td>int</td><td>Number of agent conversation turns</td></tr>
+              <tr><td><code>tool_calls</code></td><td>int</td><td>Total number of tool calls made</td></tr>
+              <tr><td><code>total_tokens</code></td><td>int</td><td>Combined input + output token count</td></tr>
+              <tr><td><code>total_cost</code></td><td>float</td><td>Estimated cost in USD</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Budget enforcement</div>
+            <p>Tutorial 4 (Budget Controls) shows how to set hard spending limits, receive mid-session warnings, and abort runs that exceed your budget threshold.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 8 ── -->
+      <section class="section" id="next-steps">
+        <div class="step-heading">
+          <div class="step-num">8</div>
+          <h2>Next Steps</h2>
+        </div>
+
+        <p>
+          You can now stream agent events, handle every message type, and build custom Python tools
+          on top of Harness. The next tutorial covers one of the most important production concerns:
+          what the agent is allowed to do.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8594;</div>
+          <div class="callout-body">
+            <div class="callout-title">Tutorial 3: Permission Modes &amp; Safety Controls</div>
+            <p>Learn the 4-mode permission system, custom allow/deny rules, and the 4-tier precedence engine — the most sophisticated permission system available in any AI coding agent.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Prev / Next ── -->
+      <nav class="prev-next" aria-label="Tutorial navigation">
+        <a href="01-getting-started.html" class="nav-card prev">
+          <span class="nav-card-dir">&larr; Previous</span>
+          <span class="nav-card-title">Getting Started</span>
+          <span class="nav-card-desc">Install Harness and fix your first bug</span>
+        </a>
+        <a href="03-permissions-safety.html" class="nav-card next">
+          <span class="nav-card-dir">Next &rarr;</span>
+          <span class="nav-card-title">Permission Modes</span>
+          <span class="nav-card-desc">Safety controls and the 4-tier precedence engine</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  function switchTab(btn, panelId, groupName) {
+    const allBtns = btn.closest('.tabs-component').querySelectorAll('.tab-btn');
+    allBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+    btn.setAttribute('aria-selected', 'true');
+
+    const group = btn.closest('.tabs-component').querySelector('[data-tabgroup]');
+    group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  function toggleDeepDive(btn) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    btn.nextElementSibling.classList.toggle('open', !expanded);
+  }
+
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  const sections = document.querySelectorAll('section[id]');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-60px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  tocLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

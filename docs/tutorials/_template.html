@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial Title — From Zero to Enterprise AI Agents</title>
+  <meta name="description" content="Tutorial description goes here." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js — tomorrow theme (dark) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES
+       ============================================================ */
+    :root {
+      --bg:          #0F172A;
+      --bg-card:     #1E293B;
+      --bg-hover:    #263348;
+      --accent:      #7C3AED;
+      --accent-light:#A78BFA;
+      --accent-hover:#6D28D9;
+      --text:        #E2E8F0;
+      --text-muted:  #94A3B8;
+      --heading:     #F8FAFC;
+      --border:      #334155;
+      --sidebar-w:   280px;
+      --header-h:    64px;
+      --font-body:   'Inter', system-ui, sans-serif;
+      --font-code:   'JetBrains Mono', 'Fira Code', monospace;
+      --radius:      8px;
+      --radius-lg:   12px;
+      --transition:  0.2s ease;
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--accent-light);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    a:hover { color: #fff; text-decoration: underline; }
+    a:focus-visible {
+      outline: 2px solid var(--accent-light);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    img { max-width: 100%; display: block; }
+
+    /* ============================================================
+       SCROLLBAR
+       ============================================================ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748B; }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 32px;
+    }
+
+    .header-logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .header-logo:hover { color: var(--accent-light); text-decoration: none; }
+
+    .logo-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-series {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .header-nav a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      transition: background var(--transition), color var(--transition);
+    }
+    .header-nav a:hover {
+      background: var(--bg-hover);
+      color: var(--heading);
+      text-decoration: none;
+    }
+
+    .btn-github {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      color: var(--text) !important;
+      padding: 6px 14px !important;
+      border-radius: var(--radius) !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+    }
+    .btn-github:hover {
+      border-color: var(--accent-light) !important;
+      color: var(--heading) !important;
+    }
+
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: var(--radius);
+      margin-left: auto;
+    }
+    .hamburger-btn:hover { background: var(--bg-hover); }
+    .hamburger-btn:focus-visible { outline: 2px solid var(--accent-light); }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    /* ============================================================
+       SIDEBAR / TOC
+       ============================================================ */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+    }
+
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-list {
+      list-style: none;
+    }
+
+    .toc-list li a {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 5px 20px;
+      border-left: 2px solid transparent;
+      transition: all var(--transition);
+      line-height: 1.4;
+    }
+    .toc-list li a:hover {
+      color: var(--heading);
+      background: var(--bg-hover);
+      text-decoration: none;
+    }
+    .toc-list li a.active {
+      color: var(--accent-light);
+      border-left-color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .toc-list .toc-h3 a { padding-left: 34px; font-size: 12px; }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 20px;
+    }
+
+    .sidebar-meta {
+      padding: 0 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .sidebar-meta p { margin-bottom: 4px; }
+    .sidebar-meta strong { color: var(--text); }
+
+    /* Sidebar overlay (mobile) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 49;
+    }
+
+    /* ============================================================
+       MAIN CONTENT
+       ============================================================ */
+    .main-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      justify-content: center;
+      padding: 48px 40px;
+    }
+
+    .main-content {
+      width: 100%;
+      max-width: 780px;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+       ============================================================ */
+    .tutorial-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .main-content h1 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+
+    .lead {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 40px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .main-content h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 48px 0 16px;
+      padding-top: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    .main-content h2::before {
+      content: '';
+      display: block;
+      height: calc(var(--header-h) + 16px);
+      margin-top: calc(-1 * (var(--header-h) + 16px));
+      pointer-events: none;
+    }
+
+    .main-content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--heading);
+      margin: 32px 0 12px;
+    }
+
+    .main-content p { margin-bottom: 16px; }
+
+    .main-content ul, .main-content ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+    .main-content li { margin-bottom: 6px; }
+
+    .main-content strong { color: var(--heading); font-weight: 600; }
+
+    .inline-code {
+      font-family: var(--font-code);
+      font-size: 0.875em;
+      background: var(--bg-card);
+      color: #A78BFA;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       CODE BLOCKS
+       ============================================================ */
+    .code-block {
+      position: relative;
+      margin: 24px 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .code-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .code-lang {
+      font-family: var(--font-code);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .code-filename {
+      font-family: var(--font-code);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      border-color: var(--accent-light);
+      color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.08);
+    }
+    .copy-btn:focus-visible { outline: 2px solid var(--accent-light); }
+    .copy-btn.copied {
+      color: #10B981;
+      border-color: #10B981;
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .code-block pre {
+      margin: 0 !important;
+      border-radius: 0 !important;
+      background: var(--bg-card) !important;
+      padding: 20px 20px !important;
+      overflow-x: auto;
+      font-family: var(--font-code) !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+    }
+
+    .code-block pre code {
+      font-family: var(--font-code) !important;
+      font-size: inherit !important;
+    }
+
+    /* ============================================================
+       TABS
+       ============================================================ */
+    .tabs-wrapper {
+      margin: 24px 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .tabs-header {
+      display: flex;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .tabs-header::-webkit-scrollbar { height: 0; }
+
+    .tab-btn {
+      position: relative;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color var(--transition);
+    }
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transition: transform var(--transition);
+    }
+    .tab-btn:hover { color: var(--heading); }
+    .tab-btn[aria-selected="true"] {
+      color: var(--accent-light);
+    }
+    .tab-btn[aria-selected="true"]::after {
+      transform: scaleX(1);
+    }
+    .tab-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: -2px; }
+
+    .tabs-body { background: var(--bg-card); }
+
+    .tab-panel {
+      display: none;
+      padding: 24px;
+    }
+    .tab-panel[aria-hidden="false"] { display: block; }
+
+    .tab-panel p { color: var(--text); margin-bottom: 12px; }
+    .tab-panel p:last-child { margin-bottom: 0; }
+
+    /* ============================================================
+       CALLOUT BOXES
+       ============================================================ */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: var(--radius);
+      border-left: 3px solid;
+      margin: 20px 0;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .callout-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      line-height: 1.5;
+    }
+
+    .callout-body { flex: 1; min-width: 0; }
+
+    .callout-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .callout-body p {
+      font-size: 14px;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .callout-info    { border-color: #3B82F6; }
+    .callout-info    .callout-icon, .callout-info    .callout-title { color: #60A5FA; }
+
+    .callout-warning { border-color: #F59E0B; }
+    .callout-warning .callout-icon, .callout-warning .callout-title { color: #FCD34D; }
+
+    .callout-success { border-color: #10B981; }
+    .callout-success .callout-icon, .callout-success .callout-title { color: #34D399; }
+
+    .callout-error   { border-color: #EF4444; }
+    .callout-error   .callout-icon, .callout-error   .callout-title { color: #F87171; }
+
+    .callout-tryit   { border-color: #7C3AED; background: rgba(124, 58, 237, 0.07); }
+    .callout-tryit   .callout-icon, .callout-tryit   .callout-title { color: var(--accent-light); }
+
+    /* ============================================================
+       COLLAPSIBLE SECTIONS
+       ============================================================ */
+    .collapsible {
+      margin: 16px 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .collapsible-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--bg-card);
+      border: none;
+      color: var(--heading);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition);
+    }
+    .collapsible-trigger:hover { background: var(--bg-hover); }
+    .collapsible-trigger:focus-visible { outline: 2px solid var(--accent-light); outline-offset: -2px; }
+
+    .collapsible-chevron {
+      flex-shrink: 0;
+      color: var(--text-muted);
+      transition: transform var(--transition);
+    }
+    .collapsible-trigger[aria-expanded="true"] .collapsible-chevron {
+      transform: rotate(180deg);
+    }
+
+    .collapsible-body {
+      background: rgba(255,255,255,0.02);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .collapsible-body.open {
+      max-height: 1000px;
+    }
+
+    .collapsible-inner {
+      padding: 18px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .collapsible-inner p { font-size: 14px; margin-bottom: 10px; color: var(--text); }
+    .collapsible-inner p:last-child { margin-bottom: 0; }
+
+    /* ============================================================
+       STEP INDICATORS
+       ============================================================ */
+    .steps {
+      margin: 32px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 20px;
+    }
+
+    .step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+    }
+
+    .step-line {
+      width: 2px;
+      flex: 1;
+      min-height: 24px;
+      background: linear-gradient(to bottom, var(--accent), var(--border));
+      margin: 6px 0;
+    }
+
+    .step:last-child .step-line { display: none; }
+
+    .step-content {
+      padding-bottom: 32px;
+      flex: 1;
+    }
+    .step:last-child .step-content { padding-bottom: 0; }
+
+    .step-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 8px;
+      padding-top: 6px;
+    }
+
+    .step-body { font-size: 14px; color: var(--text); line-height: 1.6; }
+    .step-body p { margin-bottom: 10px; }
+    .step-body p:last-child { margin-bottom: 0; }
+
+    /* ============================================================
+       COMPETITOR COMPARISON TABLE
+       ============================================================ */
+    .comparison-callout {
+      margin: 32px 0;
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .comparison-header {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0.08));
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .comparison-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 0 0 4px;
+    }
+    .comparison-header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .comparison-table-wrap {
+      overflow-x: auto;
+      background: var(--bg-card);
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 560px;
+    }
+
+    .comparison-table th {
+      padding: 12px 14px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .comparison-table th:first-child { text-align: left; }
+
+    .comparison-table th.harness-col {
+      color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .comparison-table td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+    }
+
+    .comparison-table td:first-child {
+      text-align: left;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .comparison-table td.harness-col { background: rgba(124, 58, 237, 0.05); }
+
+    .comparison-table tr:last-child td { border-bottom: none; }
+
+    .comparison-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .comparison-table tr:hover td.harness-col { background: rgba(124, 58, 237, 0.08); }
+
+    .check { color: #34D399; font-weight: 700; font-size: 15px; }
+    .cross { color: #F87171; font-weight: 700; font-size: 15px; }
+
+    /* ============================================================
+       NAVIGATION CARDS
+       ============================================================ */
+    .nav-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 48px 0 0;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      color: inherit;
+    }
+    .nav-card:hover {
+      border-color: var(--accent-light);
+      background: var(--bg-hover);
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+
+    .nav-card-prev { justify-content: flex-start; }
+    .nav-card-next { justify-content: flex-end; text-align: right; }
+
+    .nav-card-arrow {
+      font-size: 20px;
+      color: var(--accent-light);
+      flex-shrink: 0;
+    }
+
+    .nav-card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .nav-card-number {
+      font-size: 11px;
+      color: var(--accent-light);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .nav-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+      line-height: 1.3;
+    }
+
+    /* ============================================================
+       SECTION ANCHORS
+       ============================================================ */
+    .section-anchor {
+      display: block;
+      position: relative;
+      top: calc(-1 * (var(--header-h) + 16px));
+      visibility: hidden;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .site-footer a { color: var(--accent-light); }
+
+    /* ============================================================
+       RESPONSIVE — TABLET & MOBILE
+       ============================================================ */
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 50;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        background: var(--bg);
+        padding-top: calc(var(--header-h) + 16px);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay.open { display: block; }
+      .hamburger-btn { display: flex; }
+      .main-wrapper { padding: 32px 24px; }
+    }
+
+    @media (max-width: 768px) {
+      .main-wrapper { padding: 24px 16px; }
+      .header-series { display: none; }
+      .nav-cards { grid-template-columns: 1fr; }
+      .nav-card-next { justify-content: flex-start; text-align: left; }
+      .comparison-table { font-size: 12px; }
+    }
+
+    @media (max-width: 480px) {
+      .tabs-header { gap: 0; }
+      .tab-btn { padding: 10px 14px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="site-header" role="banner">
+    <a href="index.html" class="header-logo" aria-label="Harness — Home">
+      Harness
+      <span class="logo-badge">DOCS</span>
+    </a>
+
+    <span class="header-series" aria-hidden="true">From Zero to Enterprise AI Agents</span>
+
+    <nav class="header-nav" aria-label="Site navigation">
+      <a href="index.html">Tutorials</a>
+      <a href="https://github.com/AgentBoardTT/openharness" class="btn-github" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+        </svg>
+        GitHub
+      </a>
+    </nav>
+
+    <!-- Hamburger (mobile only) -->
+    <button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       LAYOUT
+       ============================================================ -->
+  <div class="layout">
+
+    <!-- ============================================================
+         SIDEBAR / TOC
+         ============================================================ -->
+    <aside class="sidebar" id="sidebar" role="complementary" aria-label="Table of contents">
+      <p class="toc-title">On this page</p>
+      <nav aria-label="Table of contents">
+        <ul class="toc-list" id="toc-list">
+          <li><a href="#introduction">Introduction</a></li>
+          <li><a href="#prerequisites">Prerequisites</a></li>
+          <li><a href="#code-blocks">Code Blocks</a></li>
+          <li><a href="#tabs">Provider Tabs</a></li>
+          <li class="toc-h3"><a href="#tabs-usage">Tab Usage</a></li>
+          <li><a href="#callouts">Callout Boxes</a></li>
+          <li><a href="#collapsible">Collapsible Sections</a></li>
+          <li><a href="#steps">Step Indicators</a></li>
+          <li><a href="#comparison">Competitor Comparison</a></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-meta">
+        <p><strong>Tutorial 01</strong></p>
+        <p>Difficulty: <strong style="color:#10B981">Beginner</strong></p>
+        <p>Time: <strong>10 min</strong></p>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
+    <div class="main-wrapper">
+      <main class="main-content" id="main-content" role="main">
+
+        <!-- Tutorial badge -->
+        <div class="tutorial-badge">Tutorial 01</div>
+
+        <!-- H1 -->
+        <h1>Getting Started — Your First AI Coding Agent</h1>
+
+        <!-- Lead paragraph -->
+        <p class="lead">
+          In this tutorial you will install Harness, configure your first provider, and run an AI coding agent against a real codebase in under ten minutes. No prior agent experience required.
+        </p>
+
+        <!-- =========================================================
+             SECTION: Introduction
+             ========================================================= -->
+        <span class="section-anchor" id="introduction" aria-hidden="true"></span>
+        <h2>Introduction</h2>
+
+        <p>
+          Harness is an open-source coding agent that runs entirely from your terminal. Unlike GUI-based tools, every behaviour is scriptable, auditable, and embeddable in your existing CI/CD pipelines. This template demonstrates every reusable component available in the tutorial series.
+        </p>
+
+        <p>
+          The inline code component renders like this: <code class="inline-code">harness run --task "fix all linting errors"</code>. Use it for short commands or identifiers inside body text.
+        </p>
+
+        <!-- =========================================================
+             SECTION: Prerequisites
+             ========================================================= -->
+        <span class="section-anchor" id="prerequisites" aria-hidden="true"></span>
+        <h2>Prerequisites</h2>
+
+        <ul>
+          <li>Python 3.11 or later</li>
+          <li><code class="inline-code">uv</code> package manager installed</li>
+          <li>An API key for Anthropic, OpenAI, Google, or a local Ollama instance</li>
+        </ul>
+
+        <!-- =========================================================
+             SECTION: Code Blocks
+             ========================================================= -->
+        <span class="section-anchor" id="code-blocks" aria-hidden="true"></span>
+        <h2>Code Blocks</h2>
+
+        <p>Code blocks support a language badge, an optional filename, and a copy-to-clipboard button.</p>
+
+        <!-- Bash code block -->
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="code-lang">Bash</span>
+            </div>
+            <button class="copy-btn" aria-label="Copy code to clipboard">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy
+            </button>
+          </div>
+          <pre><code class="language-bash">uv tool install harness-agent
+harness --version</code></pre>
+        </div>
+
+        <!-- Python code block with filename -->
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="code-lang">Python</span>
+              <span class="code-filename">agent.py</span>
+            </div>
+            <button class="copy-btn" aria-label="Copy code to clipboard">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy
+            </button>
+          </div>
+          <pre><code class="language-python">import asyncio
+import harness
+
+async def main():
+    async for message in harness.run(
+        "Refactor utils.py to use type hints",
+        provider="anthropic",
+        model="claude-sonnet-4-20250514",
+        permission_mode="accept_edits",
+    ):
+        match message:
+            case harness.TextMessage(text=t, is_partial=False):
+                print(t)
+            case harness.ToolUse(name=name):
+                print(f"  Tool: {name}")
+            case harness.Result() as r:
+                print(f"Done: {r.turns} turns, ${r.total_cost:.4f}")
+
+asyncio.run(main())</code></pre>
+        </div>
+
+        <!-- TOML code block with filename -->
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="code-lang">TOML</span>
+              <span class="code-filename">~/.harness/config.toml</span>
+            </div>
+            <button class="copy-btn" aria-label="Copy code to clipboard">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy
+            </button>
+          </div>
+          <pre><code class="language-toml">[provider]
+name    = "anthropic"
+model   = "claude-opus-4-6"
+api_key = "sk-ant-..."
+
+[budget]
+max_tokens = 50000
+max_cost   = 1.00   # USD
+
+[permissions]
+mode = "accept_edits"</code></pre>
+        </div>
+
+        <!-- =========================================================
+             SECTION: Tabs
+             ========================================================= -->
+        <span class="section-anchor" id="tabs" aria-hidden="true"></span>
+        <h2>Provider Tabs</h2>
+
+        <p>The tab component lets readers select their AI provider. Each tab panel contains provider-specific instructions.</p>
+
+        <span class="section-anchor" id="tabs-usage" aria-hidden="true"></span>
+        <h3>Tab Usage</h3>
+
+        <div class="tabs-wrapper">
+          <div class="tabs-header" role="tablist" aria-label="Provider selection">
+            <button class="tab-btn" role="tab" aria-selected="true"  aria-controls="tab-anthropic" id="btn-anthropic">Anthropic</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-openai"    id="btn-openai"   tabindex="-1">OpenAI</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-google"    id="btn-google"   tabindex="-1">Google</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-ollama"    id="btn-ollama"   tabindex="-1">Ollama</button>
+          </div>
+          <div class="tabs-body">
+            <div class="tab-panel" id="tab-anthropic" role="tabpanel" aria-labelledby="btn-anthropic" aria-hidden="false">
+              <p>Set your Anthropic API key as an environment variable:</p>
+              <div class="code-block" style="margin-top:12px">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="code-lang">Bash</span></div>
+                  <button class="copy-btn" aria-label="Copy code to clipboard">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-bash">export ANTHROPIC_API_KEY="sk-ant-..."
+harness init --provider anthropic --model claude-opus-4-6</code></pre>
+              </div>
+            </div>
+            <div class="tab-panel" id="tab-openai" role="tabpanel" aria-labelledby="btn-openai" aria-hidden="true">
+              <p>Set your OpenAI API key as an environment variable:</p>
+              <div class="code-block" style="margin-top:12px">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="code-lang">Bash</span></div>
+                  <button class="copy-btn" aria-label="Copy code to clipboard">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-bash">export OPENAI_API_KEY="sk-..."
+harness init --provider openai --model gpt-4o</code></pre>
+              </div>
+            </div>
+            <div class="tab-panel" id="tab-google" role="tabpanel" aria-labelledby="btn-google" aria-hidden="true">
+              <p>Set your Google AI API key as an environment variable:</p>
+              <div class="code-block" style="margin-top:12px">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="code-lang">Bash</span></div>
+                  <button class="copy-btn" aria-label="Copy code to clipboard">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-bash">export GOOGLE_API_KEY="AIza..."
+harness init --provider google --model gemini-2.0-flash</code></pre>
+              </div>
+            </div>
+            <div class="tab-panel" id="tab-ollama" role="tabpanel" aria-labelledby="btn-ollama" aria-hidden="true">
+              <p>Run Ollama locally, then point Harness at your local endpoint. No API key required.</p>
+              <div class="code-block" style="margin-top:12px">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="code-lang">Bash</span></div>
+                  <button class="copy-btn" aria-label="Copy code to clipboard">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-bash">ollama pull llama3.3
+harness init --provider ollama --model llama3.3 --base-url http://localhost:11434</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             SECTION: Callouts
+             ========================================================= -->
+        <span class="section-anchor" id="callouts" aria-hidden="true"></span>
+        <h2>Callout Boxes</h2>
+
+        <div class="callout callout-info" role="note">
+          <span class="callout-icon" aria-hidden="true">&#x2139;&#xFE0F;</span>
+          <div class="callout-body">
+            <p class="callout-title">Info</p>
+            <p>Harness stores its configuration at <code class="inline-code">~/.harness/config.toml</code> with permissions set to <code class="inline-code">0o600</code> so only your user account can read it.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-warning" role="note">
+          <span class="callout-icon" aria-hidden="true">&#x26A0;&#xFE0F;</span>
+          <div class="callout-body">
+            <p class="callout-title">Warning</p>
+            <p>Never commit your <code class="inline-code">config.toml</code> file to version control. Add it to your <code class="inline-code">.gitignore</code> before running <code class="inline-code">git init</code>.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-success" role="note">
+          <span class="callout-icon" aria-hidden="true">&#x2705;</span>
+          <div class="callout-body">
+            <p class="callout-title">Success</p>
+            <p>If you see <strong>Agent initialised</strong> in the terminal output, Harness has successfully connected to your provider and is ready to accept tasks.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-error" role="alert">
+          <span class="callout-icon" aria-hidden="true">&#x274C;</span>
+          <div class="callout-body">
+            <p class="callout-title">Error</p>
+            <p>A <code class="inline-code">401 Unauthorized</code> response means your API key is invalid or has expired. Regenerate the key in your provider's dashboard and update <code class="inline-code">config.toml</code>.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-tryit" role="note">
+          <span class="callout-icon" aria-hidden="true">&#x1F680;</span>
+          <div class="callout-body">
+            <p class="callout-title">Try It</p>
+            <p>Open your terminal right now and run <code class="inline-code">harness run --task "list all TODO comments in this repo"</code> inside any project. The agent will scan your code and produce a structured report in seconds.</p>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             SECTION: Collapsible
+             ========================================================= -->
+        <span class="section-anchor" id="collapsible" aria-hidden="true"></span>
+        <h2>Collapsible Sections</h2>
+
+        <p>Use collapsibles for optional deep-dives, advanced configuration, or troubleshooting details that would otherwise break reading flow.</p>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger"
+                  aria-expanded="false"
+                  aria-controls="collapse-body-1"
+                  id="collapse-trigger-1">
+            Advanced: Customising the system prompt
+            <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="collapsible-body" id="collapse-body-1" role="region" aria-labelledby="collapse-trigger-1">
+            <div class="collapsible-inner">
+              <p>Harness loads its system prompt from <code class="inline-code">~/.harness/system_prompt.md</code> if the file exists. You can override any default instruction by adding your own directives to this file.</p>
+              <p>The agent uses an action-oriented prompt by design: it should never ask clarifying questions when running in bypass mode. To enforce stricter guardrails, use <code class="inline-code">mode = "supervised"</code> in your config instead.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger"
+                  aria-expanded="false"
+                  aria-controls="collapse-body-2"
+                  id="collapse-trigger-2">
+            Troubleshooting: Connection timeouts
+            <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="collapsible-body" id="collapse-body-2" role="region" aria-labelledby="collapse-trigger-2">
+            <div class="collapsible-inner">
+              <p>If Harness times out when connecting to your provider, check your network proxy settings. Set <code class="inline-code">HTTPS_PROXY</code> in your environment and restart the agent.</p>
+              <p>You can also increase the default request timeout by adding <code class="inline-code">timeout = 120</code> (seconds) to the <code class="inline-code">[provider]</code> section of your config.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             SECTION: Steps
+             ========================================================= -->
+        <span class="section-anchor" id="steps" aria-hidden="true"></span>
+        <h2>Step Indicators</h2>
+
+        <p>Use numbered steps for installation flows, setup wizards, or any process that must be followed in sequence.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-left">
+              <div class="step-circle" aria-hidden="true">1</div>
+              <div class="step-line" aria-hidden="true"></div>
+            </div>
+            <div class="step-content">
+              <p class="step-title">Install Harness via uv</p>
+              <div class="step-body">
+                <p>The recommended installation method is via the <code class="inline-code">uv</code> tool manager, which places the <code class="inline-code">harness</code> binary in <code class="inline-code">~/.local/bin/</code>.</p>
+                <div class="code-block">
+                  <div class="code-header">
+                    <div class="code-header-left"><span class="code-lang">Bash</span></div>
+                    <button class="copy-btn" aria-label="Copy code to clipboard">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      Copy
+                    </button>
+                  </div>
+                  <pre><code class="language-bash">uv tool install harness-agent</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-left">
+              <div class="step-circle" aria-hidden="true">2</div>
+              <div class="step-line" aria-hidden="true"></div>
+            </div>
+            <div class="step-content">
+              <p class="step-title">Initialise your configuration</p>
+              <div class="step-body">
+                <p>Run the interactive setup wizard to create <code class="inline-code">~/.harness/config.toml</code> with your chosen provider and model.</p>
+                <div class="code-block">
+                  <div class="code-header">
+                    <div class="code-header-left"><span class="code-lang">Bash</span></div>
+                    <button class="copy-btn" aria-label="Copy code to clipboard">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      Copy
+                    </button>
+                  </div>
+                  <pre><code class="language-bash">harness init</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-left">
+              <div class="step-circle" aria-hidden="true">3</div>
+              <div class="step-line" aria-hidden="true"></div>
+            </div>
+            <div class="step-content">
+              <p class="step-title">Run your first task</p>
+              <div class="step-body">
+                <p>Navigate to any project directory and issue a task in plain English. Harness will plan, execute, and summarise the changes it made.</p>
+                <div class="code-block">
+                  <div class="code-header">
+                    <div class="code-header-left"><span class="code-lang">Bash</span></div>
+                    <button class="copy-btn" aria-label="Copy code to clipboard">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      Copy
+                    </button>
+                  </div>
+                  <pre><code class="language-bash">cd ~/my-project
+harness run --task "Add type hints to all functions in src/"</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             SECTION: Competitor Comparison
+             ========================================================= -->
+        <span class="section-anchor" id="comparison" aria-hidden="true"></span>
+        <h2>Competitor Comparison</h2>
+
+        <p>See how Harness stacks up against other popular AI coding agents across the enterprise features that matter most.</p>
+
+        <div class="comparison-callout">
+          <div class="comparison-header">
+            <h3>What competitors can't do</h3>
+            <p>14 enterprise features exclusive to Harness or unavailable in competing tools</p>
+          </div>
+          <div class="comparison-table-wrap">
+            <table class="comparison-table" aria-label="Feature comparison: Harness vs competitors">
+              <thead>
+                <tr>
+                  <th scope="col">Feature</th>
+                  <th scope="col" class="harness-col">Harness</th>
+                  <th scope="col">Claude Code</th>
+                  <th scope="col">Cursor</th>
+                  <th scope="col">Aider</th>
+                  <th scope="col">OpenHands</th>
+                  <th scope="col">SWE-Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Multi-provider (5+)</td>    <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Full async SDK</td>         <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>4-mode permissions</td>     <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Token/cost budgets</td>     <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Policy-as-code</td>         <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Audit hash chain</td>       <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Dual sandbox modes</td>     <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td></tr>
+                <tr><td>Sub-agent parallelism</td>  <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Native CI/CD</td>           <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Model router + fallback</td><td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>PII scanning</td>           <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>OpenTelemetry</td>          <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>Hooks system</td>           <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+                <tr><td>REPL with slash cmds</td>  <td class="harness-col"><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             PREV / NEXT NAVIGATION CARDS
+             ========================================================= -->
+        <nav class="nav-cards" aria-label="Tutorial navigation">
+          <a href="index.html" class="nav-card nav-card-prev" aria-label="Previous: Tutorial overview">
+            <span class="nav-card-arrow" aria-hidden="true">&#8592;</span>
+            <div>
+              <p class="nav-card-label">Previous</p>
+              <p class="nav-card-title">Tutorial Overview</p>
+            </div>
+          </a>
+
+          <a href="02-sdk-basics.html" class="nav-card nav-card-next" aria-label="Next: Tutorial 02, The Python SDK">
+            <div>
+              <p class="nav-card-label">Next</p>
+              <p class="nav-card-number">Tutorial 02</p>
+              <p class="nav-card-title">The Python SDK</p>
+            </div>
+            <span class="nav-card-arrow" aria-hidden="true">&#8594;</span>
+          </a>
+        </nav>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <a href="https://github.com/AgentBoardTT/openharness" target="_blank" rel="noopener">Harness</a>
+      is open-source software released under the MIT licence.
+      Built by the community.
+    </p>
+  </footer>
+
+  <!-- ============================================================
+       INLINE JAVASCRIPT
+       ============================================================ -->
+  <script>
+    // ============================================================
+    // 1. COPY TO CLIPBOARD
+    // ============================================================
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var codeEl = btn.closest('.code-block').querySelector('code');
+        var text = codeEl ? codeEl.innerText : '';
+        navigator.clipboard.writeText(text).then(function() {
+          var original = btn.innerHTML;
+          btn.classList.add('copied');
+          btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+          btn.setAttribute('aria-label', 'Copied!');
+          setTimeout(function() {
+            btn.classList.remove('copied');
+            btn.innerHTML = original;
+            btn.setAttribute('aria-label', 'Copy code to clipboard');
+          }, 2000);
+        }).catch(function() {
+          // Fallback for older browsers
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          try { document.execCommand('copy'); } catch(e) {}
+          document.body.removeChild(ta);
+        });
+      });
+    });
+
+    // ============================================================
+    // 2. TABS
+    // ============================================================
+    document.querySelectorAll('[role="tablist"]').forEach(function(tablist) {
+      var tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+
+      function activateTab(tab) {
+        tabs.forEach(function(t) {
+          t.setAttribute('aria-selected', 'false');
+          t.setAttribute('tabindex', '-1');
+        });
+        tab.setAttribute('aria-selected', 'true');
+        tab.setAttribute('tabindex', '0');
+
+        var panelId = tab.getAttribute('aria-controls');
+        var wrapper = tablist.closest('.tabs-wrapper');
+        wrapper.querySelectorAll('[role="tabpanel"]').forEach(function(panel) {
+          panel.setAttribute('aria-hidden', panel.id !== panelId ? 'true' : 'false');
+        });
+      }
+
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() { activateTab(tab); });
+        tab.addEventListener('keydown', function(e) {
+          var idx = tabs.indexOf(document.activeElement);
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            var next = tabs[(idx + 1) % tabs.length];
+            next.focus();
+            activateTab(next);
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            var prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+            prev.focus();
+            activateTab(prev);
+          } else if (e.key === 'Home') {
+            e.preventDefault();
+            tabs[0].focus();
+            activateTab(tabs[0]);
+          } else if (e.key === 'End') {
+            e.preventDefault();
+            tabs[tabs.length - 1].focus();
+            activateTab(tabs[tabs.length - 1]);
+          }
+        });
+      });
+    });
+
+    // ============================================================
+    // 3. COLLAPSIBLES
+    // ============================================================
+    document.querySelectorAll('.collapsible-trigger').forEach(function(trigger) {
+      trigger.addEventListener('click', function() {
+        var expanded = trigger.getAttribute('aria-expanded') === 'true';
+        var bodyId   = trigger.getAttribute('aria-controls');
+        var body     = document.getElementById(bodyId);
+
+        trigger.setAttribute('aria-expanded', String(!expanded));
+        if (expanded) {
+          body.classList.remove('open');
+        } else {
+          body.classList.add('open');
+        }
+      });
+    });
+
+    // ============================================================
+    // 4. TOC ACTIVE HIGHLIGHT — Intersection Observer
+    // ============================================================
+    (function() {
+      var headings = document.querySelectorAll('.main-content h2, .main-content h3');
+      var tocLinks = document.querySelectorAll('#toc-list a');
+
+      if (!headings.length || !tocLinks.length) return;
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var id = entry.target.closest('[id]') ? entry.target.closest('[id]').id : null;
+            // Walk up to find the section anchor
+            var prev = entry.target.previousElementSibling;
+            if (prev && prev.classList.contains('section-anchor')) {
+              id = prev.id;
+            }
+            if (!id) return;
+            tocLinks.forEach(function(link) {
+              link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+            });
+          }
+        });
+      }, { rootMargin: '-64px 0px -70% 0px', threshold: 0 });
+
+      headings.forEach(function(h) { observer.observe(h); });
+    })();
+
+    // ============================================================
+    // 5. MOBILE SIDEBAR TOGGLE
+    // ============================================================
+    (function() {
+      var btn      = document.getElementById('hamburger-btn');
+      var sidebar  = document.getElementById('sidebar');
+      var overlay  = document.getElementById('sidebar-overlay');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+        overlay.removeAttribute('aria-hidden');
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Close navigation');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Open navigation');
+        document.body.style.overflow = '';
+      }
+
+      btn.addEventListener('click', function() {
+        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+      });
+      overlay.addEventListener('click', closeSidebar);
+
+      // Close on TOC link click (mobile)
+      document.querySelectorAll('#toc-list a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (window.innerWidth <= 1024) closeSidebar();
+        });
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+      });
+    })();
+
+    // ============================================================
+    // 6. SMOOTH SCROLL (polyfill for Safari)
+    // ============================================================
+    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        var id = anchor.getAttribute('href').slice(1);
+        var target = document.getElementById(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

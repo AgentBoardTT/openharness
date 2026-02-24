@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Permission Modes &amp; Safety Controls | Harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #243147;
+      --accent: #7C3AED;
+      --accent-light: #A78BFA;
+      --text: #E2E8F0;
+      --text-muted: #94A3B8;
+      --heading: #F8FAFC;
+      --border: #334155;
+      --blue: #3B82F6;
+      --amber: #F59E0B;
+      --green: #10B981;
+      --sidebar-width: 280px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 60px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--heading);
+      text-decoration: none;
+    }
+
+    .brand-dot { color: var(--accent); }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-intermediate { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-time { background: rgba(124, 58, 237, 0.15); color: var(--accent-light); border: 1px solid rgba(124, 58, 237, 0.3); }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .toc-link.active { color: var(--accent-light); border-left-color: var(--accent); background: rgba(124, 58, 237, 0.08); }
+    .toc-num { font-size: 11px; font-weight: 600; color: var(--accent); min-width: 18px; }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 40px 80px;
+    }
+
+    .content { max-width: 780px; margin: 0 auto; }
+
+    /* ── Page title ── */
+    .page-title-block { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+
+    .page-title-block h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+
+    .page-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 56px; }
+
+    .step-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-heading h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    p { margin-bottom: 16px; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      margin: 20px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 18px 20px !important;
+      background: #1a2332 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      background: none !important;
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 3px solid;
+    }
+
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+    .callout-body p { font-size: 14px; margin-bottom: 0; color: var(--text); }
+
+    .callout-info { background: rgba(59, 130, 246, 0.08); border-color: #3B82F6; }
+    .callout-info .callout-title { color: #60A5FA; }
+
+    .callout-warning { background: rgba(245, 158, 11, 0.08); border-color: #F59E0B; }
+    .callout-warning .callout-title { color: #FCD34D; }
+
+    .callout-success { background: rgba(16, 185, 129, 0.08); border-color: #10B981; }
+    .callout-success .callout-title { color: #34D399; }
+
+    .callout-tryit { background: rgba(124, 58, 237, 0.08); border-color: #7C3AED; }
+    .callout-tryit .callout-title { color: var(--accent-light); }
+
+    .callout-competitor { background: rgba(124, 58, 237, 0.06); border-color: var(--accent); }
+    .callout-competitor .callout-title { color: var(--accent-light); }
+
+    /* ── Deep Dive collapsible ── */
+    .deep-dive { margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+    .deep-dive-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: none;
+      color: var(--heading);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .deep-dive-btn:hover { background: var(--surface2); }
+
+    .deep-dive-label { display: flex; align-items: center; gap: 10px; }
+    .deep-dive-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .deep-dive-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .deep-dive-content { display: none; padding: 16px 18px; border-top: 1px solid var(--border); }
+    .deep-dive-content.open { display: block; }
+
+    /* ── Permission mode cards ── */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .mode-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      transition: border-color 0.15s;
+    }
+
+    .mode-card:hover { border-color: var(--accent); }
+
+    .mode-card-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent-light);
+      margin-bottom: 8px;
+    }
+
+    .mode-card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .mode-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 2px 2px 2px 0;
+    }
+
+    .pill-allow { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .pill-ask { background: rgba(245, 158, 11, 0.15); color: #FCD34D; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .pill-block { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* ── Flowchart ── */
+    .flowchart {
+      margin: 20px 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      position: relative;
+    }
+
+    .flow-step:last-child { margin-bottom: 0; }
+
+    .flow-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .flow-1 { background: rgba(239, 68, 68, 0.2); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .flow-2 { background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .flow-3 { background: rgba(59, 130, 246, 0.2); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .flow-4 { background: rgba(124, 58, 237, 0.2); color: var(--accent-light); border: 1px solid rgba(124, 58, 237, 0.4); }
+
+    .flow-body-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 3px;
+    }
+
+    .flow-body-desc { font-size: 13px; color: var(--text-muted); }
+
+    .flow-connector {
+      display: flex;
+      align-items: center;
+      padding: 4px 0 4px 30px;
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .flow-start {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      background: rgba(124, 58, 237, 0.1);
+      border: 1px dashed rgba(124, 58, 237, 0.4);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-light);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--heading);
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) { background: rgba(30, 41, 59, 0.4); }
+
+    .td-allow { color: #34D399; font-weight: 500; }
+    .td-ask { color: #FCD34D; font-weight: 500; }
+    .td-block { color: #F87171; font-weight: 500; }
+    .td-auto { color: #34D399; font-weight: 500; }
+
+    code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: rgba(124, 58, 237, 0.12);
+      color: #C4B5FD;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* ── Prev/Next nav ── */
+    .prev-next {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+      gap: 4px;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: var(--surface2); text-decoration: none; }
+
+    .nav-card-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .nav-card-title { font-size: 15px; font-weight: 600; color: var(--heading); }
+    .nav-card-desc { font-size: 13px; color: var(--text-muted); }
+    .nav-card.next { text-align: right; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 60px;
+        height: calc(100vh - 60px);
+        background: var(--bg);
+        z-index: 90;
+        transition: left 0.25s;
+        border-right: 1px solid var(--border);
+      }
+
+      .sidebar.open { left: 0; }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 60px 0 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 89;
+      }
+
+      .sidebar-overlay.open { display: block; }
+
+      .main { padding: 32px 20px 60px; }
+      .mobile-menu-btn { display: flex; align-items: center; }
+      .mode-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .page-title-block h1 { font-size: 24px; }
+      .prev-next { grid-template-columns: 1fr; }
+      .nav-card.next { text-align: left; }
+    }
+
+    :not(pre) > code[class*="language-"], pre[class*="language-"] {
+      background: #1a2332 !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <a href="index.html" class="brand">Harness<span class="brand-dot">.</span>docs</a>
+  <div class="header-meta">
+    <span class="badge badge-intermediate">Intermediate</span>
+    <span class="badge badge-time">15 min</span>
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Toggle sidebar">&#9776;</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar" aria-label="Table of contents">
+    <div class="toc-label">On this page</div>
+    <a class="toc-link active" href="#why-permissions"><span class="toc-num">1</span>Why Permissions Matter</a>
+    <a class="toc-link" href="#four-modes"><span class="toc-num">2</span>The Four Permission Modes</a>
+    <a class="toc-link" href="#same-task"><span class="toc-num">3</span>Same Task, Four Modes</a>
+    <a class="toc-link" href="#permission-rules"><span class="toc-num">4</span>Permission Rules</a>
+    <a class="toc-link" href="#safe-refactor"><span class="toc-num">5</span>Build a Safe Refactoring Agent</a>
+    <a class="toc-link" href="#four-tier"><span class="toc-num">6</span>4-Tier Precedence</a>
+    <a class="toc-link" href="#approval-callback"><span class="toc-num">7</span>Custom Approval Callback</a>
+    <a class="toc-link" href="#next-steps"><span class="toc-num">8</span>Next Steps</a>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="content">
+
+      <!-- Page title -->
+      <div class="page-title-block">
+        <h1>Permission Modes &amp; Safety Controls</h1>
+        <p>Control exactly what your AI agent can read, write, and execute — with enterprise-grade precision.</p>
+        <div class="page-meta">
+          <span class="badge badge-intermediate">Intermediate</span>
+          <span class="badge badge-time">15 min read</span>
+        </div>
+      </div>
+
+      <!-- ── Section 1 ── -->
+      <section class="section" id="why-permissions">
+        <div class="step-heading">
+          <div class="step-num">1</div>
+          <h2>Why Permissions Matter</h2>
+        </div>
+
+        <p>
+          AI agents are powerful precisely because they can take real actions: read source code,
+          write files, run shell commands, and call external services. That power requires guardrails.
+        </p>
+
+        <p>
+          Without controls, an agent could accidentally delete files, run a destructive
+          <code>rm -rf</code>, overwrite your <code>.env</code> with secrets, or exfiltrate data
+          through a network call. Worse, a prompt injection hidden in a source file could hijack
+          the agent's actions entirely.
+        </p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">&#9888;</div>
+          <div class="callout-body">
+            <div class="callout-title">Real risks without permission controls</div>
+            <p>
+              Agents with unconstrained bash access can run <code>curl</code> to exfiltrate code,
+              <code>rm -rf</code> to destroy files, or <code>git push</code> to leak secrets.
+              Permission modes are not optional in production.
+            </p>
+          </div>
+        </div>
+
+        <p>
+          Harness solves this with a four-mode permission system backed by a 4-tier precedence
+          engine — the most sophisticated permission architecture available in any AI coding agent.
+        </p>
+
+        <div class="callout callout-competitor">
+          <div class="callout-icon">&#9889;</div>
+          <div class="callout-body">
+            <div class="callout-title">What competitors can't do</div>
+            <p>Claude Code has basic allow/deny. No other AI coding agent has a 4-tier precedence engine,
+            policy engine integration, or custom approval callbacks.
+            <strong style="color: var(--heading)">Harness gives you surgical control over every tool call the agent makes.</strong></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 2 ── -->
+      <section class="section" id="four-modes">
+        <div class="step-heading">
+          <div class="step-num">2</div>
+          <h2>The Four Permission Modes</h2>
+        </div>
+
+        <p>Select the mode that matches your trust level and use case.</p>
+
+        <div class="mode-grid">
+          <div class="mode-card">
+            <div class="mode-card-name">default</div>
+            <div class="mode-card-desc">Asks for approval before every file write, bash command, and potentially destructive action.</div>
+            <span class="mode-pill pill-ask">Reads: Ask</span>
+            <span class="mode-pill pill-ask">Writes: Ask</span>
+            <span class="mode-pill pill-ask">Bash: Ask</span>
+          </div>
+          <div class="mode-card">
+            <div class="mode-card-name">accept_edits</div>
+            <div class="mode-card-desc">Auto-approves all file reads and writes. Still asks before running bash commands.</div>
+            <span class="mode-pill pill-allow">Reads: Auto</span>
+            <span class="mode-pill pill-allow">Writes: Auto</span>
+            <span class="mode-pill pill-ask">Bash: Ask</span>
+          </div>
+          <div class="mode-card">
+            <div class="mode-card-name">plan</div>
+            <div class="mode-card-desc">Read-only mode. The agent can analyse files but cannot modify anything or run commands.</div>
+            <span class="mode-pill pill-allow">Reads: Auto</span>
+            <span class="mode-pill pill-block">Writes: Block</span>
+            <span class="mode-pill pill-block">Bash: Block</span>
+          </div>
+          <div class="mode-card">
+            <div class="mode-card-name">bypass</div>
+            <div class="mode-card-desc">Auto-approves everything. Use only in trusted CI/CD environments with pre-defined rules.</div>
+            <span class="mode-pill pill-allow">Reads: Auto</span>
+            <span class="mode-pill pill-allow">Writes: Auto</span>
+            <span class="mode-pill pill-allow">Bash: Auto</span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>File Reads</th>
+                <th>File Writes</th>
+                <th>Bash Commands</th>
+                <th>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>default</code></td>
+                <td class="td-ask">Ask</td>
+                <td class="td-ask">Ask</td>
+                <td class="td-ask">Ask</td>
+                <td>Untrusted tasks</td>
+              </tr>
+              <tr>
+                <td><code>accept_edits</code></td>
+                <td class="td-auto">Auto</td>
+                <td class="td-auto">Auto</td>
+                <td class="td-ask">Ask</td>
+                <td>Coding tasks</td>
+              </tr>
+              <tr>
+                <td><code>plan</code></td>
+                <td class="td-auto">Auto</td>
+                <td class="td-block">Block</td>
+                <td class="td-block">Block</td>
+                <td>Code review, analysis</td>
+              </tr>
+              <tr>
+                <td><code>bypass</code></td>
+                <td class="td-auto">Auto</td>
+                <td class="td-auto">Auto</td>
+                <td class="td-auto">Auto</td>
+                <td>CI/CD, trusted scripts</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── Section 3 ── -->
+      <section class="section" id="same-task">
+        <div class="step-heading">
+          <div class="step-num">3</div>
+          <h2>Same Task, Four Modes</h2>
+        </div>
+
+        <p>
+          Pass <code>--permission</code> on the CLI to control mode. Watch how the agent's
+          behaviour changes for the identical task.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash"># Default — asks permission for everything
+harness --permission default "Refactor db.py to use connection pooling"
+
+# Accept edits — auto-approves file changes, asks for bash
+harness --permission accept_edits "Refactor db.py to use connection pooling"
+
+# Plan — read-only, won't modify anything
+harness --permission plan "Refactor db.py to use connection pooling"
+
+# Bypass — auto-approves everything (use in CI/CD)
+harness --permission bypass "Refactor db.py to use connection pooling"</code></pre>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>What happens</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>default</code></td>
+                <td>Agent pauses before each file write and bash command, showing you a diff and asking y/n</td>
+              </tr>
+              <tr>
+                <td><code>accept_edits</code></td>
+                <td>File edits apply automatically; if refactoring requires running tests, the agent asks first</td>
+              </tr>
+              <tr>
+                <td><code>plan</code></td>
+                <td>Agent reads and analyses db.py, outputs a detailed refactoring plan — but touches nothing</td>
+              </tr>
+              <tr>
+                <td><code>bypass</code></td>
+                <td>Fully autonomous: reads, writes, runs tests, commits — zero interruptions</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">Try it</div>
+            <p>Start with <code>plan</code> mode to get a safe analysis, review the plan, then re-run with <code>accept_edits</code> to apply the changes.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 4 ── -->
+      <section class="section" id="permission-rules">
+        <div class="step-heading">
+          <div class="step-num">4</div>
+          <h2>Permission Rules (Allow/Deny)</h2>
+        </div>
+
+        <p>
+          For fine-grained control, use <code>PermissionConfig</code> to define explicit
+          allow and deny rules that target individual tools and argument patterns.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness import run, PermissionMode
+from harness.permissions.rules import PermissionConfig, PermissionRule, PermissionDecision
+
+# Create custom rules
+rules = PermissionConfig()
+
+# Allow all file operations
+rules.add_allow("Read")
+rules.add_allow("Write")
+rules.add_allow("Edit")
+rules.add_allow("Glob")
+rules.add_allow("Grep")
+
+# Deny dangerous bash commands
+rules.add_deny("Bash", args_pattern={"command": "rm -rf*"})
+rules.add_deny("Bash", args_pattern={"command": "*sudo*"})
+rules.add_deny("Bash", args_pattern={"command": "*curl*"})
+
+async for msg in run(
+    "Refactor the codebase",
+    permission_mode="default",
+    permission_rules=rules,
+):
+    ...</code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">args_pattern uses fnmatch glob patterns</div>
+            <p>The <code>args_pattern</code> dict matches argument names to fnmatch glob patterns via <code>fnmatch.fnmatch()</code>. Use <code>*</code> to match any sequence of characters, <code>?</code> to match a single character, and <code>[seq]</code> to match characters in a sequence.</p>
+          </div>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Available tool names for rules
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Tool name</th><th>What it controls</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>Read</code></td><td>Reading file contents</td></tr>
+                  <tr><td><code>Write</code></td><td>Writing new files</td></tr>
+                  <tr><td><code>Edit</code></td><td>Editing existing files (targeted replacements)</td></tr>
+                  <tr><td><code>Glob</code></td><td>File pattern matching / directory listing</td></tr>
+                  <tr><td><code>Grep</code></td><td>Searching file contents with regex</td></tr>
+                  <tr><td><code>Bash</code></td><td>Running shell commands</td></tr>
+                  <tr><td><code>WebFetch</code></td><td>Fetching URLs over HTTP</td></tr>
+                  <tr><td><code>Task</code></td><td>Spawning sub-agent tasks</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 5 ── -->
+      <section class="section" id="safe-refactor">
+        <div class="step-heading">
+          <div class="step-num">5</div>
+          <h2>Build a Safe Refactoring Agent</h2>
+        </div>
+
+        <p>
+          Let's build a real production scenario: refactor database code while ensuring the
+          agent can never touch shell commands or sensitive <code>.env</code> files.
+          First, create the sample project files:
+        </p>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Sample files</span>
+              View the project files to refactor
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content">
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">python</span>
+                  <span class="filename">src/db.py</span>
+                </div>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code class="language-python"># src/db.py
+import sqlite3
+
+def get_connection():
+    return sqlite3.connect("app.db")
+
+def get_user(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
+    return cursor.fetchone()</code></pre>
+            </div>
+
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">python</span>
+                  <span class="filename">src/models.py</span>
+                </div>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code class="language-python"># src/models.py
+class User:
+    def __init__(self, id, name, email):
+        self.id = id
+        self.name = name
+        self.email = email</code></pre>
+            </div>
+
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">bash</span>
+                  <span class="filename">.env</span>
+                </div>
+              </div>
+              <pre><code class="language-bash"># .env — should NEVER be touched
+DATABASE_URL=postgresql://admin:secret@prod-db:5432/myapp
+API_SECRET=sk-prod-secret-key</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          Now the safe refactoring agent. It can read and write source files, but
+          <strong style="color: var(--heading)">cannot run bash commands and cannot touch any <code>.env</code> file</strong>,
+          regardless of what the model tries to do.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">safe_refactor.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># safe_refactor.py
+import asyncio
+import harness
+from harness.permissions.rules import PermissionConfig
+
+rules = PermissionConfig()
+rules.add_allow("Read")
+rules.add_allow("Write")
+rules.add_allow("Edit")
+rules.add_allow("Glob")
+rules.add_allow("Grep")
+rules.add_deny("Bash")  # No shell access
+rules.add_deny("Read",  args_pattern={"file_path": "*.env*"})   # Protect .env
+rules.add_deny("Write", args_pattern={"file_path": "*.env*"})   # Protect .env
+rules.add_deny("Edit",  args_pattern={"file_path": "*.env*"})   # Protect .env
+
+async def main():
+    async for msg in harness.run(
+        "Refactor src/db.py to use parameterized queries and connection pooling",
+        permission_mode="default",
+        permission_rules=rules,
+    ):
+        match msg:
+            case harness.ToolUse(name=name):
+                print(f"  Tool: {name}")
+            case harness.Result() as r:
+                print(f"Done! {r.tool_calls} tool calls, ${r.total_cost:.4f}")
+
+asyncio.run(main())</code></pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">&#10003;</div>
+          <div class="callout-body">
+            <div class="callout-title">What the rules enforce</div>
+            <p>If the agent attempts <code>Bash("rm src/db.py")</code>, the call is blocked before execution. If it attempts <code>Read(".env")</code>, it's blocked. The agent receives an error message and adjusts its approach.</p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">uv run safe_refactor.py</code></pre>
+        </div>
+      </section>
+
+      <!-- ── Section 6 ── -->
+      <section class="section" id="four-tier">
+        <div class="step-heading">
+          <div class="step-num">6</div>
+          <h2>4-Tier Precedence</h2>
+        </div>
+
+        <p>
+          When the agent requests a tool call, Harness evaluates it through four layers in order.
+          The highest matching layer wins.
+        </p>
+
+        <div class="flowchart">
+          <div class="flow-start">Tool Call Request</div>
+
+          <div class="flow-step">
+            <div class="flow-num flow-1">1</div>
+            <div>
+              <div class="flow-body-title">Explicit DENY rules</div>
+              <div class="flow-body-desc">If any deny rule matches — by tool name or args_pattern — the call is immediately blocked. This layer always wins.</div>
+            </div>
+          </div>
+
+          <div class="flow-connector">&#8595;</div>
+
+          <div class="flow-step">
+            <div class="flow-num flow-2">2</div>
+            <div>
+              <div class="flow-body-title">Explicit ALLOW rules</div>
+              <div class="flow-body-desc">If an allow rule matches and no deny matched, the call proceeds automatically without prompting.</div>
+            </div>
+          </div>
+
+          <div class="flow-connector">&#8595;</div>
+
+          <div class="flow-step">
+            <div class="flow-num flow-3">3</div>
+            <div>
+              <div class="flow-body-title">Policy engine rules</div>
+              <div class="flow-body-desc">Org-level policies defined in <code>policy.yml</code> are evaluated. Useful for team-wide constraints applied to every agent run.</div>
+            </div>
+          </div>
+
+          <div class="flow-connector">&#8595;</div>
+
+          <div class="flow-step">
+            <div class="flow-num flow-4">4</div>
+            <div>
+              <div class="flow-body-title">Permission mode fallback</div>
+              <div class="flow-body-desc">The selected mode (<code>default</code> / <code>accept_edits</code> / <code>plan</code> / <code>bypass</code>) handles anything not covered by layers 1–3.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128274;</div>
+          <div class="callout-body">
+            <div class="callout-title">Deny always wins</div>
+            <p>If a deny rule matches, the tool call is blocked regardless of allow rules, policies, or permission mode. You cannot accidentally override a deny with an allow at a lower tier.</p>
+          </div>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Policy engine and policy.yml
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content">
+            <p>
+              The policy engine (Tier 3) reads a <code>policy.yml</code> file from your project root
+              or from <code>~/.harness/policy.yml</code> for global rules. This enables team-wide
+              constraints that apply automatically without configuring rules in each script.
+            </p>
+            <div class="code-block" style="margin-top: 14px;">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">yaml</span>
+                  <span class="filename">policy.yml</span>
+                </div>
+              </div>
+              <pre><code class="language-yaml">version: 1
+rules:
+  - tool: Bash
+    decision: deny
+    when:
+      command_matches: "rm -rf*"
+  - tool: WebFetch
+    decision: deny
+  - tool: Read
+    decision: deny
+    when:
+      path_matches: "*.env*"
+  - tool: Write
+    decision: deny
+    when:
+      path_matches: "*.env*"</code></pre>
+            </div>
+            <p style="margin-top: 12px;">Policy files are evaluated after explicit SDK rules (Tiers 1–2) but before the mode fallback (Tier 4).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 7 ── -->
+      <section class="section" id="approval-callback">
+        <div class="step-heading">
+          <div class="step-num">7</div>
+          <h2>Custom Approval Callback</h2>
+        </div>
+
+        <p>
+          For workflows that need dynamic, context-aware approval — such as integrating with
+          Slack, PagerDuty, or a human-in-the-loop UI — pass an <code>approval_callback</code>
+          function to <code>harness.run()</code>.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">async def my_approval(tool_name: str, args: dict) -> bool:
+    """Custom approval logic — could integrate with Slack, PagerDuty, etc."""
+    # Auto-approve reads
+    if tool_name in ("Read", "Glob", "Grep"):
+        return True
+    # Block dangerous patterns
+    if tool_name == "Bash" and "rm" in args.get("command", ""):
+        return False
+    # Ask for everything else
+    print(f"Approve {tool_name}? (y/n): ", end="")
+    return input().strip().lower() == "y"
+
+async for msg in harness.run(
+    "Clean up the project",
+    approval_callback=my_approval,
+):
+    ...</code></pre>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">Try it — extend the callback</div>
+            <p>Replace the <code>input()</code> call with a Slack API call to send an approval request to a channel. Return <code>True</code> when an approver reacts with a checkmark emoji.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-competitor">
+          <div class="callout-icon">&#9889;</div>
+          <div class="callout-body">
+            <div class="callout-title">What competitors can't do</div>
+            <p>Claude Code has basic allow/deny with no programmable approval path. No other AI coding tool has 4-tier precedence, policy engine integration, or custom approval callbacks.
+            <strong style="color: var(--heading)">Harness is the only agent with enterprise-grade permission architecture.</strong></p>
+          </div>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Async callbacks and Slack integration pattern
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content">
+            <p>The callback signature supports both sync and async functions. For Slack integration:</p>
+            <div class="code-block" style="margin-top: 12px;">
+              <div class="code-header">
+                <div class="code-header-left"><span class="lang-badge">python</span></div>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code class="language-python">import asyncio
+import slack_sdk.web.async_client as slack
+
+async def slack_approval(tool_name: str, args: dict) -> bool:
+    # Auto-approve reads
+    if tool_name in ("Read", "Glob", "Grep"):
+        return True
+
+    # Post to Slack and wait for reaction
+    client = slack.AsyncWebClient(token=SLACK_TOKEN)
+    msg = await client.chat_postMessage(
+        channel="#agent-approvals",
+        text=f"Agent wants to run `{tool_name}` with args:\n```{args}```\nReact with :white_check_mark: to approve."
+    )
+    # Poll for reaction (simplified)
+    await asyncio.sleep(30)
+    reactions = await client.reactions_get(channel=msg["channel"], timestamp=msg["ts"])
+    approved_reactions = [r for r in reactions["message"].get("reactions", [])
+                          if r["name"] == "white_check_mark"]
+    return len(approved_reactions) > 0</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 8 ── -->
+      <section class="section" id="next-steps">
+        <div class="step-heading">
+          <div class="step-num">8</div>
+          <h2>Next Steps</h2>
+        </div>
+
+        <p>
+          You now have full control over what your agent can and cannot do — from broad permission
+          modes to surgical allow/deny rules, policy files, and custom approval callbacks.
+        </p>
+
+        <p>
+          The next tutorial covers budget controls: setting hard spending limits, mid-session cost
+          warnings, and automatic session abort when thresholds are exceeded.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8594;</div>
+          <div class="callout-body">
+            <div class="callout-title">Tutorial 4: Budget &amp; Cost Controls</div>
+            <p>Set per-session and per-task spending limits. Receive warnings before you hit your budget. Abort automatically when limits are exceeded.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Prev / Next ── -->
+      <nav class="prev-next" aria-label="Tutorial navigation">
+        <a href="02-sdk-basics.html" class="nav-card prev">
+          <span class="nav-card-dir">&larr; Previous</span>
+          <span class="nav-card-title">The Python SDK</span>
+          <span class="nav-card-desc">Async streaming and message types</span>
+        </a>
+        <a href="04-budget-cost-controls.html" class="nav-card next">
+          <span class="nav-card-dir">Next &rarr;</span>
+          <span class="nav-card-title">Budget Controls</span>
+          <span class="nav-card-desc">Hard limits, warnings, and cost tracking</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  function switchTab(btn, panelId, groupName) {
+    const allBtns = btn.closest('.tabs-component').querySelectorAll('.tab-btn');
+    allBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+    btn.setAttribute('aria-selected', 'true');
+    const group = btn.closest('.tabs-component').querySelector('[data-tabgroup]');
+    group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  function toggleDeepDive(btn) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    btn.nextElementSibling.classList.toggle('open', !expanded);
+  }
+
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  const sections = document.querySelectorAll('section[id]');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-60px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  tocLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

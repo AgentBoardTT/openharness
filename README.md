@@ -13,7 +13,7 @@ The only open-source agent to score **100% on Harness-Bench** and outperform Cla
 [![PyPI](https://img.shields.io/pypi/v/harness-agent)](https://pypi.org/project/harness-agent/)
 [![GitHub stars](https://img.shields.io/github/stars/AgentBoardTT/openharness?style=social)](https://github.com/AgentBoardTT/openharness)
 
-[Quick Start](#-quick-start) · [Screenshots](#-screenshots) · [Commands](#-interactive-repl-commands) · [Providers](#-providers) · [Features](#-features) · [SDK](#-sdk) · [Benchmarks](#-benchmark-results) · [Contributing](#-contributing)
+[Quick Start](#-quick-start) · [Screenshots](#-screenshots) · [Commands](#-interactive-repl-commands) · [Providers](#-providers) · [Features](#-features) · [SDK](#-sdk) · [Benchmarks](#-benchmark-results) · [Tutorials](https://agentboardtt.github.io/openharness/tutorials/) · [Contributing](#-contributing)
 
 </div>
 
@@ -474,6 +474,29 @@ uv pip install -e ".[dev]"
 uv run pytest tests/ -v
 uv run ruff check src/ tests/
 ```
+
+---
+
+## 📚 Tutorials
+
+Learn Harness from zero to enterprise with our step-by-step tutorial series:
+
+| # | Tutorial | Difficulty | Time |
+|---|----------|:----------:|:----:|
+| 1 | [Getting Started — Your First AI Coding Agent](https://agentboardtt.github.io/openharness/tutorials/01-getting-started.html) | Beginner | 10 min |
+| 2 | [The Python SDK — Building AI-Powered Tools](https://agentboardtt.github.io/openharness/tutorials/02-sdk-basics.html) | Beginner | 15 min |
+| 3 | [Permission Modes & Safety Controls](https://agentboardtt.github.io/openharness/tutorials/03-permissions-safety.html) | Intermediate | 15 min |
+| 4 | [Budget Controls & Cost Optimization](https://agentboardtt.github.io/openharness/tutorials/04-budget-cost-controls.html) | Intermediate | 15 min |
+| 5 | [Policy-as-Code — Governing Agent Behavior](https://agentboardtt.github.io/openharness/tutorials/05-policy-as-code.html) | Intermediate | 20 min |
+| 6 | [Audit Logging & Compliance](https://agentboardtt.github.io/openharness/tutorials/06-audit-compliance.html) | Intermediate | 20 min |
+| 7 | [Sandboxed Execution](https://agentboardtt.github.io/openharness/tutorials/07-sandboxed-execution.html) | Intermediate | 20 min |
+| 8 | [Sub-Agents & Parallel Execution](https://agentboardtt.github.io/openharness/tutorials/08-sub-agents-parallel.html) | Intermediate | 20 min |
+| 9 | [CI/CD Integration — AI Agent in Your Pipeline](https://agentboardtt.github.io/openharness/tutorials/09-cicd-pipeline.html) | Advanced | 25 min |
+| 10 | [Enterprise Production Deployment](https://agentboardtt.github.io/openharness/tutorials/10-enterprise-production.html) | Advanced | 30 min |
+
+👉 **[Browse all tutorials](https://agentboardtt.github.io/openharness/tutorials/)**
+
+<p align="right"><a href="#harness">back to top</a></p>
 
 ---
 

@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>From Zero to Enterprise AI Agents — Harness Tutorial Series</title>
+  <meta name="description" content="Master Harness — the open-source coding agent with 14 enterprise features no competitor can match. Ten hands-on tutorials from install to production." />
+
+  <!-- Open Graph -->
+  <meta property="og:title"       content="From Zero to Enterprise AI Agents" />
+  <meta property="og:description" content="Master Harness — the open-source coding agent with 14 enterprise features no competitor can match." />
+  <meta property="og:type"        content="website" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES
+       ============================================================ */
+    :root {
+      --bg:          #0F172A;
+      --bg-card:     #1E293B;
+      --bg-hover:    #263348;
+      --accent:      #7C3AED;
+      --accent-light:#A78BFA;
+      --accent-hover:#6D28D9;
+      --text:        #E2E8F0;
+      --text-muted:  #94A3B8;
+      --heading:     #F8FAFC;
+      --border:      #334155;
+      --header-h:    64px;
+      --font-body:   'Inter', system-ui, sans-serif;
+      --font-code:   'JetBrains Mono', 'Fira Code', monospace;
+      --radius:      8px;
+      --radius-lg:   12px;
+      --radius-xl:   16px;
+      --transition:  0.2s ease;
+      --max-w:       1140px;
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--accent-light);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    a:hover { color: #fff; text-decoration: underline; }
+    a:focus-visible {
+      outline: 2px solid var(--accent-light);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* ============================================================
+       SCROLLBAR
+       ============================================================ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748B; }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 32px;
+    }
+
+    .header-logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .header-logo:hover { color: var(--accent-light); text-decoration: none; }
+
+    .logo-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .header-nav a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      transition: background var(--transition), color var(--transition);
+    }
+    .header-nav a:hover {
+      background: var(--bg-hover);
+      color: var(--heading);
+      text-decoration: none;
+    }
+
+    .btn-github {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-hover) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+      padding: 6px 14px !important;
+      border-radius: var(--radius) !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+    }
+    .btn-github:hover {
+      border-color: var(--accent-light) !important;
+      color: var(--heading) !important;
+    }
+
+    /* ============================================================
+       PAGE CONTAINER
+       ============================================================ */
+    .page {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ============================================================
+       HERO SECTION
+       ============================================================ */
+    .hero {
+      padding: 96px 0 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle radial gradient background glow */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    /* Violet gradient on key words */
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #6D28D9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 13px 28px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 24px rgba(124, 58, 237, 0.35);
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(124, 58, 237, 0.45);
+      text-decoration: none;
+      color: #fff;
+    }
+    .btn-primary:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 3px; }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 13px 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: border-color var(--transition), color var(--transition), background var(--transition), transform var(--transition);
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent-light);
+      color: var(--heading);
+      background: var(--bg-hover);
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+    .btn-secondary:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 3px; }
+
+    /* Quick install bar */
+    .hero-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 32px;
+      padding: 12px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      font-family: var(--font-code);
+      font-size: 14px;
+      color: var(--text-muted);
+      position: relative;
+    }
+
+    .hero-install span { color: var(--accent-light); }
+
+    .hero-install-copy {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: color var(--transition);
+    }
+    .hero-install-copy:hover { color: var(--accent-light); }
+    .hero-install-copy:focus-visible { outline: 2px solid var(--accent-light); }
+
+    /* Stats row */
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 64px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .stat-number .stat-accent { color: var(--accent-light); }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* ============================================================
+       SECTION LABELS
+       ============================================================ */
+    .section {
+      padding: 80px 0;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-light);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin-bottom: 48px;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       TUTORIAL CARDS GRID
+       ============================================================ */
+    .tutorials-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .tutorial-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition), box-shadow var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tutorial-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .tutorial-card:hover {
+      border-color: rgba(124, 58, 237, 0.5);
+      background: var(--bg-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      text-decoration: none;
+    }
+
+    .tutorial-card:hover::before { opacity: 1; }
+
+    .tutorial-card:focus-visible {
+      outline: 2px solid var(--accent-light);
+      outline-offset: 2px;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+
+    .difficulty-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-beginner {
+      color: #34D399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .badge-intermediate {
+      color: #FCD34D;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .badge-advanced {
+      color: #F87171;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-light);
+      margin-bottom: 10px;
+    }
+
+    .card-description {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(51, 65, 85, 0.6);
+    }
+
+    .card-time {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card-arrow {
+      font-size: 16px;
+      color: var(--accent-light);
+      transition: transform var(--transition);
+    }
+
+    .tutorial-card:hover .card-arrow { transform: translateX(4px); }
+
+    /* ============================================================
+       SEPARATOR
+       ============================================================ */
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ============================================================
+       COMPARISON TABLE
+       ============================================================ */
+    .comparison-section {
+      padding: 80px 0;
+    }
+
+    .comparison-wrapper {
+      background: var(--bg-card);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .comparison-banner {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(124, 58, 237, 0.1));
+      padding: 28px 32px;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .comparison-banner-left h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--heading);
+      margin-bottom: 6px;
+    }
+
+    .comparison-banner-left p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .comparison-banner-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .legend-check { color: #34D399; font-weight: 700; }
+    .legend-cross { color: #F87171; font-weight: 700; }
+
+    .comparison-scroll {
+      overflow-x: auto;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    .comparison-table thead tr {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .comparison-table th {
+      padding: 14px 16px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .comparison-table th:first-child {
+      text-align: left;
+      width: 200px;
+    }
+
+    .comparison-table th.harness-col {
+      color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.1);
+      border-left: 1px solid rgba(124, 58, 237, 0.2);
+      border-right: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    .comparison-table td {
+      padding: 11px 16px;
+      text-align: center;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .comparison-table td:first-child {
+      text-align: left;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .comparison-table td.harness-col {
+      background: rgba(124, 58, 237, 0.06);
+      border-left: 1px solid rgba(124, 58, 237, 0.15);
+      border-right: 1px solid rgba(124, 58, 237, 0.15);
+    }
+
+    .comparison-table tr:last-child td { border-bottom: none; }
+
+    .comparison-table tbody tr:hover td { background: rgba(255,255,255,0.025); }
+    .comparison-table tbody tr:hover td.harness-col { background: rgba(124, 58, 237, 0.1); }
+
+    .check { color: #34D399; font-size: 16px; font-weight: 700; }
+    .cross { color: #F87171; font-size: 16px; font-weight: 700; }
+
+    /* Harness column header badge */
+    .harness-header-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .harness-header-badge {
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--accent);
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ============================================================
+       QUICK LINKS / FOOTER CTA
+       ============================================================ */
+    .footer-cta {
+      padding: 80px 0 48px;
+      text-align: center;
+    }
+
+    .footer-cta-inner {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(124, 58, 237, 0.05));
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius-xl);
+      padding: 56px 40px;
+    }
+
+    .footer-cta h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .footer-cta p {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .footer-cta-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      font-family: var(--font-code);
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .footer-cta-install span { color: var(--accent-light); }
+
+    .footer-cta-install-copy {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: color var(--transition);
+    }
+    .footer-cta-install-copy:hover { color: var(--accent-light); }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .footer-link:hover { color: var(--accent-light); text-decoration: none; }
+
+    /* ============================================================
+       SITE FOOTER
+       ============================================================ */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .site-footer a { color: var(--accent-light); }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 900px) {
+      .tutorials-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 32px; }
+      .comparison-banner { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 768px) {
+      .page { padding: 0 20px; }
+      .site-header { padding: 0 20px; }
+      .hero { padding: 64px 0 48px; }
+      .hero-stats { gap: 24px; }
+      .stat-number { font-size: 26px; }
+      .section { padding: 56px 0; }
+      .comparison-section { padding: 56px 0; }
+      .footer-cta { padding: 56px 0 32px; }
+      .footer-cta-inner { padding: 40px 24px; }
+      .footer-cta h2 { font-size: 24px; }
+      .site-footer { padding: 20px; }
+      .comparison-banner { padding: 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { letter-spacing: -0.5px; }
+      .hero-ctas { flex-direction: column; }
+      .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .hero-stats { flex-direction: column; gap: 20px; }
+      .footer-links { flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="site-header" role="banner">
+    <a href="index.html" class="header-logo" aria-label="Harness — Home">
+      Harness
+      <span class="logo-badge">DOCS</span>
+    </a>
+
+    <nav class="header-nav" aria-label="Site navigation">
+      <a href="#tutorials">Tutorials</a>
+      <a href="#comparison">Compare</a>
+      <a href="https://pypi.org/project/harness-agent/" target="_blank" rel="noopener">PyPI</a>
+      <a href="https://github.com/AgentBoardTT/openharness" class="btn-github" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+        </svg>
+        GitHub
+      </a>
+    </nav>
+  </header>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section class="hero" aria-label="Hero">
+    <div class="page">
+      <div class="hero-eyebrow" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+        </svg>
+        Tutorial Series — 10 Hands-On Guides
+      </div>
+
+      <h1>
+        From Zero to<br />
+        <span class="gradient-text">Enterprise AI Agents</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Master Harness — the open-source coding agent with 14 enterprise features no competitor can match.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="01-getting-started.html" class="btn-primary" aria-label="Start Tutorial 1: Getting Started">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Start Tutorial 1
+        </a>
+        <a href="https://github.com/AgentBoardTT/openharness" class="btn-secondary" target="_blank" rel="noopener" aria-label="View Harness on GitHub (opens in new tab)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          View on GitHub
+        </a>
+      </div>
+
+      <!-- Install bar -->
+      <div class="hero-install" role="group" aria-label="Quick install command">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+        <code><span>uv tool install</span> harness-agent</code>
+        <button class="hero-install-copy" id="hero-copy-btn" aria-label="Copy install command">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="hero-stats" role="list" aria-label="Key statistics">
+        <div class="stat" role="listitem">
+          <div class="stat-number"><span class="stat-accent">14</span></div>
+          <div class="stat-label">Enterprise features</div>
+        </div>
+        <div class="stat" role="listitem">
+          <div class="stat-number"><span class="stat-accent">5</span></div>
+          <div class="stat-label">AI providers supported</div>
+        </div>
+        <div class="stat" role="listitem">
+          <div class="stat-number"><span class="stat-accent">10</span></div>
+          <div class="stat-label">Hands-on tutorials</div>
+        </div>
+        <div class="stat" role="listitem">
+          <div class="stat-number"><span class="stat-accent">MIT</span></div>
+          <div class="stat-label">Open-source licence</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       TUTORIAL CARDS SECTION
+       ============================================================ -->
+  <section class="section" id="tutorials" aria-labelledby="tutorials-heading">
+    <div class="page">
+      <p class="section-label">10 Tutorials</p>
+      <h2 class="section-title" id="tutorials-heading">Everything you need to master Harness</h2>
+      <p class="section-subtitle">From a single-command install to multi-agent parallel execution in production — covered step by step.</p>
+
+      <div class="tutorials-grid" role="list">
+
+        <!-- Tutorial 01 -->
+        <a href="01-getting-started.html" class="tutorial-card" role="listitem" aria-label="Tutorial 01: Getting Started — Your First AI Coding Agent. Beginner. 10 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">01</div>
+            <span class="difficulty-badge badge-beginner">Beginner</span>
+          </div>
+          <h3 class="card-title">Getting Started</h3>
+          <p class="card-subtitle">Your First AI Coding Agent</p>
+          <p class="card-description">Install Harness, configure your first AI provider, and run a real coding task in under ten minutes. No prior agent experience required.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 10 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              10 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 02 -->
+        <a href="02-sdk-basics.html" class="tutorial-card" role="listitem" aria-label="Tutorial 02: The Python SDK — Building AI-Powered Tools. Beginner. 15 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">02</div>
+            <span class="difficulty-badge badge-beginner">Beginner</span>
+          </div>
+          <h3 class="card-title">The Python SDK</h3>
+          <p class="card-subtitle">Building AI-Powered Tools</p>
+          <p class="card-description">Use the Harness async Python SDK to build custom scripts, automate repetitive coding tasks, and integrate AI agents into your own applications.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 15 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              15 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 03 -->
+        <a href="03-permissions-safety.html" class="tutorial-card" role="listitem" aria-label="Tutorial 03: Permission Modes and Safety Controls. Intermediate. 15 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">03</div>
+            <span class="difficulty-badge badge-intermediate">Intermediate</span>
+          </div>
+          <h3 class="card-title">Permission Modes &amp; Safety Controls</h3>
+          <p class="card-subtitle">Four Levels of Agent Autonomy</p>
+          <p class="card-description">Configure Harness's four permission modes — from fully supervised to fully autonomous — and learn when each is appropriate for your use case.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 15 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              15 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 04 -->
+        <a href="04-budget-cost-controls.html" class="tutorial-card" role="listitem" aria-label="Tutorial 04: Budget Controls and Cost Optimization. Intermediate. 15 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">04</div>
+            <span class="difficulty-badge badge-intermediate">Intermediate</span>
+          </div>
+          <h3 class="card-title">Budget Controls &amp; Cost Optimization</h3>
+          <p class="card-subtitle">Token and USD Spending Limits</p>
+          <p class="card-description">Set hard token and USD budget caps so agents never exceed your spending limits. Includes per-task, per-session, and monthly budget strategies.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 15 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              15 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 05 -->
+        <a href="05-policy-as-code.html" class="tutorial-card" role="listitem" aria-label="Tutorial 05: Policy-as-Code — Governing Agent Behavior. Intermediate. 20 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">05</div>
+            <span class="difficulty-badge badge-intermediate">Intermediate</span>
+          </div>
+          <h3 class="card-title">Policy-as-Code</h3>
+          <p class="card-subtitle">Governing Agent Behavior</p>
+          <p class="card-description">Write declarative YAML policies that control what actions Harness can take. Block file deletions, restrict network calls, enforce coding standards automatically.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 20 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              20 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 06 -->
+        <a href="06-audit-compliance.html" class="tutorial-card" role="listitem" aria-label="Tutorial 06: Audit Logging and Compliance. Intermediate. 20 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">06</div>
+            <span class="difficulty-badge badge-intermediate">Intermediate</span>
+          </div>
+          <h3 class="card-title">Audit Logging &amp; Compliance</h3>
+          <p class="card-subtitle">Immutable Hash-Chained Audit Trail</p>
+          <p class="card-description">Every agent action is logged to a tamper-evident, hash-chained audit log. Learn how to configure, query, and export logs for compliance requirements.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 20 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              20 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 07 -->
+        <a href="07-sandboxed-execution.html" class="tutorial-card" role="listitem" aria-label="Tutorial 07: Sandboxed Execution. Intermediate. 20 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">07</div>
+            <span class="difficulty-badge badge-intermediate">Intermediate</span>
+          </div>
+          <h3 class="card-title">Sandboxed Execution</h3>
+          <p class="card-subtitle">Process and Container Isolation</p>
+          <p class="card-description">Run agents in isolated process sandboxes or full Docker containers. Harness's dual sandbox modes protect your host system from unintended side effects.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 20 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              20 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 08 -->
+        <a href="08-sub-agents-parallel.html" class="tutorial-card" role="listitem" aria-label="Tutorial 08: Sub-Agents and Parallel Execution. Intermediate. 20 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">08</div>
+            <span class="difficulty-badge badge-intermediate">Intermediate</span>
+          </div>
+          <h3 class="card-title">Sub-Agents &amp; Parallel Execution</h3>
+          <p class="card-subtitle">Orchestrate Agent Swarms</p>
+          <p class="card-description">Spawn multiple specialised sub-agents and run them in parallel. Learn task decomposition patterns that can cut end-to-end completion time by up to 80%.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 20 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              20 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 09 -->
+        <a href="09-cicd-pipeline.html" class="tutorial-card" role="listitem" aria-label="Tutorial 09: CI/CD Integration — AI Agent in Your Pipeline. Advanced. 25 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">09</div>
+            <span class="difficulty-badge badge-advanced">Advanced</span>
+          </div>
+          <h3 class="card-title">CI/CD Integration</h3>
+          <p class="card-subtitle">AI Agent in Your Pipeline</p>
+          <p class="card-description">Embed Harness directly in GitHub Actions, GitLab CI, and Jenkins. Auto-fix failing tests, generate changelogs, and enforce code quality gates at merge time.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 25 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              25 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+        <!-- Tutorial 10 -->
+        <a href="10-enterprise-production.html" class="tutorial-card" role="listitem" aria-label="Tutorial 10: Enterprise Production Deployment. Advanced. 30 minutes.">
+          <div class="card-top">
+            <div class="card-number" aria-hidden="true">10</div>
+            <span class="difficulty-badge badge-advanced">Advanced</span>
+          </div>
+          <h3 class="card-title">Enterprise Production Deployment</h3>
+          <p class="card-subtitle">Scale to Thousands of Agent Runs</p>
+          <p class="card-description">Deploy Harness at scale with model routing, automatic fallback, PII scanning, OpenTelemetry observability, and full organisational audit compliance.</p>
+          <div class="card-footer">
+            <span class="card-time" aria-label="Estimated time: 30 minutes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              30 min
+            </span>
+            <span class="card-arrow" aria-hidden="true">&#8594;</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       COMPARISON TABLE
+       ============================================================ -->
+  <section class="comparison-section" id="comparison" aria-labelledby="comparison-heading">
+    <div class="page">
+      <p class="section-label">Feature Comparison</p>
+      <h2 class="section-title" id="comparison-heading">What competitors can't do</h2>
+      <p class="section-subtitle">14 enterprise capabilities that make Harness the only open-source agent built for production.</p>
+
+      <div class="comparison-wrapper">
+        <div class="comparison-banner">
+          <div class="comparison-banner-left">
+            <h2>Harness vs. the competition</h2>
+            <p>Across 14 enterprise features that matter for teams shipping real software</p>
+          </div>
+          <div class="comparison-banner-right">
+            <span class="legend-item"><span class="legend-check">&#10003;</span> Supported</span>
+            <span class="legend-item" style="margin-left:8px"><span class="legend-cross">&#10007;</span> Not supported</span>
+          </div>
+        </div>
+
+        <div class="comparison-scroll">
+          <table class="comparison-table" aria-label="Feature comparison: Harness vs Claude Code vs Cursor vs Aider vs OpenHands vs SWE-Agent">
+            <thead>
+              <tr>
+                <th scope="col">Feature</th>
+                <th scope="col" class="harness-col">
+                  <div class="harness-header-inner">
+                    Harness
+                    <span class="harness-header-badge">OPEN SOURCE</span>
+                  </div>
+                </th>
+                <th scope="col">Claude Code</th>
+                <th scope="col">Cursor</th>
+                <th scope="col">Aider</th>
+                <th scope="col">OpenHands</th>
+                <th scope="col">SWE-Agent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Multi-provider (5+)</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Full async SDK</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>4-mode permissions</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Token/cost budgets</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Policy-as-code</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Audit hash chain</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Dual sandbox modes</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              </tr>
+              <tr>
+                <td>Sub-agent parallelism</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Native CI/CD</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Model router + fallback</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>PII scanning</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>OpenTelemetry</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>Hooks system</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td>REPL with slash cmds</td>
+                <td class="harness-col"><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="check" aria-label="Yes">&#10003;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+                <td><span class="cross" aria-label="No">&#10007;</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       FOOTER CTA
+       ============================================================ -->
+  <section class="footer-cta" aria-labelledby="footer-cta-heading">
+    <div class="page">
+      <div class="footer-cta-inner">
+        <h2 id="footer-cta-heading">Ready to get started?</h2>
+        <p>Install Harness in one command and run your first AI coding task in minutes.</p>
+
+        <div>
+          <div class="footer-cta-install" role="group" aria-label="Install command">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <code><span>uv tool install</span> harness-agent</code>
+            <button class="footer-cta-install-copy" id="footer-copy-btn" aria-label="Copy install command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="footer-links" role="list">
+          <a href="01-getting-started.html" class="footer-link" role="listitem" aria-label="Start with Tutorial 1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Start Tutorial 1
+          </a>
+          <a href="https://github.com/AgentBoardTT/openharness" class="footer-link" role="listitem" target="_blank" rel="noopener" aria-label="View Harness on GitHub (opens in new tab)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+          </a>
+          <a href="https://pypi.org/project/harness-agent/" class="footer-link" role="listitem" target="_blank" rel="noopener" aria-label="View harness-agent on PyPI (opens in new tab)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            PyPI
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SITE FOOTER
+       ============================================================ -->
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      <a href="https://github.com/AgentBoardTT/openharness" target="_blank" rel="noopener">Harness</a>
+      is open-source software released under the MIT licence.
+      &nbsp;&middot;&nbsp;
+      <a href="https://pypi.org/project/harness-agent/" target="_blank" rel="noopener">harness-agent on PyPI</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://github.com/AgentBoardTT/openharness" target="_blank" rel="noopener">GitHub</a>
+    </p>
+  </footer>
+
+  <!-- ============================================================
+       INLINE JAVASCRIPT
+       ============================================================ -->
+  <script>
+    // ============================================================
+    // COPY INSTALL COMMAND BUTTONS
+    // ============================================================
+    var INSTALL_CMD = 'uv tool install harness-agent';
+
+    function setupCopyButton(btnId) {
+      var btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        navigator.clipboard.writeText(INSTALL_CMD).then(function() {
+          var origHTML = btn.innerHTML;
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+          btn.setAttribute('aria-label', 'Copied!');
+          setTimeout(function() {
+            btn.innerHTML = origHTML;
+            btn.setAttribute('aria-label', 'Copy install command');
+          }, 2000);
+        }).catch(function() {
+          // Fallback
+          var ta = document.createElement('textarea');
+          ta.value = INSTALL_CMD;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          try { document.execCommand('copy'); } catch(e) {}
+          document.body.removeChild(ta);
+        });
+      });
+    }
+
+    setupCopyButton('hero-copy-btn');
+    setupCopyButton('footer-copy-btn');
+
+    // ============================================================
+    // SMOOTH SCROLL for anchor links
+    // ============================================================
+    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        var id = anchor.getAttribute('href').slice(1);
+        var target = document.getElementById(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ============================================================
+    // CARD HOVER: keyboard focus parity
+    // ============================================================
+    document.querySelectorAll('.tutorial-card').forEach(function(card) {
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

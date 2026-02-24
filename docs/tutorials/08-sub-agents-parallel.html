@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sub-Agents &amp; Parallel Execution | Harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #243147;
+      --accent: #7C3AED;
+      --accent-light: #A78BFA;
+      --text: #E2E8F0;
+      --text-muted: #94A3B8;
+      --heading: #F8FAFC;
+      --border: #334155;
+      --blue: #3B82F6;
+      --amber: #F59E0B;
+      --green: #10B981;
+      --red: #EF4444;
+      --sidebar-width: 280px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 60px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--heading);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot { color: var(--accent); }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-intermediate { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-time { background: rgba(124, 58, 237, 0.15); color: var(--accent-light); border: 1px solid rgba(124, 58, 237, 0.3); }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .toc-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .toc-link.active { color: var(--accent-light); border-left-color: var(--accent); background: rgba(124, 58, 237, 0.08); }
+    .toc-num { font-size: 11px; font-weight: 600; color: var(--accent); min-width: 18px; }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 40px 80px;
+    }
+
+    .content { max-width: 780px; margin: 0 auto; }
+
+    /* ── Page title ── */
+    .page-title-block { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+
+    .page-title-block h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+
+    .page-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 56px; }
+
+    .step-heading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-heading h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    p { margin-bottom: 16px; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      margin: 20px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent-light); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 18px 20px !important;
+      background: #1a2332 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      background: none !important;
+    }
+
+    /* ── Tabs ── */
+    .tabs-component { margin: 20px 0; }
+
+    .tab-list {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn[aria-selected="true"] { color: var(--accent-light); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; padding-top: 4px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 3px solid;
+    }
+
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+    .callout-body p { font-size: 14px; margin-bottom: 0; color: var(--text); }
+
+    .callout-info { background: rgba(59, 130, 246, 0.08); border-color: #3B82F6; }
+    .callout-info .callout-title { color: #60A5FA; }
+
+    .callout-warning { background: rgba(245, 158, 11, 0.08); border-color: #F59E0B; }
+    .callout-warning .callout-title { color: #FCD34D; }
+
+    .callout-success { background: rgba(16, 185, 129, 0.08); border-color: #10B981; }
+    .callout-success .callout-title { color: #34D399; }
+
+    .callout-error { background: rgba(239, 68, 68, 0.08); border-color: #EF4444; }
+    .callout-error .callout-title { color: #F87171; }
+
+    .callout-tryit { background: rgba(124, 58, 237, 0.08); border-color: #7C3AED; }
+    .callout-tryit .callout-title { color: var(--accent-light); }
+
+    .callout-competitor { background: rgba(124, 58, 237, 0.06); border-color: var(--accent); border-left-width: 3px; border-radius: 8px; }
+    .callout-competitor .callout-title { color: var(--accent-light); }
+
+    /* ── Deep Dive collapsible ── */
+    .deep-dive { margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+    .deep-dive-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: none;
+      color: var(--heading);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .deep-dive-btn:hover { background: var(--surface2); }
+
+    .deep-dive-label { display: flex; align-items: center; gap: 10px; }
+    .deep-dive-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent-light);
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .deep-dive-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .deep-dive-content { display: none; padding: 16px 18px; border-top: 1px solid var(--border); }
+    .deep-dive-content.open { display: block; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--heading);
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) { background: rgba(30, 41, 59, 0.4); }
+
+    code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: rgba(124, 58, 237, 0.12);
+      color: #C4B5FD;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* ── Agent type cards ── */
+    .agent-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 16px;
+      transition: border-color 0.15s;
+    }
+
+    .agent-card:hover { border-color: var(--accent); }
+
+    .agent-card-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent-light);
+      margin-bottom: 6px;
+    }
+
+    .agent-card-purpose {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .agent-card-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .tag-readonly { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
+    .tag-write { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+
+    /* ── Numbered steps list ── */
+    .steps-list {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .steps-list li {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 0;
+      position: relative;
+    }
+
+    .steps-list li:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 34px;
+      bottom: -16px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .steps-list li:not(:last-child) { margin-bottom: 16px; }
+
+    .step-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.2);
+      border: 2px solid var(--accent);
+      color: var(--accent-light);
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-text { padding-top: 4px; font-size: 14px; color: var(--text); flex: 1; }
+
+    /* ── Savings table highlight ── */
+    .savings-highlight { color: #34D399; font-weight: 600; }
+
+    /* ── Prev/Next nav ── */
+    .prev-next {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+      gap: 4px;
+    }
+
+    .nav-card:hover { border-color: var(--accent); background: var(--surface2); text-decoration: none; }
+
+    .nav-card-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .nav-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    .nav-card-desc { font-size: 13px; color: var(--text-muted); }
+    .nav-card.next { text-align: right; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 60px;
+        height: calc(100vh - 60px);
+        background: var(--bg);
+        z-index: 90;
+        transition: left 0.25s;
+        border-right: 1px solid var(--border);
+      }
+
+      .sidebar.open { left: 0; }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 60px 0 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 89;
+      }
+
+      .sidebar-overlay.open { display: block; }
+
+      .main { padding: 32px 20px 60px; }
+      .mobile-menu-btn { display: flex; align-items: center; }
+    }
+
+    @media (max-width: 640px) {
+      .page-title-block h1 { font-size: 24px; }
+      .prev-next { grid-template-columns: 1fr; }
+      .nav-card.next { text-align: left; }
+      .agent-cards { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Prism overrides */
+    :not(pre) > code[class*="language-"], pre[class*="language-"] {
+      background: #1a2332 !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <a href="index.html" class="brand">Harness<span class="brand-dot">.</span>docs</a>
+  <div class="header-meta">
+    <span class="badge badge-intermediate">Intermediate</span>
+    <span class="badge badge-time">20 min</span>
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Toggle sidebar" aria-expanded="false">&#9776;</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar" aria-label="Table of contents">
+    <div class="toc-label">On this page</div>
+    <a class="toc-link active" href="#why-sub-agents"><span class="toc-num">1</span>Why Sub-Agents?</a>
+    <a class="toc-link" href="#agent-types"><span class="toc-num">2</span>Agent Types</a>
+    <a class="toc-link" href="#spawning-a-sub-agent"><span class="toc-num">3</span>Spawning a Sub-Agent</a>
+    <a class="toc-link" href="#sequential-workflow"><span class="toc-num">4</span>Sequential Workflow</a>
+    <a class="toc-link" href="#parallel-workflow"><span class="toc-num">5</span>Parallel Workflow</a>
+    <a class="toc-link" href="#team-workflow-script"><span class="toc-num">6</span>Build a Team Workflow Script</a>
+    <a class="toc-link" href="#wall-clock-savings"><span class="toc-num">7</span>Wall-Clock Time Savings</a>
+    <a class="toc-link" href="#team-repl-command"><span class="toc-num">8</span>The /team REPL Command</a>
+    <a class="toc-link" href="#next-steps"><span class="toc-num">9</span>Next Steps</a>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="content">
+
+      <!-- Page title -->
+      <div class="page-title-block">
+        <h1>Sub-Agents &amp; Parallel Execution</h1>
+        <p>Delegate work to specialized agents. Run multiple agents concurrently and compress wall-clock time dramatically.</p>
+        <div class="page-meta">
+          <span class="badge badge-intermediate">Intermediate</span>
+          <span class="badge badge-time">20 min read</span>
+        </div>
+      </div>
+
+      <!-- ── Section 1 ── -->
+      <section class="section" id="why-sub-agents">
+        <div class="step-heading">
+          <div class="step-num">1</div>
+          <h2>Why Sub-Agents?</h2>
+        </div>
+
+        <p>
+          A senior developer doesn't do everything themselves. They delegate: one person explores the codebase,
+          another writes the plan, a third reviews the code. Harness agents work the same way.
+        </p>
+
+        <p>Two key benefits drive the sub-agent model:</p>
+
+        <ol style="padding-left: 22px; margin-bottom: 16px; line-height: 2.1;">
+          <li><strong style="color: var(--heading)">Specialization</strong> — different agents optimized for different tasks (exploring vs planning vs reviewing)</li>
+          <li><strong style="color: var(--heading)">Parallelism</strong> — run multiple agents concurrently and get results in the wall-clock time of the slowest, not the sum of all</li>
+        </ol>
+
+        <div class="callout callout-competitor">
+          <div class="callout-icon">&#9889;</div>
+          <div class="callout-body">
+            <div class="callout-title">Harness vs the field: Sub-agent support</div>
+            <div class="table-wrap" style="margin: 12px 0 0;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Harness</th>
+                    <th>Claude Code</th>
+                    <th>Cursor</th>
+                    <th>Aider</th>
+                    <th>OpenHands</th>
+                    <th>SWE-Agent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Sub-agents</td>
+                    <td style="color: #34D399; font-weight: 600;">&#10003; (4 types)</td>
+                    <td style="color: #34D399;">&#10003; (Task)</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                  </tr>
+                  <tr>
+                    <td>Parallel spawn</td>
+                    <td style="color: #34D399; font-weight: 600;">&#10003;</td>
+                    <td style="color: #34D399;">&#10003;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                  </tr>
+                  <tr>
+                    <td>Custom agent defs</td>
+                    <td style="color: #34D399; font-weight: 600;">&#10003;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                    <td style="color: #F87171;">&#10007;</td>
+                  </tr>
+                  <tr>
+                    <td>Agent types</td>
+                    <td style="color: #34D399; font-weight: 600;">4 built-in</td>
+                    <td>1 generic</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 2 ── -->
+      <section class="section" id="agent-types">
+        <div class="step-heading">
+          <div class="step-num">2</div>
+          <h2>Agent Types</h2>
+        </div>
+
+        <p>Harness ships with four built-in agent types. Each has a predefined tool set and permission level.</p>
+
+        <div class="agent-cards">
+          <div class="agent-card">
+            <div class="agent-card-name">general</div>
+            <div class="agent-card-purpose">General-purpose tasks with full tool access — Read, Write, Edit, Bash, Glob, Grep</div>
+            <span class="agent-card-tag tag-write">Read + Write</span>
+          </div>
+          <div class="agent-card">
+            <div class="agent-card-name">explore</div>
+            <div class="agent-card-purpose">Code exploration and research — Read, Glob, Grep</div>
+            <span class="agent-card-tag tag-readonly">Read-only</span>
+          </div>
+          <div class="agent-card">
+            <div class="agent-card-name">plan</div>
+            <div class="agent-card-purpose">Architecture and planning — Read, Glob, Grep</div>
+            <span class="agent-card-tag tag-readonly">Read-only</span>
+          </div>
+          <div class="agent-card">
+            <div class="agent-card-name">review</div>
+            <div class="agent-card-purpose">Code review and analysis — Read, Glob, Grep</div>
+            <span class="agent-card-tag tag-readonly">Read-only</span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Agent Type</th>
+                <th>Default max_turns</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>general</code></td>
+                <td><code>50</code></td>
+                <td>Read + Write (Read, Write, Edit, Bash, Glob, Grep)</td>
+              </tr>
+              <tr>
+                <td><code>explore</code></td>
+                <td><code>20</code></td>
+                <td>Read-only (Read, Glob, Grep)</td>
+              </tr>
+              <tr>
+                <td><code>plan</code></td>
+                <td><code>30</code></td>
+                <td>Read-only (Read, Glob, Grep)</td>
+              </tr>
+              <tr>
+                <td><code>review</code></td>
+                <td><code>30</code></td>
+                <td>Read-only (Read, Glob, Grep)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Read-only by default</div>
+            <p>Explore, plan, and review agents are read-only by default — they can search and read but never modify files. This makes them safe to run in parallel without risk of conflicting writes.</p>
+          </div>
+        </div>
+
+        <p>You can also define custom agent types using <code>AgentDef</code>:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.types.agents import AgentDef
+
+# Define a custom agent type
+security_agent = AgentDef(
+    name="security",
+    description="Security-focused code reviewer",
+    model=None,           # None = inherit from parent
+    tools=("Read", "Glob", "Grep"),
+    system_prompt="You are a security expert. Identify vulnerabilities only.",
+    max_turns=50,
+    read_only=True,
+)</code></pre>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" aria-controls="dd-agentdef" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Full AgentDef signature
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content" id="dd-agentdef">
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">python</span>
+                </div>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code class="language-python"># From harness.types.agents
+class AgentDef:
+    name: str
+    description: str
+    model: str | None = None       # Override model, None = inherit
+    tools: tuple[str, ...] = ()    # Allowed tools, empty = inherit
+    system_prompt: str | None = None
+    max_turns: int = 50
+    read_only: bool = False</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 3 ── -->
+      <section class="section" id="spawning-a-sub-agent">
+        <div class="step-heading">
+          <div class="step-num">3</div>
+          <h2>Spawning a Sub-Agent</h2>
+        </div>
+
+        <p>
+          The simplest way to use sub-agents is through <code>harness.run()</code>. When the agent decides to
+          delegate, it uses the built-in <code>Task</code> tool internally:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">import asyncio
+import harness
+from harness.agents.manager import AgentManager
+
+async def main():
+    # AgentManager needs a provider and tools —
+    # normally these come from the engine internally.
+    # For standalone use, you can get them from a running session.
+
+    # Simple example using harness.run() with sub-agents via the SDK
+    async for msg in harness.run(
+        "Explore the src/ directory and summarize the architecture",
+        provider="anthropic",
+    ):
+        if isinstance(msg, harness.ToolUse) and msg.name == "Task":
+            print(f"Sub-agent spawned: {msg.args.get('prompt', '')[:50]}...")
+        elif isinstance(msg, harness.Result):
+            print(f"Done: {msg.text[:200]}")
+
+asyncio.run(main())</code></pre>
+        </div>
+
+        <p>For direct control, use <code>AgentManager</code> to spawn agents explicitly:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python">from harness.agents.manager import AgentManager
+
+# Create manager (provider and tools come from your setup)
+manager = AgentManager(
+    provider=my_provider,
+    tools=my_tools,
+    cwd="/path/to/project",
+)
+
+# Spawn a single sub-agent
+result = await manager.spawn(
+    "explore",
+    "Find all API endpoint definitions in this codebase",
+)
+print(result)  # Returns the agent's response text</code></pre>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" aria-controls="dd-manager-sig" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              Full AgentManager signature
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content" id="dd-manager-sig">
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">python</span>
+                </div>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code class="language-python"># From harness.agents.manager
+class AgentManager:
+    def __init__(
+        self,
+        provider: ProviderAdapter,
+        tools: dict,
+        cwd: str | Path,
+        context_window: int = 200_000,
+    ): ...
+
+    async def spawn(
+        self,
+        agent_name: str,
+        prompt: str,
+        *,
+        model: str | None = None,
+    ) -> str: ...
+
+    async def spawn_parallel(
+        self,
+        tasks: list[tuple[str, str]],
+        *,
+        model: str | None = None,
+    ) -> list[str]: ...</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 4 ── -->
+      <section class="section" id="sequential-workflow">
+        <div class="step-heading">
+          <div class="step-num">4</div>
+          <h2>Sequential Workflow</h2>
+        </div>
+
+        <p>
+          The classic pattern is Explore &rarr; Plan &rarr; Implement. Each agent hands its output to the next as context:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">team_sequential.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># team_sequential.py
+import asyncio
+from harness.agents.manager import AgentManager
+
+async def sequential_workflow(manager: AgentManager):
+    # Step 1: Explore the codebase
+    print("Step 1: Exploring...")
+    exploration = await manager.spawn(
+        "explore",
+        "Map out the authentication system: find all files, classes, and functions involved",
+    )
+    print(f"Found: {exploration[:100]}...")
+
+    # Step 2: Plan changes based on exploration
+    print("Step 2: Planning...")
+    plan = await manager.spawn(
+        "plan",
+        f"Based on this exploration:\n{exploration}\n\nPlan how to add OAuth2 support",
+    )
+    print(f"Plan: {plan[:100]}...")
+
+    # Step 3: Implement (uses general agent with write access)
+    print("Step 3: Implementing...")
+    implementation = await manager.spawn(
+        "general",
+        f"Implement this plan:\n{plan}",
+    )
+    print(f"Done: {implementation[:100]}...")
+
+    return implementation</code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Context flows forward</div>
+            <p>Each agent's full response is passed as context to the next. This gives later agents complete awareness of what earlier agents found, without inflating a single agent's context window with tool calls.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 5 ── -->
+      <section class="section" id="parallel-workflow">
+        <div class="step-heading">
+          <div class="step-num">5</div>
+          <h2>Parallel Workflow</h2>
+        </div>
+
+        <p>
+          When tasks are independent, use <code>spawn_parallel</code> to run them simultaneously.
+          All agents start at the same time and results are returned once all complete:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">team_parallel.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># team_parallel.py
+import asyncio
+from harness.agents.manager import AgentManager
+
+async def parallel_exploration(manager: AgentManager):
+    # Spawn 3 explore agents in parallel
+    results = await manager.spawn_parallel([
+        ("explore", "Find all database models and their relationships"),
+        ("explore", "Find all API routes and their handlers"),
+        ("explore", "Find all test files and their coverage"),
+    ])
+
+    db_models, api_routes, test_coverage = results
+
+    print(f"DB Models: {db_models[:100]}...")
+    print(f"API Routes: {api_routes[:100]}...")
+    print(f"Test Coverage: {test_coverage[:100]}...")
+
+    # Now plan based on all three findings
+    combined = f"""
+    Database Models: {db_models}
+    API Routes: {api_routes}
+    Test Coverage: {test_coverage}
+    """
+
+    plan = await manager.spawn(
+        "plan",
+        f"Based on this analysis:\n{combined}\n\nPlan a comprehensive refactoring",
+    )
+    return plan</code></pre>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">The key insight</div>
+            <p>Three explorations that each take 30 seconds run in 30 seconds total — not 90. The wall-clock time is bounded by the slowest agent, not the sum.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 6 ── -->
+      <section class="section" id="team-workflow-script">
+        <div class="step-heading">
+          <div class="step-num">6</div>
+          <h2>Build a Team Workflow Script</h2>
+        </div>
+
+        <p>
+          Here is a complete, runnable three-phase team workflow: parallel exploration, then planning,
+          then review — with timing and cost reporting at each stage:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">python</span>
+              <span class="filename">team_workflow.py</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-python"># team_workflow.py — full team workflow with parallel exploration
+import asyncio
+import time
+import harness
+
+async def team_workflow():
+    start = time.time()
+
+    # Phase 1: Parallel exploration (3 agents at once)
+    print("=== Phase 1: Parallel Exploration ===")
+    phase1_start = time.time()
+
+    async for msg in harness.run(
+        """Run three parallel explorations:
+        1. Find all Python files with security vulnerabilities
+        2. Find all files missing type hints
+        3. Find all TODO/FIXME comments
+
+        Use sub-agents to explore in parallel, then summarize all findings.""",
+        provider="anthropic",
+        model="claude-sonnet-4-20250514",
+        permission_mode="plan",  # Read-only for safety
+    ):
+        if isinstance(msg, harness.TextMessage) and not msg.is_partial:
+            print(msg.text)
+        elif isinstance(msg, harness.Result):
+            phase1_time = time.time() - phase1_start
+            print(f"\nPhase 1 complete: {phase1_time:.1f}s")
+            print(f"  Turns: {msg.turns}, Tools: {msg.tool_calls}")
+            exploration_result = msg.text
+
+    # Phase 2: Planning (single agent)
+    print("\n=== Phase 2: Planning ===")
+    async for msg in harness.run(
+        f"Based on these findings:\n{exploration_result}\n\nCreate a prioritized action plan",
+        provider="anthropic",
+        permission_mode="plan",
+    ):
+        if isinstance(msg, harness.Result):
+            plan_result = msg.text
+            print(f"Plan created: {len(plan_result)} chars")
+
+    # Phase 3: Review (single agent)
+    print("\n=== Phase 3: Review ===")
+    async for msg in harness.run(
+        f"Review this plan for completeness and risks:\n{plan_result}",
+        provider="anthropic",
+        permission_mode="plan",
+    ):
+        if isinstance(msg, harness.Result):
+            total_time = time.time() - start
+            print(f"\nTotal time: {total_time:.1f}s")
+            print(f"Total cost: ${msg.total_cost:.4f}")
+
+asyncio.run(team_workflow())</code></pre>
+        </div>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">&#10003;</div>
+          <div class="callout-body">
+            <div class="callout-title">Run it</div>
+            <p>Save this file and run <code>uv run team_workflow.py</code> from your project root. The agent will spawn explore sub-agents in parallel during Phase 1.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 7 ── -->
+      <section class="section" id="wall-clock-savings">
+        <div class="step-heading">
+          <div class="step-num">7</div>
+          <h2>Wall-Clock Time Savings</h2>
+        </div>
+
+        <p>
+          Parallelism yields real, measurable time savings. Because read-only agents never conflict,
+          they can all run simultaneously:
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Approach</th>
+                <th>Sequential</th>
+                <th>Parallel (3 agents)</th>
+                <th>Savings</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>3 explorations (30s each)</td>
+                <td>90s</td>
+                <td>30s</td>
+                <td class="savings-highlight">67%</td>
+              </tr>
+              <tr>
+                <td>5 file reviews (20s each)</td>
+                <td>100s</td>
+                <td>20s</td>
+                <td class="savings-highlight">80%</td>
+              </tr>
+              <tr>
+                <td>Explore + Plan + Review</td>
+                <td>60s</td>
+                <td>~35s</td>
+                <td class="savings-highlight">42%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">Shared provider, separate contexts</div>
+            <p>Parallel agents share the same provider and API key. Each agent gets its own context window and tool access. API rate limits are the only practical ceiling on parallelism.</p>
+          </div>
+        </div>
+
+        <div class="deep-dive">
+          <button class="deep-dive-btn" aria-expanded="false" aria-controls="dd-parallelism" onclick="toggleDeepDive(this)">
+            <span class="deep-dive-label">
+              <span class="deep-dive-tag">Deep Dive</span>
+              How parallel spawning works under the hood
+            </span>
+            <span class="chevron">&#8964;</span>
+          </button>
+          <div class="deep-dive-content" id="dd-parallelism">
+            <p style="font-size: 14px; margin-bottom: 12px;">
+              <code>spawn_parallel</code> uses <code>asyncio.gather</code> to launch all agents concurrently.
+              Each agent runs its own async loop, makes independent API calls, and uses its own context.
+              Results are collected once all coroutines complete.
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-header-left">
+                  <span class="lang-badge">python</span>
+                </div>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code class="language-python"># Conceptually, spawn_parallel does this:
+results = await asyncio.gather(
+    manager.spawn("explore", tasks[0][1]),
+    manager.spawn("explore", tasks[1][1]),
+    manager.spawn("explore", tasks[2][1]),
+)
+# All three run concurrently; gather returns when all complete</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 8 ── -->
+      <section class="section" id="team-repl-command">
+        <div class="step-heading">
+          <div class="step-num">8</div>
+          <h2>The /team REPL Command</h2>
+        </div>
+
+        <p>
+          You do not need to write a script to use sub-agents. The <code>/team</code> REPL command
+          automatically decomposes your request and parallelizes it:
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-header-left">
+              <span class="lang-badge">bash</span>
+            </div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code class="language-bash"># Start REPL
+harness
+
+# Use /team to decompose and parallelize
+> /team Add comprehensive test coverage for the auth module
+# Harness automatically:
+# 1. Spawns an explore agent to find existing tests
+# 2. Spawns an explore agent to find auth module files
+# 3. Plans test cases
+# 4. Implements tests</code></pre>
+        </div>
+
+        <div class="callout callout-tryit">
+          <div class="callout-icon">&#9654;</div>
+          <div class="callout-body">
+            <div class="callout-title">Try it now</div>
+            <p>The <code>/team</code> command is the easiest way to use sub-agents. It automatically decides how to split the work — no scripting required.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8505;</div>
+          <div class="callout-body">
+            <div class="callout-title">When to use /team vs scripting</div>
+            <p>Use <code>/team</code> for one-off tasks in the REPL. Use <code>AgentManager</code> directly when building automated pipelines, CI integrations, or workflows that need fine-grained control over agent selection and prompt templating.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 9 ── -->
+      <section class="section" id="next-steps">
+        <div class="step-heading">
+          <div class="step-num">9</div>
+          <h2>Next Steps</h2>
+        </div>
+
+        <p>
+          You now know how to spawn specialized sub-agents, chain them sequentially, and run them in parallel.
+          The next tutorial takes this further — integrating Harness into your CI/CD pipeline so every pull request
+          gets an automatic AI review.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#8594;</div>
+          <div class="callout-body">
+            <div class="callout-title">Tutorial 9: CI/CD Integration</div>
+            <p>Set up GitHub Actions to auto-review PRs and triage issues using Harness — with native webhook parsing and Check Runs reporting.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Prev / Next ── -->
+      <nav class="prev-next" aria-label="Tutorial navigation">
+        <a href="07-sandboxed-execution.html" class="nav-card">
+          <span class="nav-card-dir">&larr; Previous</span>
+          <span class="nav-card-title">Sandboxed Execution</span>
+          <span class="nav-card-desc">Running agents safely in isolated environments</span>
+        </a>
+        <a href="09-cicd-pipeline.html" class="nav-card next">
+          <span class="nav-card-dir">Next &rarr;</span>
+          <span class="nav-card-title">CI/CD Integration</span>
+          <span class="nav-card-desc">AI agent in your pipeline</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+  // ── Copy to clipboard ──
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // ── Tab switching ──
+  function switchTab(btn, panelId) {
+    const allBtns = btn.closest('.tabs-component').querySelectorAll('.tab-btn');
+    allBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+    btn.setAttribute('aria-selected', 'true');
+
+    const group = btn.closest('.tabs-component').querySelector('[data-tabgroup]');
+    group.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  // ── Collapsible deep dive ──
+  function toggleDeepDive(btn) {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    const content = btn.nextElementSibling;
+    content.classList.toggle('open', !expanded);
+  }
+
+  // ── Mobile sidebar ──
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    menuBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  menuBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', () => {
+    closeSidebar();
+  });
+
+  // ── TOC scroll highlight ──
+  const sections = document.querySelectorAll('section[id]');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-60px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Close sidebar on TOC link click (mobile)
+  tocLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

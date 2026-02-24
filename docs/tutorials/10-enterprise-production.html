@@ -1,0 +1,3022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Production Deployment — Harness Tutorials</title>
+  <meta name="description" content="Deploy Harness with all 14 enterprise features: multi-provider routing, policy-as-code, audit logging, OpenTelemetry observability, Docker sandbox, and cloud deployment." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js tomorrow theme -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES
+       ============================================================ */
+    :root {
+      --bg:            #0F172A;
+      --surface:       #1E293B;
+      --surface-hover: #263348;
+      --accent:        #7C3AED;
+      --accent-light:  #A78BFA;
+      --accent-hover:  #6D28D9;
+      --text:          #E2E8F0;
+      --muted:         #94A3B8;
+      --heading:       #F8FAFC;
+      --border:        #334155;
+      --info:          #3B82F6;
+      --warning:       #F59E0B;
+      --success:       #10B981;
+      --error:         #EF4444;
+      --sidebar-w:     280px;
+      --header-h:      60px;
+      --radius:        8px;
+      --radius-lg:     12px;
+      --transition:    0.18s ease;
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    a { color: var(--accent-light); text-decoration: none; transition: color var(--transition); }
+    a:hover { color: #fff; text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; border-radius: 2px; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748B; }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -0.4px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .brand:hover { color: var(--accent-light); text-decoration: none; }
+
+    .brand-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-sep {
+      color: var(--border);
+      font-size: 18px;
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    .header-series {
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .header-badges {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-advanced {
+      background: rgba(239, 68, 68, 0.14);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-time {
+      background: rgba(148, 163, 184, 0.08);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-github {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-hover);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      transition: border-color var(--transition), color var(--transition);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-github:hover { border-color: var(--accent-light); color: var(--heading); text-decoration: none; }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .mobile-menu-btn:hover { border-color: var(--accent-light); }
+    .mobile-menu-btn:focus-visible { outline: 2px solid var(--accent-light); }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    /* ============================================================
+       SIDEBAR / TOC
+       ============================================================ */
+    aside {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+    }
+
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-track { background: transparent; }
+    aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .toc-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 0 20px 12px;
+    }
+
+    .toc-list { list-style: none; }
+
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      color: var(--muted);
+      font-size: 13px;
+      border-left: 2px solid transparent;
+      transition: all var(--transition);
+      line-height: 1.4;
+      text-decoration: none;
+    }
+
+    .toc-list a:hover { color: var(--heading); background: var(--surface-hover); text-decoration: none; }
+    .toc-list a.active {
+      color: var(--accent-light);
+      border-left-color: var(--accent);
+      background: rgba(124, 58, 237, 0.09);
+    }
+
+    .toc-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 18px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 20px;
+    }
+
+    .sidebar-meta {
+      padding: 0 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .sidebar-meta p { margin-bottom: 4px; }
+    .sidebar-meta strong { color: var(--text); }
+
+    /* Sidebar overlay (mobile) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 49;
+    }
+
+    /* ============================================================
+       MAIN CONTENT
+       ============================================================ */
+    .main-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 780px;
+      padding: 48px 40px 80px;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+       ============================================================ */
+    .tutorial-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-light);
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 700;
+      color: var(--heading);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 14px;
+    }
+
+    .lead {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 40px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-anchor {
+      display: block;
+      position: relative;
+      top: calc(-1 * (var(--header-h) + 20px));
+      visibility: hidden;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 52px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--heading);
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 14px; }
+    ul, ol { padding-left: 22px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+    strong { color: var(--heading); font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+    code:not([class]) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: var(--accent-light);
+    }
+
+    /* ============================================================
+       STEP INDICATOR (headline number badge)
+       ============================================================ */
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       NUMBERED STEPS WITH CONNECTING LINES
+       ============================================================ */
+    .steps { margin: 28px 0 36px; display: flex; flex-direction: column; }
+
+    .step { display: flex; gap: 18px; }
+
+    .step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .step-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.14);
+    }
+
+    .step-line {
+      width: 2px;
+      flex: 1;
+      min-height: 20px;
+      background: linear-gradient(to bottom, var(--accent), var(--border));
+      margin: 5px 0;
+    }
+
+    .step:last-child .step-line { display: none; }
+
+    .step-content {
+      padding-bottom: 28px;
+      flex: 1;
+      min-width: 0;
+    }
+    .step:last-child .step-content { padding-bottom: 0; }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 8px;
+      padding-top: 5px;
+    }
+
+    .step-body { font-size: 14px; color: var(--text); line-height: 1.65; }
+    .step-body p { margin-bottom: 10px; }
+    .step-body p:last-child { margin-bottom: 0; }
+
+    /* ============================================================
+       CODE BLOCKS
+       ============================================================ */
+    .code-block {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin: 16px 0 24px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      gap: 12px;
+    }
+
+    .code-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .lang-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(124, 58, 237, 0.18);
+      color: var(--accent-light);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover { border-color: var(--accent-light); color: var(--accent-light); background: rgba(124, 58, 237, 0.08); }
+    .copy-btn:focus-visible { outline: 2px solid var(--accent-light); }
+    .copy-btn.copied { color: var(--success); border-color: var(--success); background: rgba(16, 185, 129, 0.08); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 18px 20px !important;
+      background: transparent !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13.5px !important;
+      line-height: 1.65 !important;
+      overflow-x: auto;
+    }
+
+    .code-block pre::-webkit-scrollbar { height: 4px; }
+    .code-block pre::-webkit-scrollbar-track { background: transparent; }
+    .code-block pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ============================================================
+       CALLOUT BOXES
+       ============================================================ */
+    .callout {
+      border-radius: var(--radius);
+      padding: 15px 18px;
+      margin: 20px 0;
+      border-left: 3px solid;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .callout-header {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .callout p { font-size: 14px; color: var(--text); margin-bottom: 8px; line-height: 1.6; }
+    .callout p:last-child { margin-bottom: 0; }
+
+    .callout-info    { border-color: var(--info); }
+    .callout-info    .callout-header { color: #60A5FA; }
+    .callout-warning { border-color: var(--warning); }
+    .callout-warning .callout-header { color: #FCD34D; }
+    .callout-success { border-color: var(--success); }
+    .callout-success .callout-header { color: #34D399; }
+    .callout-error   { border-color: var(--error); }
+    .callout-error   .callout-header { color: #F87171; }
+    .callout-tryit   { border-color: var(--accent); background: rgba(124, 58, 237, 0.07); }
+    .callout-tryit   .callout-header { color: var(--accent-light); }
+
+    /* ============================================================
+       COLLAPSIBLE SECTIONS
+       ============================================================ */
+    .collapsible { margin: 18px 0; }
+
+    .collapsible-trigger {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color var(--transition), background var(--transition);
+      text-align: left;
+    }
+
+    .collapsible-trigger:hover { border-color: var(--accent); background: var(--surface-hover); }
+    .collapsible-trigger[aria-expanded="true"] {
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-color: var(--accent);
+    }
+    .collapsible-trigger:focus-visible { outline: 2px solid var(--accent-light); outline-offset: -2px; }
+
+    .chevron {
+      transition: transform 0.22s ease;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .collapsible-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+    .collapsible-content {
+      background: rgba(255,255,255,0.018);
+      border: 1px solid var(--accent);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 16px 18px;
+      display: none;
+    }
+    .collapsible-content.open { display: block; }
+    .collapsible-content p { font-size: 14px; margin-bottom: 10px; color: var(--text); }
+    .collapsible-content p:last-child { margin-bottom: 0; }
+
+    /* ============================================================
+       TABS
+       ============================================================ */
+    .tab-group {
+      margin: 20px 0 28px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .tab-nav {
+      display: flex;
+      background: rgba(255,255,255,0.025);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .tab-nav::-webkit-scrollbar { height: 0; }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 11px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      white-space: nowrap;
+      position: relative;
+      transition: color var(--transition);
+    }
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transition: transform var(--transition);
+    }
+    .tab-btn:hover { color: var(--heading); }
+    .tab-btn[aria-selected="true"] { color: var(--accent-light); }
+    .tab-btn[aria-selected="true"]::after { transform: scaleX(1); }
+    .tab-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: -2px; }
+
+    .tab-panel { display: none; padding: 22px; background: var(--surface); }
+    .tab-panel[aria-hidden="false"] { display: block; }
+    .tab-panel > p { font-size: 14px; color: var(--text); margin-bottom: 12px; }
+    .tab-panel > p:last-child { margin-bottom: 0; }
+
+    /* ============================================================
+       COMPETITOR COMPARISON TABLE
+       ============================================================ */
+    .comparison-wrap {
+      margin: 28px 0;
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .comparison-header {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0.07));
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .comparison-header h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 0 0 3px;
+    }
+    .comparison-header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .comparison-table-wrap { overflow-x: auto; }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 640px;
+    }
+
+    .comparison-table th {
+      padding: 10px 12px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      background: var(--surface);
+    }
+    .comparison-table th:first-child { text-align: left; padding-left: 16px; }
+    .comparison-table th:nth-child(2) { color: var(--accent-light); background: rgba(124, 58, 237, 0.1); }
+
+    .comparison-table td {
+      padding: 9px 12px;
+      text-align: center;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text);
+    }
+    .comparison-table td:first-child { text-align: left; padding-left: 16px; font-weight: 500; }
+    .comparison-table td.num-col { color: var(--muted); font-size: 12px; font-weight: 600; min-width: 28px; }
+    .comparison-table td:nth-child(3) { background: rgba(124, 58, 237, 0.04); }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .comparison-table tr:hover td:nth-child(3) { background: rgba(124, 58, 237, 0.08); }
+    .comparison-table tr.total-row td { font-weight: 700; background: rgba(124, 58, 237, 0.06); border-top: 1px solid rgba(124, 58, 237, 0.3); }
+    .comparison-table tr.total-row td:nth-child(3) { background: rgba(124, 58, 237, 0.14); color: #34D399; }
+
+    .check { color: #34D399; font-weight: 700; font-size: 15px; }
+    .cross { color: #F87171; }
+
+    /* ============================================================
+       ARCHITECTURE DIAGRAM
+       ============================================================ */
+    .arch-diagram {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: 20px 0 28px;
+    }
+
+    .arch-diagram-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .arch-inner {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      align-items: center;
+    }
+
+    .arch-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .arch-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      background: var(--bg);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .arch-box.accent-border { border-color: rgba(124, 58, 237, 0.5); }
+    .arch-box.wide { flex: 2; }
+
+    .arch-box-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .arch-box-items {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .arch-box-items span { display: block; }
+    .arch-box-items span::before { content: '  '; }
+
+    .arch-arrow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 6px 0;
+      width: 100%;
+      gap: 24px;
+    }
+
+    .arch-arrow-line {
+      flex: 1;
+      max-width: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .arch-wide-box {
+      width: 100%;
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      background: rgba(124, 58, 237, 0.06);
+      margin: 0;
+    }
+
+    .arch-wide-box-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-light);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .arch-sub-agents {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .arch-sub-box {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: var(--bg);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .arch-sub-box strong { display: block; color: var(--text); font-size: 11.5px; margin-bottom: 2px; }
+
+    /* ============================================================
+       INHERITANCE DIAGRAM
+       ============================================================ */
+    .inherit-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 20px 0 28px;
+    }
+
+    .inherit-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .inherit-connector {
+      width: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .inherit-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .inherit-v-line {
+      width: 2px;
+      height: 24px;
+      background: var(--border);
+    }
+
+    .inherit-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 15px;
+      margin: 0 0 0 0;
+    }
+    .inherit-box:hover { border-color: var(--accent); }
+
+    .inherit-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent-light);
+      margin-bottom: 1px;
+    }
+
+    .inherit-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .inherit-desc {
+      font-size: 12px;
+      color: var(--text);
+      margin-top: 3px;
+    }
+
+    /* ============================================================
+       DATA TABLES
+       ============================================================ */
+    .table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(51,65,85,0.5);
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    tbody tr.table-total { font-weight: 700; background: rgba(124, 58, 237, 0.05); border-top: 1px solid rgba(124, 58, 237, 0.25); }
+
+    .td-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    /* ============================================================
+       PREV / NEXT NAVIGATION
+       ============================================================ */
+    .page-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 60px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      color: inherit;
+    }
+    .nav-card:hover { border-color: var(--accent); background: rgba(124, 58, 237, 0.07); transform: translateY(-2px); text-decoration: none; }
+
+    .nav-card.nav-next { text-align: right; }
+
+    .nav-dir {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
+    .nav-tut-num {
+      font-size: 11px;
+      color: var(--accent-light);
+      font-weight: 600;
+    }
+
+    .nav-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent-light); }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 1024px) {
+      aside {
+        position: fixed;
+        left: -100%;
+        top: var(--header-h);
+        height: calc(100vh - var(--header-h));
+        background: var(--bg);
+        z-index: 50;
+        border-right: 1px solid var(--border);
+        transition: left 0.25s ease;
+      }
+      aside.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .mobile-menu-btn { display: flex; }
+      main { padding: 32px 24px 60px; max-width: 100%; }
+      .header-series { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      main { padding: 24px 16px 48px; }
+      .page-nav { grid-template-columns: 1fr; }
+      .nav-card.nav-next { text-align: left; }
+      .arch-row { flex-direction: column; }
+      .arch-sub-agents { flex-direction: column; }
+      .comparison-table { font-size: 12px; }
+    }
+
+    @media (max-width: 480px) {
+      .tab-btn { padding: 10px 14px; font-size: 13px; }
+      .header-badges { gap: 6px; }
+      .badge { padding: 2px 7px; font-size: 10px; }
+    }
+
+    /* ============================================================
+       CTA BLOCK (Congratulations section)
+       ============================================================ */
+    .cta-block {
+      border: 1px solid rgba(124, 58, 237, 0.5);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: 28px 0;
+    }
+
+    .cta-header {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(124, 58, 237, 0.1));
+      padding: 22px 26px;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+      text-align: center;
+    }
+
+    .cta-header h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 0 0 6px;
+    }
+
+    .cta-header p {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .cta-body {
+      background: var(--surface);
+      padding: 24px 26px;
+    }
+
+    .cta-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .cta-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      transition: background var(--transition), transform var(--transition);
+    }
+    .cta-link-btn:hover { background: var(--accent-hover); color: #fff; text-decoration: none; transform: translateY(-1px); }
+
+    .cta-link-btn.secondary {
+      background: var(--surface-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .cta-link-btn.secondary:hover { border-color: var(--accent-light); color: var(--heading); }
+
+    .tutorial-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .tutorial-link-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      text-decoration: none;
+      color: var(--muted);
+      transition: border-color var(--transition), color var(--transition);
+    }
+    .tutorial-link-item:hover { border-color: var(--accent-light); color: var(--accent-light); text-decoration: none; }
+    .tutorial-link-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 22px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 640px) {
+      .tutorial-links { grid-template-columns: 1fr; }
+      .cta-links { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header role="banner">
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">&#9776;</button>
+
+  <a href="index.html" class="brand" aria-label="Harness — Home">
+    Harness
+    <span class="brand-badge">DOCS</span>
+  </a>
+
+  <span class="header-sep" aria-hidden="true">/</span>
+  <span class="header-series">From Zero to Enterprise AI Agents</span>
+
+  <div class="header-badges">
+    <span class="badge badge-advanced">Advanced</span>
+    <span class="badge badge-time">30 min</span>
+    <a href="https://github.com/AgentBoardTT/openharness" class="btn-github" target="_blank" rel="noopener" aria-label="View Harness on GitHub">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+      </svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+<!-- ============================================================
+     LAYOUT
+     ============================================================ -->
+<div class="layout">
+
+  <!-- ============================================================
+       SIDEBAR / TOC
+       ============================================================ -->
+  <aside id="sidebar" role="complementary" aria-label="Table of contents">
+    <p class="toc-label">On this page</p>
+    <nav aria-label="Table of contents">
+      <ul class="toc-list" id="tocList">
+        <li><a href="#enterprise-checklist" class="toc-link"><span class="toc-num">1</span>The Enterprise Checklist</a></li>
+        <li><a href="#complete-config" class="toc-link"><span class="toc-num">2</span>Complete Configuration</a></li>
+        <li><a href="#architecture" class="toc-link"><span class="toc-num">3</span>Architecture Overview</a></li>
+        <li><a href="#observability" class="toc-link"><span class="toc-num">4</span>OpenTelemetry Observability</a></li>
+        <li><a href="#security" class="toc-link"><span class="toc-num">5</span>Security Hardening</a></li>
+        <li><a href="#multi-team" class="toc-link"><span class="toc-num">6</span>Multi-Team Policy Setup</a></li>
+        <li><a href="#monitoring" class="toc-link"><span class="toc-num">7</span>Monitoring &amp; Alerting</a></li>
+        <li><a href="#production-script" class="toc-link"><span class="toc-num">8</span>Production Script</a></li>
+        <li><a href="#capacity" class="toc-link"><span class="toc-num">9</span>Capacity Planning</a></li>
+        <li><a href="#cloud" class="toc-link"><span class="toc-num">10</span>Cloud Deployment</a></li>
+        <li><a href="#congratulations" class="toc-link"><span class="toc-num">11</span>Congratulations</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-meta">
+      <p><strong>Tutorial 10 of 10</strong></p>
+      <p>Difficulty: <strong style="color:#F87171">Advanced</strong></p>
+      <p>Time: <strong>30 min</strong></p>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
+  <div class="main-wrapper">
+    <main id="main-content" role="main">
+
+      <div class="tutorial-tag">Tutorial 10 &mdash; Capstone</div>
+
+      <h1>Enterprise Production Deployment</h1>
+
+      <p class="lead">
+        The definitive guide to deploying Harness with all 14 enterprise features enabled simultaneously.
+        This capstone tutorial brings together multi-provider routing, policy-as-code, audit logging,
+        OpenTelemetry observability, Docker sandboxing, and cloud-native deployment into a single,
+        production-ready configuration.
+      </p>
+
+      <!-- =======================================================
+           SECTION 1: The Enterprise Checklist
+           ======================================================= -->
+      <span class="section-anchor" id="enterprise-checklist"></span>
+      <h2><span class="step-num">1</span>The Enterprise Checklist</h2>
+
+      <p>
+        Before deploying any AI coding agent in a regulated or enterprise environment, security, compliance,
+        and operations teams ask the same 14 questions. Harness is the <strong>only coding agent that
+        answers yes to all of them</strong>. The table below is the definitive comparison.
+      </p>
+
+      <div class="comparison-wrap">
+        <div class="comparison-header">
+          <h3>14-Feature Enterprise Comparison</h3>
+          <p>Every feature that matters for production-grade coding agent deployment</p>
+        </div>
+        <div class="comparison-table-wrap">
+          <table class="comparison-table" aria-label="14-feature enterprise comparison: Harness vs Claude Code vs Cursor vs Aider vs OpenHands vs SWE-Agent">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Enterprise Feature</th>
+                <th scope="col">Harness</th>
+                <th scope="col">Claude Code</th>
+                <th scope="col">Cursor</th>
+                <th scope="col">Aider</th>
+                <th scope="col">OpenHands</th>
+                <th scope="col">SWE-Agent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="num-col">1</td>
+                <td>Multi-provider (5+)</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">2</td>
+                <td>Full async streaming SDK</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">3</td>
+                <td>4-mode permission system</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">4</td>
+                <td>Token / cost budgets</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">5</td>
+                <td>Policy-as-code engine</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">6</td>
+                <td>SHA-256 audit hash chain</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">7</td>
+                <td>PII scanning</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">8</td>
+                <td>Dual sandbox modes</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="check">&#10003;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">9</td>
+                <td>Sub-agent parallelism</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">10</td>
+                <td>Model router + fallback</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">11</td>
+                <td>Native CI/CD integration</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">12</td>
+                <td>OpenTelemetry observability</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">13</td>
+                <td>Hooks system</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr>
+                <td class="num-col">14</td>
+                <td>Interactive REPL</td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="check">&#10003;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+                <td><span class="cross">&#10007;</span></td>
+              </tr>
+              <tr class="total-row">
+                <td></td>
+                <td><strong>Total Score</strong></td>
+                <td><strong style="color:#34D399">14 / 14</strong></td>
+                <td><strong>3 / 14</strong></td>
+                <td><strong>0 / 14</strong></td>
+                <td><strong>1 / 14</strong></td>
+                <td><strong>3 / 14</strong></td>
+                <td><strong>1 / 14</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="callout callout-success" role="note">
+        <div class="callout-header">Harness is the only coding agent that checks every enterprise box</div>
+        <p>
+          Claude Code scores 3/14 &mdash; the second-closest competitor. It has sub-agent parallelism, hooks,
+          and an interactive REPL, but lacks budgets, policy-as-code, audit logging, PII scanning, observability,
+          sandbox modes, and CI/CD integration. <strong>This tutorial shows you how to deploy all 14 features together.</strong>
+        </p>
+      </div>
+
+      <!-- =======================================================
+           SECTION 2: Complete Configuration
+           ======================================================= -->
+      <span class="section-anchor" id="complete-config"></span>
+      <h2><span class="step-num">2</span>Complete Configuration</h2>
+
+      <p>
+        The following configuration file enables every enterprise feature. Copy it to
+        <code>.harness/config.toml</code> in your project root (or <code>~/.harness/config.toml</code>
+        for a user-level default) and fill in your provider API keys via environment variables.
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">TOML</span>
+            <span class="filename">.harness/config.toml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-toml"># .harness/config.toml — Complete Enterprise Configuration
+
+# === Provider Selection ===
+# Provider and model are set via CLI flags (-p, -m),
+# environment variables, or the router configuration below.
+# Default provider: anthropic
+# Default model: determined by provider
+
+# === Router & Budget ===
+[router]
+strategy = "cost_optimized"
+fallback_chain = ["anthropic", "openai", "google"]
+max_cost_per_session = 5.00
+max_tokens_per_session = 1000000
+simple_task_model = "claude-haiku-4-5-20251001"
+
+# === Permissions ===
+[permissions]
+mode = "accept_edits"
+
+# === Policy ===
+[policy]
+policy_paths = [".harness/policy.yml", "~/.harness/policy.yml"]
+simulation_mode = false
+
+# === Audit ===
+[audit]
+enabled = true
+scan_pii = true
+retention_days = 365
+retention_max_size_mb = 1000
+log_tool_args = true
+
+# === Sandbox ===
+[sandbox]
+enabled = true
+mode = "docker"
+max_memory_mb = 1024
+max_cpu_seconds = 60
+network_access = false
+docker_image = "python:3.12-slim"
+allowed_paths = ["/workspace"]
+blocked_commands = ["rm -rf /", "curl", "wget", "nc"]
+
+# === OpenTelemetry ===
+# OpenTelemetry is configured via environment variables:
+# export OTEL_SERVICE_NAME="harness-agent"
+# export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+# export OTEL_TRACES_EXPORTER="otlp"
+# export OTEL_METRICS_EXPORTER="otlp"</code></pre>
+      </div>
+
+      <div class="callout callout-info" role="note">
+        <div class="callout-header">Configuration Precedence</div>
+        <p>
+          Harness merges configuration in this order: environment variables override
+          <code>.harness/config.toml</code> (project), which overrides
+          <code>~/.harness/config.toml</code> (user). API keys should always be set via environment
+          variables, never committed to config files.
+        </p>
+      </div>
+
+      <!-- =======================================================
+           SECTION 3: Architecture Overview
+           ======================================================= -->
+      <span class="section-anchor" id="architecture"></span>
+      <h2><span class="step-num">3</span>Architecture Overview</h2>
+
+      <p>
+        The diagram below shows how all 14 enterprise features interact at runtime. Every task flows
+        through the Model Router and Policy Engine before reaching the Agent Loop, then exits through
+        the Sandbox and Audit Logger to OpenTelemetry.
+      </p>
+
+      <div class="arch-diagram" role="img" aria-label="Harness enterprise architecture diagram">
+        <div class="arch-diagram-header">
+          <div class="code-header-left">
+            <span class="lang-badge">Diagram</span>
+            <span class="filename">Harness Enterprise Architecture</span>
+          </div>
+        </div>
+        <div class="arch-inner">
+
+          <!-- Top: User / CI/CD -->
+          <div style="width:100%">
+            <div class="arch-box accent-border" style="text-align:center;width:100%">
+              <div class="arch-box-title" style="text-align:center;margin-bottom:4px">User / CI/CD</div>
+              <div class="arch-box-items" style="text-align:center;display:flex;justify-content:center;gap:20px;flex-wrap:wrap">
+                <span style="display:inline">CLI</span>
+                <span style="display:inline">Python SDK</span>
+                <span style="display:inline">GitHub Actions</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="arch-arrow">
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+          </div>
+
+          <!-- Row 1: Model Router + Policy Engine -->
+          <div class="arch-row">
+            <div class="arch-box">
+              <div class="arch-box-title">Model Router</div>
+              <div class="arch-box-items">
+                <span>Cost Optimized</span>
+                <span>Quality First</span>
+                <span>Latency First</span>
+                <span>Fallback Chain</span>
+              </div>
+            </div>
+            <div class="arch-box">
+              <div class="arch-box-title">Policy Engine</div>
+              <div class="arch-box-items">
+                <span>YAML Rules</span>
+                <span>Inheritance Chain</span>
+                <span>Simulation Mode</span>
+                <span>Audit Log</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="arch-arrow">
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+          </div>
+
+          <!-- Row 2: Budget Tracker + Permission System -->
+          <div class="arch-row">
+            <div class="arch-box">
+              <div class="arch-box-title">Budget Tracker</div>
+              <div class="arch-box-items">
+                <span>Token limits</span>
+                <span>Cost limits</span>
+                <span>BudgetExhaustedError</span>
+                <span>Live snapshot</span>
+              </div>
+            </div>
+            <div class="arch-box">
+              <div class="arch-box-title">Permission System</div>
+              <div class="arch-box-items">
+                <span>4-mode control</span>
+                <span>4-tier hierarchy</span>
+                <span>Allow / Deny rules</span>
+                <span>Ask at runtime</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="arch-arrow">
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+          </div>
+
+          <!-- Agent Loop wide box -->
+          <div class="arch-wide-box">
+            <div class="arch-wide-box-title">Agent Loop (Prompt &rarr; Model &rarr; Tool &rarr; Result)</div>
+            <div class="arch-sub-agents">
+              <div class="arch-sub-box">
+                <strong>Sub-Agent</strong>
+                explore
+              </div>
+              <div class="arch-sub-box">
+                <strong>Sub-Agent</strong>
+                plan
+              </div>
+              <div class="arch-sub-box">
+                <strong>Sub-Agent</strong>
+                implement
+              </div>
+              <div class="arch-sub-box">
+                <strong>Sub-Agent</strong>
+                review
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="arch-arrow">
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+          </div>
+
+          <!-- Row 3: Sandbox + Audit Logger -->
+          <div class="arch-row">
+            <div class="arch-box">
+              <div class="arch-box-title">Sandbox Runtime</div>
+              <div class="arch-box-items">
+                <span>Process / Docker</span>
+                <span>Memory limits</span>
+                <span>CPU limits</span>
+                <span>Network isolation</span>
+              </div>
+            </div>
+            <div class="arch-box">
+              <div class="arch-box-title">Audit Logger</div>
+              <div class="arch-box-items">
+                <span>SHA-256 hash chain</span>
+                <span>PII scanning</span>
+                <span>JSONL + rotation</span>
+                <span>Retention policy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow down -->
+          <div class="arch-arrow">
+            <div class="arch-arrow-line"><span style="color:var(--muted);font-size:20px">&#8595;</span></div>
+          </div>
+
+          <!-- Bottom: OpenTelemetry -->
+          <div style="width:100%">
+            <div class="arch-box accent-border" style="text-align:center;width:100%">
+              <div class="arch-box-title" style="text-align:center;margin-bottom:4px">OpenTelemetry Export</div>
+              <div class="arch-box-items" style="text-align:center;display:flex;justify-content:center;gap:24px;flex-wrap:wrap">
+                <span style="display:inline">Traces &rarr; Jaeger</span>
+                <span style="display:inline">Metrics &rarr; Prometheus</span>
+                <span style="display:inline">Dashboards &rarr; Grafana</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="callout callout-info" role="note">
+        <div class="callout-header">Every Request is Governed End-to-End</div>
+        <p>
+          No tool call can bypass the Policy Engine or Budget Tracker. Even sub-agents spawned during
+          parallel execution inherit the parent session's policy and budget constraints. The audit hash
+          chain covers every event from session start to completion.
+        </p>
+      </div>
+
+      <!-- =======================================================
+           SECTION 4: OpenTelemetry Observability
+           ======================================================= -->
+      <span class="section-anchor" id="observability"></span>
+      <h2><span class="step-num">4</span>OpenTelemetry Observability</h2>
+
+      <p>
+        Harness emits OpenTelemetry traces and metrics for every agent session, tool call, and model
+        request. Start the monitoring stack with a single Docker Compose command, then explore traces
+        in Jaeger and dashboards in Grafana.
+      </p>
+
+      <h3>Telemetry Configuration</h3>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">Shell</span>
+            <span class="filename">Environment Variables</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-bash"># OpenTelemetry is configured via environment variables:
+export OTEL_SERVICE_NAME="harness-agent"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_METRICS_EXPORTER="otlp"</code></pre>
+      </div>
+
+      <h3>Monitoring Stack</h3>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">YAML</span>
+            <span class="filename">docker-compose.monitoring.yml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-yaml">version: "3.8"
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+      - jaeger</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">Bash</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-bash">docker compose -f docker-compose.monitoring.yml up -d</code></pre>
+      </div>
+
+      <h3>Prometheus Scrape Config</h3>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">YAML</span>
+            <span class="filename">prometheus.yml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-yaml">global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "harness"
+    static_configs:
+      - targets: ["host.docker.internal:9464"]</code></pre>
+      </div>
+
+      <div class="callout callout-info" role="note">
+        <div class="callout-header">Access the Stack</div>
+        <p>
+          After starting the stack, access <strong>Jaeger</strong> at
+          <code>http://localhost:16686</code> to see distributed traces, <strong>Prometheus</strong>
+          at <code>http://localhost:9090</code> for raw metrics, and <strong>Grafana</strong> at
+          <code>http://localhost:3000</code> (admin / admin) for dashboards.
+        </p>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-trigger" aria-expanded="false" aria-controls="dd-otel-metrics" id="dd-otel-metrics-btn">
+          <span>Deep Dive: Harness OpenTelemetry metric names</span>
+          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="collapsible-content" id="dd-otel-metrics" role="region" aria-labelledby="dd-otel-metrics-btn">
+          <p>Key metrics emitted by Harness to the configured OTLP endpoint:</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-mono">harness_tokens</td>
+                  <td>Counter</td>
+                  <td>Total tokens consumed this session</td>
+                </tr>
+                <tr>
+                  <td class="td-mono">harness_tool_calls</td>
+                  <td>Counter</td>
+                  <td>Total tool calls made this session</td>
+                </tr>
+                <tr>
+                  <td class="td-mono">harness_cost</td>
+                  <td>Gauge</td>
+                  <td>Cumulative session cost in USD</td>
+                </tr>
+                <tr>
+                  <td class="td-mono">harness_provider_latency</td>
+                  <td>Histogram</td>
+                  <td>Provider response latency distribution</td>
+                </tr>
+                <tr>
+                  <td class="td-mono">harness_context_utilization</td>
+                  <td>Gauge</td>
+                  <td>Fraction of context window consumed</td>
+                </tr>
+                <tr>
+                  <td class="td-mono">harness_audit_chain_valid</td>
+                  <td>Gauge</td>
+                  <td>1 = chain intact, 0 = integrity broken</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =======================================================
+           SECTION 5: Security Hardening
+           ======================================================= -->
+      <span class="section-anchor" id="security"></span>
+      <h2><span class="step-num">5</span>Security Hardening</h2>
+
+      <p>
+        Follow these five steps to harden a Harness deployment before exposing it to production
+        workloads. Each step takes under two minutes.
+      </p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" aria-hidden="true">1</div>
+            <div class="step-line" aria-hidden="true"></div>
+          </div>
+          <div class="step-content">
+            <p class="step-title">Set restrictive file permissions</p>
+            <div class="step-body">
+              <p>Lock down the config directory so only your user account can read API keys and credentials.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-bash">chmod 600 ~/.harness/config.toml   # Owner read/write only
+chmod 600 ~/.harness/credentials   # Protect API keys
+chmod 700 ~/.harness/              # Protect directory</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" aria-hidden="true">2</div>
+            <div class="step-line" aria-hidden="true"></div>
+          </div>
+          <div class="step-content">
+            <p class="step-title">Use environment variables for secrets</p>
+            <div class="step-body">
+              <p>Never put API keys in config files. Use environment variables that are injected at runtime by your secrets manager or CI/CD system.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+                  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-bash"># Use env vars instead of config file for secrets
+export ANTHROPIC_API_KEY="sk-ant-..."
+export OPENAI_API_KEY="sk-..."
+# Never commit API keys to git!</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" aria-hidden="true">3</div>
+            <div class="step-line" aria-hidden="true"></div>
+          </div>
+          <div class="step-content">
+            <p class="step-title">Enable Docker sandbox with network disabled</p>
+            <div class="step-body">
+              <p>Docker mode provides filesystem isolation that the process sandbox cannot. Disabling network access prevents exfiltration even if the agent is tricked into running malicious commands.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left">
+                    <span class="lang-badge">TOML</span>
+                    <span class="filename">.harness/config.toml</span>
+                  </div>
+                  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-toml">[sandbox]
+enabled = true
+mode = "docker"
+network_access = false</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" aria-hidden="true">4</div>
+            <div class="step-line" aria-hidden="true"></div>
+          </div>
+          <div class="step-content">
+            <p class="step-title">Enable PII scanning in the audit logger</p>
+            <div class="step-body">
+              <p>PII scanning checks every tool argument and result for names, emails, SSNs, credit card numbers, and phone numbers before writing them to the audit log.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left">
+                    <span class="lang-badge">TOML</span>
+                    <span class="filename">.harness/config.toml</span>
+                  </div>
+                  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-toml">[audit]
+scan_pii = true</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-left">
+            <div class="step-circle" aria-hidden="true">5</div>
+            <div class="step-line" aria-hidden="true"></div>
+          </div>
+          <div class="step-content">
+            <p class="step-title">Add a network exfiltration policy rule</p>
+            <div class="step-body">
+              <p>Even with <code>network_access = false</code> in Docker, add an explicit policy rule as a defence-in-depth layer for any future sandbox escape scenarios.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="code-header-left">
+                    <span class="lang-badge">YAML</span>
+                    <span class="filename">.harness/policy.yml</span>
+                  </div>
+                  <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                  </button>
+                </div>
+                <pre><code class="language-yaml"># .harness/policy.yml
+version: 1
+rules:
+  - tool: Bash
+    decision: deny
+    conditions:
+      - type: command_matches
+        pattern: "curl.*|wget.*|nc .*"
+    description: "Block network exfiltration"</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /steps -->
+
+      <div class="callout callout-warning" role="note">
+        <div class="callout-header">Docker vs Process Sandbox</div>
+        <p>
+          In production, always use Docker sandbox mode with network disabled. The process sandbox
+          (<code>mode = "process"</code>) is lighter-weight and faster to start, but it does not
+          provide filesystem isolation &mdash; the agent can still read files outside your working
+          directory if not restricted by policy rules.
+        </p>
+      </div>
+
+      <!-- =======================================================
+           SECTION 6: Multi-Team Policy Setup
+           ======================================================= -->
+      <span class="section-anchor" id="multi-team"></span>
+      <h2><span class="step-num">6</span>Multi-Team Policy Setup</h2>
+
+      <p>
+        Large organizations need three levels of policy: organization-wide rules that apply everywhere,
+        team-level customizations, and project-specific overrides. Harness evaluates these in reverse
+        order (project first) so more specific rules always take precedence.
+      </p>
+
+      <!-- Inheritance diagram -->
+      <div class="inherit-diagram" aria-label="Policy inheritance hierarchy: Org, Team, Project">
+        <div class="inherit-row">
+          <div class="inherit-connector">
+            <div class="inherit-dot"></div>
+          </div>
+          <div class="inherit-box">
+            <div class="inherit-label">Organization Level</div>
+            <div class="inherit-path">~/.harness/policy.yml</div>
+            <div class="inherit-desc">Global rules for every project on this machine / CI runner</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0">
+          <div style="width:40px;display:flex;justify-content:center">
+            <div class="inherit-v-line"></div>
+          </div>
+          <div style="flex:1"></div>
+        </div>
+        <div class="inherit-row">
+          <div class="inherit-connector">
+            <div class="inherit-dot"></div>
+          </div>
+          <div class="inherit-box">
+            <div class="inherit-label">Team Level</div>
+            <div class="inherit-path">~/team-policy.yml &nbsp;|&nbsp; shared repo .harness/policy.yml</div>
+            <div class="inherit-desc">Shared across all projects in a team repository; inherits org rules</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0">
+          <div style="width:40px;display:flex;justify-content:center">
+            <div class="inherit-v-line"></div>
+          </div>
+          <div style="flex:1"></div>
+        </div>
+        <div class="inherit-row">
+          <div class="inherit-connector">
+            <div class="inherit-dot"></div>
+          </div>
+          <div class="inherit-box">
+            <div class="inherit-label">Project Level</div>
+            <div class="inherit-path">.harness/policy.yml &nbsp;&mdash;&nbsp; in the project root</div>
+            <div class="inherit-desc">Project-specific rules; inherits team rules via inherit_from</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Organization Policy</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">YAML</span>
+            <span class="filename">~/.harness/policy.yml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-yaml">version: 1
+defaults:
+  decision: ask
+rules:
+  - tool: Bash
+    decision: deny
+    conditions:
+      - type: command_matches
+        pattern: "rm -rf /.*"
+    description: "Org: Never delete root paths"
+  - tool: Write
+    decision: deny
+    conditions:
+      - type: path_matches
+        pattern: "\\.(env|pem|key)$"
+    description: "Org: Protect secrets"</code></pre>
+      </div>
+
+      <h3>Team Policy</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">YAML</span>
+            <span class="filename">team-policy.yml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-yaml">version: 1
+inherit_from: "~/.harness/policy.yml"
+rules:
+  - tool: Bash
+    decision: deny
+    conditions:
+      - type: command_matches
+        pattern: "docker push.*"
+    description: "Team: No manual docker pushes"</code></pre>
+      </div>
+
+      <h3>Project Policy</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">YAML</span>
+            <span class="filename">.harness/policy.yml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-yaml">version: 1
+inherit_from: "../team-policy.yml"
+rules:
+  - tool: Read
+    decision: allow
+    description: "Project: Allow all reads"
+  - tool: Edit
+    decision: allow
+    conditions:
+      - type: path_matches
+        pattern: "src/.*\\.py$"
+    description: "Project: Allow editing Python source"</code></pre>
+      </div>
+
+      <div class="callout callout-tryit" role="note">
+        <div class="callout-header">Try It: Test your policy chain</div>
+        <p>
+          Use simulation mode to verify the full inheritance chain without enforcing anything.
+          Set <code>simulation_mode = true</code> in your config and run a test task. Then check
+          the audit log to confirm every tool call was evaluated against all three policy files.
+        </p>
+      </div>
+
+      <!-- =======================================================
+           SECTION 7: Monitoring & Alerting
+           ======================================================= -->
+      <span class="section-anchor" id="monitoring"></span>
+      <h2><span class="step-num">7</span>Monitoring &amp; Alerting</h2>
+
+      <p>
+        Add these Prometheus alert rules to get notified about cost overruns, exhausted budgets,
+        audit chain integrity failures, and high error rates. Save them to <code>alerts.yml</code>
+        and reference them from your Prometheus configuration.
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">YAML</span>
+            <span class="filename">alerts.yml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-yaml">groups:
+  - name: harness
+    rules:
+      - alert: HighCostSession
+        expr: harness_cost > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Harness session cost exceeds $5"
+
+      - alert: HighErrorRate
+        expr: rate(harness_tool_calls{status="error"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Harness tool error rate above 10%"
+
+      - alert: HighLatency
+        expr: harness_provider_latency > 30000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Harness provider latency above 30s"
+
+      - alert: AuditChainBroken
+        expr: harness_audit_chain_valid == 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Audit log chain integrity check failed"</code></pre>
+      </div>
+
+      <div class="callout callout-error" role="note">
+        <div class="callout-header">Treat AuditChainBroken as P0</div>
+        <p>
+          A broken audit hash chain means one or more audit log entries have been tampered with or
+          corrupted. This alert should page your on-call team immediately. Preserve the log file
+          and open an incident before running any further agent tasks.
+        </p>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-trigger" aria-expanded="false" aria-controls="dd-grafana" id="dd-grafana-btn">
+          <span>Deep Dive: Recommended Grafana dashboard panels</span>
+          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="collapsible-content" id="dd-grafana" role="region" aria-labelledby="dd-grafana-btn">
+          <p>Create a Grafana dashboard with these panels for a complete operational view:</p>
+          <ul>
+            <li><strong>Session Cost (USD)</strong> &mdash; <code>harness_cost</code> as a time-series</li>
+            <li><strong>Token Usage</strong> &mdash; <code>harness_tokens</code> as a counter time-series</li>
+            <li><strong>Context Utilization</strong> &mdash; <code>harness_context_utilization</code> as a gauge with warning threshold at 0.8</li>
+            <li><strong>Tool Calls/min</strong> &mdash; <code>rate(harness_tool_calls[1m])</code></li>
+            <li><strong>Error Rate</strong> &mdash; <code>rate(harness_tool_calls{status="error"}[5m]) / rate(harness_tool_calls[5m])</code></li>
+            <li><strong>Provider Latency P99</strong> &mdash; <code>histogram_quantile(0.99, harness_provider_latency_bucket)</code></li>
+            <li><strong>Audit Chain Status</strong> &mdash; <code>harness_audit_chain_valid</code> as a stat panel (green=1, red=0)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- =======================================================
+           SECTION 8: Production Script
+           ======================================================= -->
+      <span class="section-anchor" id="production-script"></span>
+      <h2><span class="step-num">8</span>Production Script</h2>
+
+      <p>
+        Use this script as the entry point for any production automation. It handles budget
+        guarding, structured logging, and clean error exit codes &mdash; ready to use directly
+        in a Kubernetes Job, GitHub Actions step, or cron task.
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">Python</span>
+            <span class="filename">production_agent.py</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-python"># production_agent.py — Enterprise-grade Harness deployment
+import asyncio
+import logging
+import sys
+from pathlib import Path
+
+import harness
+from harness.audit.logger import AuditLogger
+from harness.providers.budget import TokenBudgetTracker, BudgetExhaustedError
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger("harness-prod")
+
+async def run_production_task(prompt: str) -> dict:
+    """Run a task with full enterprise controls."""
+
+    # Budget guard
+    # Note: This budget tracker monitors cost AFTER each run completes.
+    # To enforce budgets mid-run, configure the [router] section in
+    # .harness/config.toml with max_cost_per_session — the engine
+    # checks the budget internally between turns.
+    budget = TokenBudgetTracker(max_tokens=500_000, max_cost=5.00)
+
+    result_data = {
+        "success": False,
+        "output": "",
+        "tokens": 0,
+        "cost": 0.0,
+        "error": None,
+    }
+
+    try:
+        async for msg in harness.run(
+            prompt,
+            provider="anthropic",
+            model="claude-sonnet-4-20250514",
+            permission_mode="accept_edits",
+            sandbox_mode="docker",
+            max_turns=50,
+        ):
+            match msg:
+                case harness.TextMessage(text=t, is_partial=False):
+                    logger.info(f"Agent: {t[:100]}...")
+
+                case harness.ToolUse(name=name, args=args):
+                    logger.info(f"Tool: {name}")
+
+                case harness.Result() as r:
+                    # Record final usage
+                    budget.record_usage(
+                        # Approximation: total_tokens doesn't split input/output
+                        input_tokens=r.total_tokens // 2,
+                        output_tokens=r.total_tokens // 2,
+                        cost=r.total_cost,
+                    )
+                    # Check if we should stop future runs
+                    budget.check_budget()
+
+                    result_data.update({
+                        "success": True,
+                        "output": r.text,
+                        "tokens": r.total_tokens,
+                        "cost": r.total_cost,
+                    })
+
+                    snap = budget.snapshot()
+                    logger.info(
+                        f"Complete: {r.turns} turns, {r.tool_calls} tools, "
+                        f"${r.total_cost:.4f}, {r.total_tokens:,} tokens"
+                    )
+                    logger.info(
+                        f"Budget: ${snap.cost_remaining:.2f} remaining, "
+                        f"{snap.tokens_remaining:,} tokens remaining"
+                    )
+
+    except BudgetExhaustedError as e:
+        logger.error(f"Budget exhausted: {e}")
+        result_data["error"] = str(e)
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        result_data["error"] = str(e)
+
+    return result_data
+
+async def main():
+    if len(sys.argv) < 2:
+        print("Usage: python production_agent.py 'Your task here'")
+        sys.exit(1)
+
+    prompt = sys.argv[1]
+    logger.info(f"Starting production task: {prompt[:50]}...")
+
+    result = await run_production_task(prompt)
+
+    if result["success"]:
+        logger.info(f"Task completed successfully. Cost: ${result['cost']:.4f}")
+    else:
+        logger.error(f"Task failed: {result['error']}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">Bash</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-bash">uv run python production_agent.py "Audit all TODO comments and open GitHub issues for each"</code></pre>
+      </div>
+
+      <!-- =======================================================
+           SECTION 9: Capacity Planning
+           ======================================================= -->
+      <span class="section-anchor" id="capacity"></span>
+      <h2><span class="step-num">9</span>Capacity Planning</h2>
+
+      <p>
+        Use the table below to estimate monthly costs before enabling Harness for your team.
+        The cost-optimized router automatically routes simple tasks to Haiku and complex tasks
+        to Sonnet, so your actual costs will be at or below these estimates.
+      </p>
+
+      <div class="table-wrap">
+        <table aria-label="Capacity planning cost estimates">
+          <thead>
+            <tr>
+              <th>Use Case</th>
+              <th>Tasks / Day</th>
+              <th>Avg Tokens / Task</th>
+              <th>Model</th>
+              <th>Daily Cost</th>
+              <th>Monthly Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PR Reviews</td>
+              <td>10</td>
+              <td>5,000</td>
+              <td>Sonnet 4</td>
+              <td>$0.90</td>
+              <td>$27</td>
+            </tr>
+            <tr>
+              <td>Issue Triage</td>
+              <td>20</td>
+              <td>2,000</td>
+              <td>Haiku 4.5</td>
+              <td>$0.12</td>
+              <td>$3.60</td>
+            </tr>
+            <tr>
+              <td>Code Generation</td>
+              <td>5</td>
+              <td>50,000</td>
+              <td>Sonnet 4</td>
+              <td>$4.50</td>
+              <td>$135</td>
+            </tr>
+            <tr>
+              <td>Security Scans</td>
+              <td>3</td>
+              <td>30,000</td>
+              <td>Opus 4</td>
+              <td>$13.50</td>
+              <td>$405</td>
+            </tr>
+            <tr class="table-total">
+              <td><strong>Total</strong></td>
+              <td><strong>38</strong></td>
+              <td>&mdash;</td>
+              <td>&mdash;</td>
+              <td><strong>$19.02</strong></td>
+              <td><strong>$570.60</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info" role="note">
+        <div class="callout-header">Cost-Optimized Routing Saves 40&ndash;60%</div>
+        <p>
+          With <code>strategy = "cost_optimized"</code>, simple tasks use Haiku
+          ($0.80 / 1M input tokens) and complex tasks use Sonnet ($3 / 1M input tokens).
+          This typically reduces total costs by 40&ndash;60% compared to always using the
+          best available model.
+        </p>
+      </div>
+
+      <h3>Session Budget Recommendation</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-header-left">
+            <span class="lang-badge">TOML</span>
+            <span class="filename">.harness/config.toml</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre><code class="language-toml">[router]
+max_cost_per_session = 10.00       # Individual session cap
+# Monthly budget tracked externally via audit logs + Prometheus</code></pre>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-trigger" aria-expanded="false" aria-controls="dd-cost-audit" id="dd-cost-audit-btn">
+          <span>Deep Dive: Querying cost from the audit log</span>
+          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="collapsible-content" id="dd-cost-audit" role="region" aria-labelledby="dd-cost-audit-btn">
+          <p>The audit log is JSONL format. Aggregate monthly costs with a single Python one-liner:</p>
+          <div class="code-block" style="margin-bottom:0">
+            <div class="code-header">
+              <div class="code-header-left"><span class="lang-badge">Bash</span></div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-bash"># Sum total cost from audit log entries this month
+python3 -c "
+import json, sys
+from pathlib import Path
+from datetime import datetime
+month = datetime.now().strftime('%Y-%m')
+total = sum(
+    e.get('cost', 0) for e in
+    (json.loads(l) for l in open(Path('~/.harness/audit.jsonl').expanduser()))
+    if e.get('timestamp', '').startswith(month)
+)
+print(f'Monthly cost: \${total:.4f}')
+"</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- =======================================================
+           SECTION 10: Cloud Deployment
+           ======================================================= -->
+      <span class="section-anchor" id="cloud"></span>
+      <h2><span class="step-num">10</span>Cloud Deployment</h2>
+
+      <p>
+        Deploy Harness as a containerized workload on your cloud provider of choice. Select your
+        platform below for the Kubernetes deployment manifest and CLI commands.
+      </p>
+
+      <div class="tab-group" id="cloud-tabs">
+        <div class="tab-nav" role="tablist" aria-label="Cloud provider deployment">
+          <button class="tab-btn" role="tab" aria-selected="true" aria-controls="tab-aws" id="btn-aws" tabindex="0">AWS (EKS)</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-azure" id="btn-azure" tabindex="-1">Azure (AKS)</button>
+          <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-gcp" id="btn-gcp" tabindex="-1">GCP (GKE)</button>
+        </div>
+
+        <!-- AWS Tab -->
+        <div class="tab-panel" id="tab-aws" role="tabpanel" aria-labelledby="btn-aws" aria-hidden="false">
+          <p>Deploy to Amazon Elastic Kubernetes Service. API keys are stored in Secrets Manager and injected via a Kubernetes Secret.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-header-left">
+                <span class="lang-badge">YAML</span>
+                <span class="filename">k8s/deployment.yml</span>
+              </div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-yaml"># AWS EKS deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harness-agent
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: harness
+          image: your-ecr-repo/harness-agent:latest
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: harness-secrets
+                  key: anthropic-api-key
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-header-left">
+                <span class="lang-badge">Bash</span>
+              </div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-bash"># ECR + EKS setup
+aws ecr create-repository --repository-name harness-agent
+docker build -t harness-agent .
+docker tag harness-agent:latest &lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com/harness-agent:latest
+docker push &lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com/harness-agent:latest
+kubectl apply -f k8s/deployment.yml</code></pre>
+          </div>
+        </div>
+
+        <!-- Azure Tab -->
+        <div class="tab-panel" id="tab-azure" role="tabpanel" aria-labelledby="btn-azure" aria-hidden="true">
+          <p>Deploy to Azure Kubernetes Service. Store API keys in Azure Key Vault and reference them through the AKS Secrets Store CSI driver.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-header-left">
+                <span class="lang-badge">YAML</span>
+                <span class="filename">k8s/deployment.yml</span>
+              </div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-yaml"># Azure AKS deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harness-agent
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: harness
+          image: your-acr.azurecr.io/harness-agent:latest
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: harness-secrets
+                  key: anthropic-api-key
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-header-left">
+                <span class="lang-badge">Bash</span>
+              </div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-bash"># ACR + AKS setup
+az acr create --name harnessprod --resource-group mygroup --sku Standard
+az acr login --name harnessprod
+docker build -t harnessprod.azurecr.io/harness-agent:latest .
+docker push harnessprod.azurecr.io/harness-agent:latest
+kubectl apply -f k8s/deployment.yml</code></pre>
+          </div>
+        </div>
+
+        <!-- GCP Tab -->
+        <div class="tab-panel" id="tab-gcp" role="tabpanel" aria-labelledby="btn-gcp" aria-hidden="true">
+          <p>Deploy to Google Kubernetes Engine. Store API keys in Secret Manager and reference them as environment variables via Workload Identity.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-header-left">
+                <span class="lang-badge">YAML</span>
+                <span class="filename">k8s/deployment.yml</span>
+              </div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-yaml"># GCP GKE deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harness-agent
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: harness
+          image: gcr.io/your-project/harness-agent:latest
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: harness-secrets
+                  key: anthropic-api-key
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-header-left">
+                <span class="lang-badge">Bash</span>
+              </div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-bash"># Artifact Registry + GKE setup
+gcloud artifacts repositories create harness --repository-format=docker --location=us-central1
+docker build -t us-central1-docker.pkg.dev/your-project/harness/harness-agent:latest .
+docker push us-central1-docker.pkg.dev/your-project/harness/harness-agent:latest
+gcloud container clusters get-credentials my-cluster --region us-central1
+kubectl apply -f k8s/deployment.yml</code></pre>
+          </div>
+        </div>
+
+      </div><!-- /tab-group -->
+
+      <div class="callout callout-warning" role="note">
+        <div class="callout-header">Kubernetes Resource Limits</div>
+        <p>
+          Always set both <code>requests</code> and <code>limits</code> for memory and CPU.
+          An unconstrained Harness container running a large code generation task with sub-agents
+          can consume several gigabytes of RAM during peak parallel execution.
+        </p>
+      </div>
+
+      <!-- =======================================================
+           SECTION 11: Congratulations
+           ======================================================= -->
+      <span class="section-anchor" id="congratulations"></span>
+      <h2><span class="step-num">11</span>Congratulations</h2>
+
+      <div class="cta-block">
+        <div class="cta-header">
+          <h3>You've completed the entire tutorial series</h3>
+          <p>You now know how to deploy Harness with all 14 enterprise features in production</p>
+        </div>
+        <div class="cta-body">
+          <p>
+            Over 10 tutorials you went from installing Harness to running a fully governed, observable,
+            cost-controlled enterprise AI coding agent. Here is a summary of everything covered:
+          </p>
+
+          <div class="tutorial-links" role="list" aria-label="All tutorials">
+            <a href="01-getting-started.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">01</span>Getting Started
+            </a>
+            <a href="02-sdk-basics.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">02</span>SDK Basics
+            </a>
+            <a href="03-permissions-safety.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">03</span>Permissions &amp; Safety
+            </a>
+            <a href="04-budget-cost-controls.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">04</span>Budget &amp; Cost Controls
+            </a>
+            <a href="05-policy-as-code.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">05</span>Policy-as-Code
+            </a>
+            <a href="06-audit-compliance.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">06</span>Audit &amp; Compliance
+            </a>
+            <a href="07-sandboxed-execution.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">07</span>Sandbox Isolation
+            </a>
+            <a href="08-sub-agents-parallel.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">08</span>Sub-Agent Parallelism
+            </a>
+            <a href="09-cicd-pipeline.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">09</span>CI/CD Integration
+            </a>
+            <a href="10-enterprise-production.html" class="tutorial-link-item" role="listitem">
+              <span class="tutorial-link-num">10</span>Enterprise Production (this page)
+            </a>
+          </div>
+
+          <div class="cta-links">
+            <a href="https://github.com/AgentBoardTT/openharness" class="cta-link-btn" target="_blank" rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+              Star on GitHub
+            </a>
+            <a href="https://pypi.org/project/harness-agent/" class="cta-link-btn secondary" target="_blank" rel="noopener">
+              PyPI: harness-agent
+            </a>
+            <a href="index.html" class="cta-link-btn secondary">
+              Back to All Tutorials
+            </a>
+          </div>
+
+          <div class="code-block" style="margin-top:20px;margin-bottom:0">
+            <div class="code-header">
+              <div class="code-header-left">
+                <span class="lang-badge">Bash</span>
+              </div>
+              <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </div>
+            <pre><code class="language-bash">uv tool install harness-agent
+harness --version</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           PREV / NEXT NAVIGATION
+           ========================================================= -->
+      <nav class="page-nav" aria-label="Tutorial navigation">
+        <a href="09-cicd-pipeline.html" class="nav-card" aria-label="Previous: Tutorial 09, CI/CD Integration">
+          <span class="nav-dir">&#8592; Previous</span>
+          <span class="nav-tut-num">Tutorial 09</span>
+          <span class="nav-title">CI/CD Integration</span>
+        </a>
+        <a href="index.html" class="nav-card nav-next" aria-label="Back to all tutorials">
+          <span class="nav-dir">Back to &#8594;</span>
+          <span class="nav-tut-num">Series Index</span>
+          <span class="nav-title">All Tutorials</span>
+        </a>
+      </nav>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer role="contentinfo">
+  <p>
+    <a href="https://github.com/AgentBoardTT/openharness" target="_blank" rel="noopener">Harness</a>
+    is open-source software released under the MIT licence.
+    Install: <code>uv tool install harness-agent</code>
+  </p>
+</footer>
+
+<!-- ============================================================
+     INLINE JAVASCRIPT
+     ============================================================ -->
+<script>
+  // ============================================================
+  // 1. COPY TO CLIPBOARD
+  // ============================================================
+  function copyCode(btn) {
+    var pre = btn.closest('.code-block').querySelector('pre');
+    var text = pre ? pre.innerText : '';
+    navigator.clipboard.writeText(text).then(function() {
+      var original = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+      btn.setAttribute('aria-label', 'Copied!');
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.innerHTML = original;
+        btn.setAttribute('aria-label', 'Copy code');
+      }, 2000);
+    }).catch(function() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.textContent = 'Copy';
+      }, 2000);
+    });
+  }
+
+  // ============================================================
+  // 2. TABS — ARIA tablist / tab / tabpanel
+  // ============================================================
+  document.querySelectorAll('[role="tablist"]').forEach(function(tablist) {
+    var tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+
+    function activateTab(tab) {
+      tabs.forEach(function(t) {
+        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('tabindex', '-1');
+      });
+      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('tabindex', '0');
+
+      var panelId = tab.getAttribute('aria-controls');
+      var wrapper = tablist.closest('.tab-group');
+      wrapper.querySelectorAll('[role="tabpanel"]').forEach(function(panel) {
+        panel.setAttribute('aria-hidden', panel.id !== panelId ? 'true' : 'false');
+      });
+    }
+
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() { activateTab(tab); });
+      tab.addEventListener('keydown', function(e) {
+        var idx = tabs.indexOf(document.activeElement);
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          var next = tabs[(idx + 1) % tabs.length];
+          next.focus(); activateTab(next);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          var prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+          prev.focus(); activateTab(prev);
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          tabs[0].focus(); activateTab(tabs[0]);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          tabs[tabs.length - 1].focus(); activateTab(tabs[tabs.length - 1]);
+        }
+      });
+    });
+  });
+
+  // ============================================================
+  // 3. COLLAPSIBLES — ARIA expanded / controls
+  // ============================================================
+  document.querySelectorAll('.collapsible-trigger').forEach(function(trigger) {
+    trigger.addEventListener('click', function() {
+      var expanded = trigger.getAttribute('aria-expanded') === 'true';
+      trigger.setAttribute('aria-expanded', String(!expanded));
+      var bodyId = trigger.getAttribute('aria-controls');
+      var body = document.getElementById(bodyId);
+      if (body) body.classList.toggle('open', !expanded);
+    });
+  });
+
+  // ============================================================
+  // 4. TOC SCROLL HIGHLIGHT — IntersectionObserver
+  // ============================================================
+  (function() {
+    var sections = document.querySelectorAll('.section-anchor');
+    var tocLinks = document.querySelectorAll('.toc-link');
+    if (!sections.length || !tocLinks.length) return;
+
+    // Fallback: scroll-based highlight for older browsers
+    function updateFromScroll() {
+      var scrollY = window.scrollY + 100;
+      var current = '';
+      sections.forEach(function(anchor) {
+        // section-anchor is positioned above the heading via negative top offset
+        // Use offsetTop of the following heading sibling
+        var next = anchor.nextElementSibling;
+        var top = next ? next.offsetTop : anchor.offsetTop;
+        if (top <= scrollY) current = anchor.id;
+      });
+      tocLinks.forEach(function(link) {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+      });
+    }
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var id = entry.target.id;
+            tocLinks.forEach(function(link) {
+              link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+            });
+          }
+        });
+      }, { rootMargin: '-64px 0px -65% 0px', threshold: 0 });
+      sections.forEach(function(s) { observer.observe(s); });
+    } else {
+      window.addEventListener('scroll', updateFromScroll, { passive: true });
+      updateFromScroll();
+    }
+  })();
+
+  // ============================================================
+  // 5. MOBILE SIDEBAR TOGGLE
+  // ============================================================
+  (function() {
+    var btn = document.getElementById('mobileMenuBtn');
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('open');
+      overlay.removeAttribute('aria-hidden');
+      btn.setAttribute('aria-expanded', 'true');
+      btn.setAttribute('aria-label', 'Close navigation');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open navigation');
+      document.body.style.overflow = '';
+    }
+
+    btn.addEventListener('click', function() {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close when a TOC link is tapped on mobile
+    document.querySelectorAll('.toc-link').forEach(function(link) {
+      link.addEventListener('click', function() {
+        if (window.innerWidth <= 1023) closeSidebar();
+      });
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+        closeSidebar();
+        btn.focus();
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
