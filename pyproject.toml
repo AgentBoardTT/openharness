@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "harness-agent"
-version = "0.5.1"
+version = "0.6.0"
 description = "Multi-provider coding agent CLI + SDK"
 readme = "README.md"
 license = "MIT"

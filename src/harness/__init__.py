@@ -26,7 +26,7 @@ from harness.types.messages import (
 )
 from harness.types.tools import ToolContext, ToolDef, ToolParam, ToolResultData
 
-__version__ = "0.2.0"
+__version__ = "0.6.0"
 
 __all__ = [
     # Core API
